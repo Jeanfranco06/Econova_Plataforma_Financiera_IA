@@ -1,0 +1,740 @@
+{% extends "base.html" %}
+
+{% block title %}Simulación - Econova{% endblock %}
+
+{% block content %}
+
+<div class="page-title">
+    <h1><i class="fas fa-calculator"></i> Simulación Financiera</h1>
+    <p class="text-muted">Realiza análisis financieros profesionales</p>
+</div>
+
+<!-- Selector de Tipo de Simulación -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Selecciona el tipo de análisis</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="van">
+                    <i class="fas fa-equals"></i> VAN
+                </button>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="tir">
+                    <i class="fas fa-percent"></i> TIR
+                </button>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="wacc">
+                    <i class="fas fa-weight"></i> WACC
+                </button>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="portafolio">
+                    <i class="fas fa-briefcase"></i> Portafolio
+                </button>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="reemplazo">
+                    <i class="fas fa-sync"></i> Reemplazo
+                </button>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-outline-primary w-100 tipo-btn" data-tipo="payback">
+                    <i class="fas fa-hourglass-end"></i> Payback
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario VAN -->
+<div class="formulario-simulacion" id="form-van" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-equals"></i> Análisis de VAN (Valor Actual Neto)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-van" onsubmit="ejecutarVAN(event)">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Inversión Inicial ($)</label>
+                            <input type="number" class="form-control" name="inversion_inicial" 
+                                   placeholder="100000" required step="0.01">
+                            <small class="text-muted">Monto inicial a invertir</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Tasa de Descuento (%)</label>
+                            <input type="number" class="form-control" name="tasa_descuento" 
+                                   placeholder="10" required step="0.01">
+                            <small class="text-muted">Tasa de descuento (ej: 10 para 10%)</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Flujos de Caja Anuales ($)</label>
+                    <div id="flujos-container-van">
+                        <div class="input-group mb-2">
+                            <input type="number" class="form-control flujo-input" 
+                                   placeholder="Año 1" step="0.01">
+                            <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFlujo('van')">
+                        <i class="fas fa-plus"></i> Agregar flujo
+                    </button>
+                    <small class="text-muted d-block mt-2">Ingresa los flujos de caja para cada año</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre de la Simulación (opcional)</label>
+                    <input type="text" class="form-control" name="nombre_simulacion" 
+                           placeholder="Ej: Proyecto X - Escenario Optimista">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Ejecutar Análisis
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario TIR -->
+<div class="formulario-simulacion" id="form-tir" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-percent"></i> Análisis de TIR (Tasa Interna de Retorno)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-tir" onsubmit="ejecutarTIR(event)">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Inversión Inicial ($)</label>
+                            <input type="number" class="form-control" name="inversion_inicial" 
+                                   placeholder="100000" required step="0.01">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Tasa Referencia (%)</label>
+                            <input type="number" class="form-control" name="tasa_referencia" 
+                                   placeholder="10" required step="0.01">
+                            <small class="text-muted">Tasa mínima requerida</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Flujos de Caja Anuales ($)</label>
+                    <div id="flujos-container-tir">
+                        <div class="input-group mb-2">
+                            <input type="number" class="form-control flujo-input" 
+                                   placeholder="Año 1" step="0.01">
+                            <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFlujo('tir')">
+                        <i class="fas fa-plus"></i> Agregar flujo
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre de la Simulación (opcional)</label>
+                    <input type="text" class="form-control" name="nombre_simulacion">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Ejecutar Análisis
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario WACC -->
+<div class="formulario-simulacion" id="form-wacc" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-weight"></i> Cálculo de WACC (Costo Promedio Ponderado de Capital)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-wacc" onsubmit="ejecutarWACC(event)">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Costo de Deuda (%)</label>
+                            <input type="number" class="form-control" name="costo_deuda" 
+                                   placeholder="5" required step="0.01">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Costo de Patrimonio (%)</label>
+                            <input type="number" class="form-control" name="costo_patrimonio" 
+                                   placeholder="12" required step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Proporción de Deuda (%)</label>
+                            <input type="number" class="form-control" name="proporcion_deuda" 
+                                   placeholder="30" required step="0.01" min="0" max="100">
+                            <small class="text-muted">0-100%</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Tasa de Impuestos (%)</label>
+                            <input type="number" class="form-control" name="tasa_impuestos" 
+                                   placeholder="30" required step="0.01" min="0" max="100">
+                            <small class="text-muted">0-100%</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Calcular WACC
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario Portafolio -->
+<div class="formulario-simulacion" id="form-portafolio" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-briefcase"></i> Análisis de Portafolio
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-portafolio" onsubmit="ejecutarPortafolio(event)">
+                <div class="mb-3">
+                    <label class="form-label">Activos del Portafolio</label>
+                    <div id="activos-container">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control activo-nombre" 
+                                       placeholder="Nombre del activo" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" class="form-control activo-proporcion" 
+                                       placeholder="Proporción (%)" step="0.01" required>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-danger" onclick="removerActivo(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="agregarActivo()">
+                        <i class="fas fa-plus"></i> Agregar activo
+                    </button>
+                    <small class="text-muted d-block mt-2">Las proporciones deben sumar 100%</small>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Analizar Portafolio
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario Reemplazo -->
+<div class="formulario-simulacion" id="form-reemplazo" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-sync"></i> Análisis de Reemplazo de Activos
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-reemplazo" onsubmit="ejecutarReemplazo(event)">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Inversión del Nuevo Activo ($)</label>
+                            <input type="number" class="form-control" name="inversion_inicial" 
+                                   required step="0.01">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Valor Salvamento Actual ($)</label>
+                            <input type="number" class="form-control" name="valor_salvamento_actual" 
+                                   required step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tasa de Descuento (%)</label>
+                    <input type="number" class="form-control" name="tasa_descuento" 
+                           placeholder="10" required step="0.01">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Flujos Nuevo Activo</label>
+                            <div id="flujos-nuevo-container">
+                                <div class="input-group mb-2">
+                                    <input type="number" class="form-control flujo-input" 
+                                           placeholder="Año 1" step="0.01">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFlujoReemplazo('nuevo')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Flujos Activo Actual</label>
+                            <div id="flujos-actual-container">
+                                <div class="input-group mb-2">
+                                    <input type="number" class="form-control flujo-input" 
+                                           placeholder="Año 1" step="0.01">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFlujoReemplazo('actual')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Analizar Reemplazo
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario Payback -->
+<div class="formulario-simulacion" id="form-payback" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-hourglass-end"></i> Cálculo de Período de Recuperación (Payback)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formulario-payback" onsubmit="ejecutarPayback(event)">
+                <div class="mb-3">
+                    <label class="form-label">Inversión Inicial ($)</label>
+                    <input type="number" class="form-control" name="inversion_inicial" 
+                           placeholder="100000" required step="0.01">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Flujos de Caja Anuales ($)</label>
+                    <div id="flujos-container-payback">
+                        <div class="input-group mb-2">
+                            <input type="number" class="form-control flujo-input" 
+                                   placeholder="Año 1" step="0.01">
+                            <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFlujo('payback')">
+                        <i class="fas fa-plus"></i> Agregar flujo
+                    </button>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Calcular Payback
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let tipoActualSeleccionado = null;
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+        // Obtener tipo de parámetro URL
+        const params = new URLSearchParams(window.location.search);
+        const tipoURL = params.get('tipo');
+        
+        if (tipoURL) {
+            seleccionarTipo(tipoURL);
+        }
+
+        // Event listeners para botones de tipo
+        document.querySelectorAll('.tipo-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                seleccionarTipo(btn.dataset.tipo);
+            });
+        });
+
+        // Agregar flujo inicial
+        agregarFlujo('van');
+        agregarFlujo('tir');
+        agregarFlujo('payback');
+        agregarFlujoReemplazo('nuevo');
+        agregarFlujoReemplazo('actual');
+        agregarActivo();
+    });
+
+    /**
+     * Seleccionar tipo de simulación
+     */
+    function seleccionarTipo(tipo) {
+        tipoActualSeleccionado = tipo;
+        document.querySelectorAll('.formulario-simulacion').forEach(f => f.style.display = 'none');
+        document.getElementById(`form-${tipo}`).style.display = 'block';
+        
+        // Marcar botón como activo
+        document.querySelectorAll('.tipo-btn').forEach(btn => {
+            if (btn.dataset.tipo === tipo) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Scroll al formulario
+        setTimeout(() => {
+            document.getElementById(`form-${tipo}`).scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
+    /**
+     * Agregar flujo de caja
+     */
+    function agregarFlujo(tipo) {
+        const container = document.getElementById(`flujos-container-${tipo}`);
+        const num = container.children.length + 1;
+        const html = `
+            <div class="input-group mb-2">
+                <input type="number" class="form-control flujo-input" 
+                       placeholder="Año ${num}" step="0.01">
+                <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    /**
+     * Agregar flujo para reemplazo
+     */
+    function agregarFlujoReemplazo(tipo) {
+        const container = document.getElementById(`flujos-${tipo}-container`);
+        const num = container.children.length + 1;
+        const html = `
+            <div class="input-group mb-2">
+                <input type="number" class="form-control flujo-input" 
+                       placeholder="Año ${num}" step="0.01">
+                <button type="button" class="btn btn-outline-danger" onclick="removerFlujo(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    /**
+     * Remover flujo
+     */
+    function removerFlujo(btn) {
+        btn.parentElement.remove();
+    }
+
+    /**
+     * Agregar activo
+     */
+    function agregarActivo() {
+        const container = document.getElementById('activos-container');
+        const html = `
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <input type="text" class="form-control activo-nombre" 
+                           placeholder="Nombre del activo" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="form-control activo-proporcion" 
+                           placeholder="Proporción (%)" step="0.01" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger" onclick="removerActivo(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    /**
+     * Remover activo
+     */
+    function removerActivo(btn) {
+        btn.parentElement.parentElement.remove();
+    }
+
+    /**
+     * Ejecutar análisis VAN
+     */
+    async function ejecutarVAN(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const inversion = parseFloat(form.inversion_inicial.value);
+        const tasa = parseFloat(form.tasa_descuento.value) / 100;
+        const flujos = Array.from(form.querySelectorAll('.flujo-input')).map(f => parseFloat(f.value));
+        
+        if (!Validador.esNumeroPositivo(inversion) || !Validador.esArrayNumeros(flujos)) {
+            mostrarAlerta('Por favor ingresa valores válidos', 'danger');
+            return;
+        }
+
+        try {
+            const datos = {
+                inversion_inicial: inversion,
+                flujos_caja: flujos,
+                tasa_descuento: tasa,
+                usuario_id: usuarioActual.usuario_id,
+                nombre_simulacion: form.nombre_simulacion.value || 'VAN - Sin nombre'
+            };
+
+            const resultado = await APIService.calcularVAN(datos);
+            guardarResultadoYRedirigir(resultado, 'van');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Ejecutar análisis TIR
+     */
+    async function ejecutarTIR(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const inversion = parseFloat(form.inversion_inicial.value);
+        const tasa = parseFloat(form.tasa_referencia.value) / 100;
+        const flujos = Array.from(form.querySelectorAll('.flujo-input')).map(f => parseFloat(f.value));
+        
+        if (!Validador.esNumeroPositivo(inversion) || !Validador.esArrayNumeros(flujos)) {
+            mostrarAlerta('Por favor ingresa valores válidos', 'danger');
+            return;
+        }
+
+        try {
+            const datos = {
+                inversion_inicial: inversion,
+                flujos_caja: flujos,
+                tasa_referencia: tasa,
+                usuario_id: usuarioActual.usuario_id,
+                nombre_simulacion: form.nombre_simulacion.value || 'TIR - Sin nombre'
+            };
+
+            const resultado = await APIService.calcularTIR(datos);
+            guardarResultadoYRedirigir(resultado, 'tir');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Ejecutar análisis WACC
+     */
+    async function ejecutarWACC(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const datos = {
+            costo_deuda: parseFloat(form.costo_deuda.value) / 100,
+            costo_patrimonio: parseFloat(form.costo_patrimonio.value) / 100,
+            tasa_impuestos: parseFloat(form.tasa_impuestos.value) / 100,
+            proporcion_deuda: parseFloat(form.proporcion_deuda.value) / 100,
+            usuario_id: usuarioActual.usuario_id
+        };
+
+        if (!Object.values(datos).every(v => !isNaN(v) && v >= 0)) {
+            mostrarAlerta('Por favor ingresa valores válidos', 'danger');
+            return;
+        }
+
+        try {
+            const resultado = await APIService.calcularWACC(datos);
+            guardarResultadoYRedirigir(resultado, 'wacc');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Ejecutar análisis Portafolio
+     */
+    async function ejecutarPortafolio(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const activos = Array.from(form.querySelectorAll('.activo-nombre')).map(n => n.value);
+        const proporciones = Array.from(form.querySelectorAll('.activo-proporcion')).map(p => parseFloat(p.value) / 100);
+        
+        const sumaProorciones = proporciones.reduce((a, b) => a + b, 0);
+        if (Math.abs(sumaProorciones - 1) > 0.01) {
+            mostrarAlerta('Las proporciones deben sumar 100%', 'danger');
+            return;
+        }
+
+        try {
+            const datos = {
+                activos: activos,
+                proporciones: proporciones,
+                usuario_id: usuarioActual.usuario_id
+            };
+
+            const resultado = await APIService.analizarPortafolio(datos);
+            guardarResultadoYRedirigir(resultado, 'portafolio');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Ejecutar análisis Reemplazo
+     */
+    async function ejecutarReemplazo(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const flujos_nuevo = Array.from(document.querySelectorAll('#flujos-nuevo-container .flujo-input')).map(f => parseFloat(f.value));
+        const flujos_actual = Array.from(document.querySelectorAll('#flujos-actual-container .flujo-input')).map(f => parseFloat(f.value));
+        
+        try {
+            const datos = {
+                inversion_inicial: parseFloat(form.inversion_inicial.value),
+                valor_salvamento_actual: parseFloat(form.valor_salvamento_actual.value),
+                flujos_nuevo: flujos_nuevo,
+                flujos_actual: flujos_actual,
+                tasa_descuento: parseFloat(form.tasa_descuento.value) / 100,
+                usuario_id: usuarioActual.usuario_id
+            };
+
+            const resultado = await APIService.analizarReemplazo(datos);
+            guardarResultadoYRedirigir(resultado, 'reemplazo');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Ejecutar cálculo Payback
+     */
+    async function ejecutarPayback(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        const inversion = parseFloat(form.inversion_inicial.value);
+        const flujos = Array.from(form.querySelectorAll('.flujo-input')).map(f => parseFloat(f.value));
+        
+        if (!Validador.esNumeroPositivo(inversion) || !Validador.esArrayNumeros(flujos)) {
+            mostrarAlerta('Por favor ingresa valores válidos', 'danger');
+            return;
+        }
+
+        try {
+            const datos = {
+                inversion_inicial: inversion,
+                flujos_caja: flujos,
+                usuario_id: usuarioActual.usuario_id,
+                nombre_simulacion: 'Payback - Sin nombre'
+            };
+
+            const resultado = await APIService.calcularPeriodoRecuperacion(datos);
+            guardarResultadoYRedirigir(resultado, 'payback');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    /**
+     * Guardar resultado y redirigir
+     */
+    function guardarResultadoYRedirigir(resultado, tipo) {
+        // Guardar en sessionStorage para mostrar en resultados.html
+        sessionStorage.setItem('ultimoResultado', JSON.stringify(resultado));
+        sessionStorage.setItem('tipoSimulacion', tipo);
+        
+        mostrarAlerta('¡Análisis completado! Redirigiendo...', 'success');
+        setTimeout(() => {
+            window.location.href = '/resultados';
+        }, 1500);
+    }
+</script>
+{% endblock %}

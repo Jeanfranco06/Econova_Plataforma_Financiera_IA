@@ -1,8 +1,16 @@
 from app.utils.base_datos import get_db_connection
 
+
 class Usuario:
-    def __init__(self, usuario_id=None, nombre_usuario=None, nombres=None, apellidos=None,
-                 email=None, nivel=None):
+    def __init__(
+        self,
+        usuario_id=None,
+        nombre_usuario=None,
+        nombres=None,
+        apellidos=None,
+        email=None,
+        nivel=None,
+    ):
         self.usuario_id = usuario_id
         self.nombre_usuario = nombre_usuario
         self.nombres = nombres
@@ -11,7 +19,7 @@ class Usuario:
         self.nivel = nivel
 
     @staticmethod
-    def crear_usuario(nombre_usuario, nombres, apellidos, email, nivel='Principiante'):
+    def crear_usuario(nombre_usuario, nombres, apellidos, email, nivel="Principiante"):
         """Crear un nuevo usuario"""
         db = get_db_connection()
         query = """
@@ -21,10 +29,12 @@ class Usuario:
         """
         try:
             db.connect()
-            result = db.execute_query(query, (nombre_usuario, nombres, apellidos, email, nivel), fetch=True)
+            result = db.execute_query(
+                query, (nombre_usuario, nombres, apellidos, email, nivel), fetch=True
+            )
             db.commit()
             if result:
-                return result[0]['usuario_id']
+                return result[0]["usuario_id"]
             return None
         except Exception as e:
             print(f"Error creando usuario: {e}")
@@ -87,6 +97,39 @@ class Usuario:
             db.disconnect()
 
     @staticmethod
+    def obtener_estadisticas(usuario_id):
+        """Obtener estadísticas del usuario"""
+        from app.modelos.simulacion import Simulacion
+
+        try:
+            usuario = Usuario.obtener_usuario_por_id(usuario_id)
+            if not usuario:
+                return None
+
+            # Obtener cantidad de simulaciones
+            simulaciones = Simulacion.obtener_simulaciones_usuario(
+                usuario_id, limite=1000
+            )
+            total_simulaciones = len(simulaciones)
+
+            # Contar por tipo
+            simulaciones_por_tipo = {}
+            for sim in simulaciones:
+                tipo = sim.tipo_simulacion
+                simulaciones_por_tipo[tipo] = simulaciones_por_tipo.get(tipo, 0) + 1
+
+            return {
+                "usuario_id": usuario_id,
+                "total_simulaciones": total_simulaciones,
+                "simulaciones_por_tipo": simulaciones_por_tipo,
+                "nivel": usuario.nivel,
+                "nombre": f"{usuario.nombres} {usuario.apellidos}",
+            }
+        except Exception as e:
+            print(f"Error obteniendo estadísticas: {e}")
+            return None
+
+    @staticmethod
     def listar_usuarios():
         """Listar todos los usuarios"""
         db = get_db_connection()
@@ -108,10 +151,10 @@ class Usuario:
     def to_dict(self):
         """Convertir objeto a diccionario"""
         return {
-            'usuario_id': self.usuario_id,
-            'nombre_usuario': self.nombre_usuario,
-            'nombres': self.nombres,
-            'apellidos': self.apellidos,
-            'email': self.email,
-            'nivel': self.nivel
+            "usuario_id": self.usuario_id,
+            "nombre_usuario": self.nombre_usuario,
+            "nombres": self.nombres,
+            "apellidos": self.apellidos,
+            "email": self.email,
+            "nivel": self.nivel,
         }

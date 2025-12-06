@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Econova{% endblock %}
+
+{% block content %}
+
+<div class="page-title">
+    <h1><i class="fas fa-home"></i> Dashboard</h1>
+    <p class="text-muted">Bienvenido a Econova - Plataforma de Simulación Financiera Inteligente</p>
+</div>
+
+<!-- Tarjetas de Resumen -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calculator fa-2x text-primary mb-3"></i>
+                <h6 class="card-title">Simulaciones</h6>
+                <p class="card-text">
+                    <span class="h4" id="total-simulaciones">0</span>
+                </p>
+                <small class="text-muted">Total realizadas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-trophy fa-2x text-warning mb-3"></i>
+                <h6 class="card-title">Logros</h6>
+                <p class="card-text">
+                    <span class="h4" id="total-logros">0</span>
+                </p>
+                <small class="text-muted">Desbloqueados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-2x text-success mb-3"></i>
+                <h6 class="card-title">Puntos</h6>
+                <p class="card-text">
+                    <span class="h4" id="total-puntos">0</span>
+                </p>
+                <small class="text-muted">Acumulados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user fa-2x text-info mb-3"></i>
+                <h6 class="card-title">Nivel</h6>
+                <p class="card-text">
+                    <span class="h4" id="nivel-usuario">Principiante</span>
+                </p>
+                <small class="text-muted">Tu rango</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Simulaciones Recientes -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-history text-white"></i> Simulaciones Recientes
+                </h5>
+                <a href="/resultados" class="btn btn-sm btn-light">Ver todas</a>
+            </div>
+            <div class="card-body">
+                <div id="simulaciones-container">
+                    <p class="text-muted text-center">Cargando simulaciones...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acceso Rápido -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-lightning-bolt"></i> Acceso Rápido
+        </h5>
+    </div>
+</div>
+
+<div class="row">
+    <!-- VAN -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('van')">
+            <div class="card-body text-center">
+                <i class="fas fa-equals fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">VAN</h5>
+                <p class="card-text">Valor Actual Neto</p>
+                <p class="small text-muted">Evalúa la rentabilidad de una inversión</p>
+                <button class="btn btn-sm btn-primary mt-2" onclick="event.stopPropagation()">Ir a VAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIR -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('tir')">
+            <div class="card-body text-center">
+                <i class="fas fa-percent fa-3x text-success mb-3"></i>
+                <h5 class="card-title">TIR</h5>
+                <p class="card-text">Tasa Interna de Retorno</p>
+                <p class="small text-muted">Calcula la tasa de retorno esperada</p>
+                <button class="btn btn-sm btn-success mt-2" onclick="event.stopPropagation()">Ir a TIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WACC -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('wacc')">
+            <div class="card-body text-center">
+                <i class="fas fa-weight fa-3x text-info mb-3"></i>
+                <h5 class="card-title">WACC</h5>
+                <p class="card-text">Costo Promedio Ponderado</p>
+                <p class="small text-muted">Costo de capital de la empresa</p>
+                <button class="btn btn-sm btn-info mt-2" onclick="event.stopPropagation()">Ir a WACC</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portafolio -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('portafolio')">
+            <div class="card-body text-center">
+                <i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Portafolio</h5>
+                <p class="card-text">Análisis de Portafolio</p>
+                <p class="small text-muted">Retorno y riesgo de múltiples activos</p>
+                <button class="btn btn-sm btn-warning mt-2" onclick="event.stopPropagation()">Ir a Portafolio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reemplazo -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('reemplazo')">
+            <div class="card-body text-center">
+                <i class="fas fa-sync fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">Reemplazo</h5>
+                <p class="card-text">Análisis de Reemplazo</p>
+                <p class="small text-muted">Decisiones de actualización de activos</p>
+                <button class="btn btn-sm btn-danger mt-2" onclick="event.stopPropagation()">Ir a Reemplazo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payback -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irASimulacion('payback')">
+            <div class="card-body text-center">
+                <i class="fas fa-hourglass-end fa-3x text-secondary mb-3"></i>
+                <h5 class="card-title">Payback</h5>
+                <p class="card-text">Período de Recuperación</p>
+                <p class="small text-muted">Tiempo para recuperar la inversión</p>
+                <button class="btn btn-sm btn-secondary mt-2" onclick="event.stopPropagation()">Ir a Payback</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Logros -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy"></i> Logros Desbloqueados
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="logros-container" class="row">
+                    <p class="text-muted text-center col-12">Cargando logros...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .card:hover {
+        cursor: pointer;
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cargar datos al abrir la página
+    document.addEventListener('DOMContentLoaded', async () => {
+        await cargarEstadisticas();
+        await cargarSimulacionesRecientes();
+        await cargarLogros();
+    });
+
+    /**
+     * Cargar estadísticas del usuario
+     */
+    async function cargarEstadisticas() {
+        try {
+            const stats = await APIService.obtenerEstadisticas(usuarioActual.usuario_id);
+            
+            document.getElementById('total-simulaciones').textContent = stats.data.total_simulaciones || 0;
+            document.getElementById('total-logros').textContent = stats.data.total_logros || 0;
+            document.getElementById('total-puntos').textContent = stats.data.puntos_totales || 0;
+            document.getElementById('nivel-usuario').textContent = stats.data.nivel || 'Principiante';
+        } catch (error) {
+            console.error('Error cargando estadísticas:', error);
+        }
+    }
+
+    /**
+     * Cargar simulaciones recientes
+     */
+    async function cargarSimulacionesRecientes() {
+        try {
+            const respuesta = await APIService.listarSimulacionesUsuario(usuarioActual.usuario_id, null, 5);
+            const simulaciones = respuesta.data || [];
+            
+            const container = document.getElementById('simulaciones-container');
+            
+            if (simulaciones.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <p><i class="fas fa-inbox fa-2x mb-2"></i></p>
+                        <p>No hay simulaciones aún. ¡Comienza con tu primera simulación!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Resultado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            simulaciones.forEach(sim => {
+                const fecha = FormatoUtil.formatoFecha(sim.fecha);
+                html += `
+                    <tr>
+                        <td>
+                            <span class="badge bg-primary">${sim.tipo_simulacion}</span>
+                        </td>
+                        <td>${fecha}</td>
+                        <td>
+                            <a href="/resultados?id=${sim.simulacion_id}" class="text-primary">Ver resultados</a>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="duplicarSimulacion(${sim.simulacion_id})">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Error cargando simulaciones:', error);
+            document.getElementById('simulaciones-container').innerHTML = `
+                <p class="text-danger">Error al cargar simulaciones</p>
+            `;
+        }
+    }
+
+    /**
+     * Cargar logros del usuario
+     */
+    async function cargarLogros() {
+        try {
+            const respuesta = await APIService.obtenerLogros(usuarioActual.usuario_id);
+            const logros = respuesta.data || [];
+            
+            const container = document.getElementById('logros-container');
+            
+            if (logros.length === 0) {
+                container.innerHTML = `
+                    <p class="text-muted text-center">
+                        Comienza a realizar simulaciones para desbloquear logros
+                    </p>
+                `;
+                return;
+            }
+
+            let html = '';
+            logros.forEach(logro => {
+                html += `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-medal fa-2x text-warning mb-2"></i>
+                                <h6 class="card-title">${logro.nombre}</h6>
+                                <p class="card-text small">${logro.descripcion}</p>
+                                <span class="badge bg-success">+${logro.puntos} pts</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Error cargando logros:', error);
+        }
+    }
+
+    /**
+     * Navegar a formulario de simulación
+     */
+    function irASimulacion(tipo) {
+        window.location.href = `/simulacion?tipo=${tipo}`;
+    }
+
+    /**
+     * Duplicar una simulación (cargar parámetros)
+     */
+    function duplicarSimulacion(simulacionId) {
+        window.location.href = `/simulacion?duplicar=${simulacionId}`;
+    }
+</script>
+{% endblock %}

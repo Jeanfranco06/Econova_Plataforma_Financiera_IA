@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Econova - Plataforma de Simulación Financiera{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Plotly JS para gráficos -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- CSS Global -->
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-bg: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: #374151;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar a {
+            color: white !important;
+            transition: opacity 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+
+        .user-info {
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Layout Principal */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            height: calc(100vh - 70px);
+            padding-top: 1rem;
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar .nav-link {
+            color: #6b7280;
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+
+        /* Container Principal */
+        .main-container {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 0 1rem;
+        }
+
+        /* Cartas */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Botones */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+
+        /* Tablas */
+        .table thead th {
+            background-color: var(--light-bg);
+            color: #374151;
+            font-weight: 600;
+            border-color: var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--light-bg);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1f2937;
+            color: #9ca3af;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Formularios */
+        .form-control,
+        .form-select {
+            border-color: var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        .form-label {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Alertas */
+        .alert {
+            border-radius: 6px;
+            border: none;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Spinner personalizado */
+        .spinner-custom {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner-custom.show {
+            display: block;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                padding: 1rem;
+            }
+
+            .content-wrapper {
+                padding: 1rem 0;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        /* Tipografía */
+        h1, h2, h3, h4, h5, h6 {
+            color: #1f2937;
+            font-weight: 700;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Utilidades */
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .text-success {
+            color: var(--success-color) !important;
+        }
+
+        .text-danger {
+            color: var(--danger-color) !important;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line"></i> Econova
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/simulacion">
+                            <i class="fas fa-calculator"></i> Simulación
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resultados">
+                            <i class="fas fa-chart-bar"></i> Resultados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chatbot">
+                            <i class="fas fa-comments"></i> Chatbot
+                        </a>
+                    </li>
+                </ul>
+                <div class="user-info ms-3">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="usuario-nombre">Usuario Demo</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        <div class="content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-lg-2 d-none d-lg-block">
+                        <div class="sidebar">
+                            <nav class="nav flex-column">
+                                <a class="nav-link" href="/simulacion?tipo=van">
+                                    <i class="fas fa-equals"></i> VAN
+                                </a>
+                                <a class="nav-link" href="/simulacion?tipo=tir">
+                                    <i class="fas fa-percent"></i> TIR
+                                </a>
+                                <a class="nav-link" href="/simulacion?tipo=wacc">
+                                    <i class="fas fa-weight"></i> WACC
+                                </a>
+                                <a class="nav-link" href="/simulacion?tipo=portafolio">
+                                    <i class="fas fa-briefcase"></i> Portafolio
+                                </a>
+                                <a class="nav-link" href="/simulacion?tipo=reemplazo">
+                                    <i class="fas fa-sync"></i> Reemplazo
+                                </a>
+                                <a class="nav-link" href="/simulacion?tipo=payback">
+                                    <i class="fas fa-hourglass-end"></i> Payback
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="col-lg-10">
+                        {% block content %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <p>&copy; 2025 Econova - Plataforma Inteligente de Simulación Financiera</p>
+                <p class="small">Desarrollado por el equipo de Econova | Germaín (Backend) | Gianfranco (Frontend) | Diego (ML) | Ronaldo (Chatbot) | Jeanfranco (BD)</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- API Service JS -->
+    <script src="/static/js/api-service.js"></script>
+    
+    <!-- Global JS -->
+    <script>
+        // Simulación de usuario actual (sin login real)
+        const usuarioActual = {
+            usuario_id: 1,
+            nombre_usuario: 'usuario_demo',
+            nombres: 'Juan',
+            apellidos: 'Demo',
+            email: 'demo@econova.com',
+            nivel: 'Intermedio'
+        };
+
+        // Actualizar nombre de usuario en navbar
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('usuario-nombre').textContent = usuarioActual.nombres + ' ' + usuarioActual.apellidos;
+        });
+
+        // Función para mostrar/ocultar loading
+        function mostrarLoading(mostrar = true) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (mostrar) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show fade-in`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.main-container') || document.querySelector('.content-wrapper');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // Auto-descartar después de 5 segundos
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

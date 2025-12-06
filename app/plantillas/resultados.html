@@ -1,0 +1,682 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados - Econova{% endblock %}
+
+{% block content %}
+
+<div class="page-title">
+    <h1><i class="fas fa-chart-bar"></i> Resultados de Simulaciones</h1>
+    <p class="text-muted">Visualiza y analiza los resultados de tus simulaciones financieras</p>
+</div>
+
+<!-- Selector de Simulación -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Selecciona una simulación</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <select id="simulacion-select" class="form-select" onchange="cargarSimulacion()">
+                    <option value="">Cargando simulaciones...</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100" onclick="refrescarSimulaciones()">
+                    <i class="fas fa-sync"></i> Refrescar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenedor de Resultados -->
+<div id="resultados-container">
+    <div class="text-center text-muted py-5">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <p>Selecciona una simulación para ver los resultados</p>
+    </div>
+</div>
+
+<!-- Modal para exportar -->
+<div class="modal fade" id="modalExportar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Exportar Resultado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿En qué formato deseas exportar?</p>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary flex-grow-1" onclick="exportarJSON()">
+                        <i class="fas fa-file-code"></i> JSON
+                    </button>
+                    <button class="btn btn-outline-success flex-grow-1" onclick="exportarCSV()">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
+                    <button class="btn btn-outline-danger flex-grow-1" onclick="exportarPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    let resultadoActual = null;
+    let simulacionActual = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Cargar resultado de sessionStorage si existe
+        const ultimoResultado = sessionStorage.getItem('ultimoResultado');
+        if (ultimoResultado) {
+            resultadoActual = JSON.parse(ultimoResultado);
+            mostrarResultado(resultadoActual);
+            sessionStorage.removeItem('ultimoResultado');
+        } else {
+            // Cargar simulaciones
+            await cargarSimulaciones();
+        }
+    });
+
+    /**
+     * Cargar lista de simulaciones
+     */
+    async function cargarSimulaciones() {
+        try {
+            const respuesta = await APIService.listarSimulacionesUsuario(usuarioActual.usuario_id, null, 100);
+            const simulaciones = respuesta.data || [];
+            
+            const select = document.getElementById('simulacion-select');
+            select.innerHTML = '';
+
+            if (simulaciones.length === 0) {
+                select.innerHTML = '<option value="">No hay simulaciones</option>';
+                return;
+            }
+
+            simulaciones.forEach(sim => {
+                const fecha = new Date(sim.fecha).toLocaleDateString();
+                const option = document.createElement('option');
+                option.value = sim.simulacion_id;
+                option.textContent = `${sim.tipo_simulacion} - ${fecha}`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error cargando simulaciones:', error);
+        }
+    }
+
+    /**
+     * Refrescar lista de simulaciones
+     */
+    async function refrescarSimulaciones() {
+        await cargarSimulaciones();
+        mostrarAlerta('Simulaciones refrescadas', 'info');
+    }
+
+    /**
+     * Cargar simulación seleccionada
+     */
+    async function cargarSimulacion() {
+        const select = document.getElementById('simulacion-select');
+        const simulacionId = select.value;
+
+        if (!simulacionId) {
+            return;
+        }
+
+        try {
+            simulacionActual = await APIService.obtenerSimulacion(simulacionId);
+            resultadoActual = simulacionActual.data;
+            mostrarResultado(resultadoActual);
+        } catch (error) {
+            console.error('Error cargando simulación:', error);
+        }
+    }
+
+    /**
+     * Mostrar resultado con formato según el tipo
+     */
+    function mostrarResultado(resultado) {
+        if (!resultado) {
+            return;
+        }
+
+        const container = document.getElementById('resultados-container');
+        const tipo = resultado.tipo_simulacion || 'desconocido';
+
+        let html = '';
+
+        switch (tipo.toUpperCase()) {
+            case 'VAN':
+                html = mostrarVAN(resultado);
+                break;
+            case 'TIR':
+                html = mostrarTIR(resultado);
+                break;
+            case 'WACC':
+                html = mostrarWACC(resultado);
+                break;
+            case 'PORTAFOLIO':
+                html = mostrarPortafolio(resultado);
+                break;
+            case 'REEMPLAZO_ACTIVOS':
+                html = mostrarReemplazo(resultado);
+                break;
+            case 'PAYBACK':
+                html = mostrarPayback(resultado);
+                break;
+            default:
+                html = `<p>Tipo de simulación no reconocido: ${tipo}</p>`;
+        }
+
+        container.innerHTML = html;
+
+        // Agregar botones de acción
+        agregarBotonesAccion();
+    }
+
+    /**
+     * Mostrar resultados VAN
+     */
+    function mostrarVAN(resultado) {
+        const d = resultado.data || resultado;
+        const van = parseFloat(d.van || 0);
+        const decision = d.decision || 'RECHAZAR';
+        const tipoIcono = van > 0 ? 'check-circle text-success' : 'times-circle text-danger';
+        const tipoClase = van > 0 ? 'success' : 'danger';
+
+        let html = `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-${tipoClase} mb-4">
+                        <div class="card-header bg-${tipoClase}">
+                            <h5 class="mb-0 text-white">Resultado del VAN</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-${tipoIcono} fa-3x mb-2"></i>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">VAN Calculado</label>
+                                <h3 class="text-${tipoClase}">${FormatoUtil.formatoMoneda(van)}</h3>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Decisión</label>
+                                <h4><span class="badge bg-${tipoClase}">${decision}</span></h4>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Interpretación</label>
+                                <p class="card-text">${d.interpretacion || 'Sin interpretación'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Detalles</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Inversión Inicial</strong></td>
+                                    <td>${FormatoUtil.formatoMoneda(d.inversion_inicial)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tasa de Descuento</strong></td>
+                                    <td>${FormatoUtil.formatoPorcentaje(d.tasa_descuento)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Número de Períodos</strong></td>
+                                    <td>${d.numero_periodos || Array.from(d.flujos_caja || []).length}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Valor Actual de Flujos</strong></td>
+                                    <td>${FormatoUtil.formatoMoneda(d.valor_actual_flujos || 0)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Flujos de Caja Descontados</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="grafico-van" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Flujos de Caja</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Período</th>
+                                            <th>Flujo Nominal</th>
+                                            <th>Factor de Descuento</th>
+                                            <th>Flujo Descontado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+        `;
+
+        if (d.flujos_descontados) {
+            d.flujos_descontados.forEach((flujo, idx) => {
+                html += `
+                    <tr>
+                        <td>${idx}</td>
+                        <td>${FormatoUtil.formatoMoneda(d.flujos_caja[idx] || 0)}</td>
+                        <td>${FormatoUtil.formatoNumero(flujo.factor_descuento || 1, 4)}</td>
+                        <td>${FormatoUtil.formatoMoneda(flujo.valor_descontado || 0)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Programar gráfico
+        setTimeout(() => {
+            const periodos = d.flujos_caja ? d.flujos_caja.map((_, i) => `Año ${i}`) : [];
+            const flujos = d.flujos_caja || [];
+            GraficoUtil.crearGraficoBarras('grafico-van', periodos, flujos, 'Flujos de Caja', 'Monto ($)');
+        }, 100);
+
+        return html;
+    }
+
+    /**
+     * Mostrar resultados TIR
+     */
+    function mostrarTIR(resultado) {
+        const d = resultado.data || resultado;
+        const tir = (parseFloat(d.tir) || 0) * 100;
+        const tasa_ref = (parseFloat(d.tasa_referencia) || 0) * 100;
+        const decision = d.decision || 'RECHAZAR';
+        const tipoIcono = tir >= tasa_ref ? 'check-circle text-success' : 'times-circle text-danger';
+        const tipoClase = tir >= tasa_ref ? 'success' : 'danger';
+
+        return `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-${tipoClase} mb-4">
+                        <div class="card-header bg-${tipoClase}">
+                            <h5 class="mb-0 text-white">Resultado del TIR</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-${tipoIcono} fa-3x mb-2"></i>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">TIR Calculada</label>
+                                <h3 class="text-${tipoClase}">${FormatoUtil.formatoPorcentaje(d.tir || 0, 2)}</h3>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Tasa Referencia</label>
+                                <p>${FormatoUtil.formatoPorcentaje(d.tasa_referencia || 0, 2)}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Decisión</label>
+                                <h4><span class="badge bg-${tipoClase}">${decision}</span></h4>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Interpretación</label>
+                                <p class="card-text">${d.interpretacion || 'Sin interpretación'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Comparativa</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="grafico-tir-comparativa" style="height: 250px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Mostrar resultados WACC
+     */
+    function mostrarWACC(resultado) {
+        const d = resultado.data || resultado;
+        const wacc = (parseFloat(d.wacc) || 0) * 100;
+
+        return `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info">
+                            <h5 class="mb-0 text-white">Resultado del WACC</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-weight fa-3x text-info mb-2"></i>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">WACC Calculado</label>
+                                <h3 class="text-info">${FormatoUtil.formatoPorcentaje(d.wacc || 0, 2)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Detalles</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Costo de Deuda</strong></td>
+                                    <td>${FormatoUtil.formatoPorcentaje(d.costo_deuda || 0)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Costo de Patrimonio</strong></td>
+                                    <td>${FormatoUtil.formatoPorcentaje(d.costo_patrimonio || 0)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Proporción Deuda</strong></td>
+                                    <td>${FormatoUtil.formatoPorcentaje(d.proporcion_deuda || 0)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tasa de Impuestos</strong></td>
+                                    <td>${FormatoUtil.formatoPorcentaje(d.tasa_impuestos || 0)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Mostrar resultados Portafolio
+     */
+    function mostrarPortafolio(resultado) {
+        const d = resultado.data || resultado;
+        
+        return `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0 text-dark">Análisis de Portafolio</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="text-muted">Retorno Esperado</label>
+                                <h3 class="text-warning">${FormatoUtil.formatoPorcentaje(d.retorno_esperado || 0)}</h3>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Riesgo (Desviación Estándar)</label>
+                                <h3>${FormatoUtil.formatoPorcentaje(d.riesgo || 0)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Composición</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="grafico-portafolio" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Mostrar resultados Reemplazo
+     */
+    function mostrarReemplazo(resultado) {
+        const d = resultado.data || resultado;
+        const decision = d.decision || 'REVISAR';
+        const tipoClase = decision === 'REEMPLAZAR' ? 'success' : 'warning';
+
+        return `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-${tipoClase} mb-4">
+                        <div class="card-header bg-${tipoClase}">
+                            <h5 class="mb-0 text-white">Decisión de Reemplazo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="text-muted">Decisión Recomendada</label>
+                                <h3><span class="badge bg-${tipoClase}">${decision}</span></h3>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Interpretación</label>
+                                <p class="card-text">${d.interpretacion || 'Revisar análisis detallado'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Comparativa de VAN</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>VAN Nuevo Activo</strong></td>
+                                    <td>${FormatoUtil.formatoMoneda(d.van_nuevo || 0)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VAN Activo Actual</strong></td>
+                                    <td>${FormatoUtil.formatoMoneda(d.van_actual || 0)}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Diferencia</strong></td>
+                                    <td>${FormatoUtil.formatoMoneda((d.van_nuevo - d.van_actual) || 0)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Mostrar resultados Payback
+     */
+    function mostrarPayback(resultado) {
+        const d = resultado.data || resultado;
+        const payback = parseFloat(d.periodo_recuperacion || 0);
+
+        return `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-primary mb-4">
+                        <div class="card-header bg-primary">
+                            <h5 class="mb-0 text-white">Período de Recuperación</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-hourglass-end fa-3x text-primary mb-2"></i>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Payback Period</label>
+                                <h3 class="text-primary">${payback.toFixed(2)} años</h3>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted">Interpretación</label>
+                                <p class="card-text">${d.interpretacion || 'Ver detalles'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Flujos Acumulados</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="grafico-payback" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Agregar botones de acción
+     */
+    function agregarBotonesAccion() {
+        const container = document.getElementById('resultados-container');
+        const botonesDiv = document.createElement('div');
+        botonesDiv.className = 'row mt-4';
+        botonesDiv.innerHTML = `
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="reproducirSimulacion()">
+                        <i class="fas fa-redo"></i> Reproducir Simulación
+                    </button>
+                    <button class="btn btn-success" onclick="abrirModalExportar()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-secondary" onclick="volverAlInicio()">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(botonesDiv);
+    }
+
+    /**
+     * Reproducir simulación
+     */
+    function reproducirSimulacion() {
+        if (!resultadoActual) return;
+        
+        const tipo = (resultadoActual.tipo_simulacion || 'van').toLowerCase();
+        window.location.href = `/simulacion?tipo=${tipo}&duplicar=${resultadoActual.simulacion_id}`;
+    }
+
+    /**
+     * Abrir modal de exportar
+     */
+    function abrirModalExportar() {
+        const modal = new bootstrap.Modal(document.getElementById('modalExportar'));
+        modal.show();
+    }
+
+    /**
+     * Exportar como JSON
+     */
+    function exportarJSON() {
+        const dataStr = JSON.stringify(resultadoActual, null, 2);
+        descargarArchivo(dataStr, 'simulacion.json', 'application/json');
+        mostrarAlerta('Exportado como JSON', 'success');
+    }
+
+    /**
+     * Exportar como CSV
+     */
+    function exportarCSV() {
+        let csv = 'Resultado,Valor\n';
+        
+        if (resultadoActual.data) {
+            for (const [key, value] of Object.entries(resultadoActual.data)) {
+                csv += `"${key}","${value}"\n`;
+            }
+        }
+
+        descargarArchivo(csv, 'simulacion.csv', 'text/csv');
+        mostrarAlerta('Exportado como CSV', 'success');
+    }
+
+    /**
+     * Exportar como PDF
+     */
+    function exportarPDF() {
+        const element = document.getElementById('resultados-container');
+        const opt = {
+            margin: 10,
+            filename: 'simulacion.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+        mostrarAlerta('Exportado como PDF', 'success');
+    }
+
+    /**
+     * Descargar archivo
+     */
+    function descargarArchivo(contenido, nombre, tipo) {
+        const blob = new Blob([contenido], { type: tipo });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    }
+
+    /**
+     * Volver al inicio
+     */
+    function volverAlInicio() {
+        window.location.href = '/';
+    }
+
+    // Cerrar modal al exportar
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('[onclick*="exportar"]')) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportar'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+    });
+</script>
+{% endblock %}
