@@ -3,18 +3,18 @@ Flask==3.0.0
 flask-cors==4.0.0
 
 # Procesamiento de datos
-pandas==2.1.4
-numpy==1.26.2
+pandas>=2.1.4
+numpy>=1.26.2
 
 # Cálculos científicos y optimización
-scipy==1.11.4
+scipy>=1.11.4
 
 # Base de datos
-psycopg2-binary==2.9.9
+psycopg[binary]>=3.1.0
 
 # Machine Learning (para integración con Diego)
-scikit-learn==1.3.2
-xgboost==2.0.3
+scikit-learn>=1.3.2
+xgboost>=2.0.3
 
 # Visualización (para integración con Gianfranco)
 plotly==5.18.0
