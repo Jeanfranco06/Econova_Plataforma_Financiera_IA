@@ -153,6 +153,7 @@ def registrar_blueprints(app):
 
     # Rutas financieras (Germaín)
     from app.rutas.financiero import bp_financiero
+
     app.register_blueprint(bp_financiero)
 
     # Rutas de usuarios (Germaín)
