@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Simulador de Ahorro e Inversión - Econova{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-green-900 to-emerald-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <i class="fas fa-piggy-bank mr-3"></i>Simulador de Ahorro e Inversión
+    </h1>
+    <p class="text-xl text-green-100 mb-4 max-w-2xl mx-auto">
+      Proyecta tu crecimiento financiero, compara instrumentos de inversión y planifica tus metas
+    </p>
+  </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-5xl mx-auto">
+      
+      <!-- Tabs for different analyses -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div class="flex border-b border-gray-200 flex-wrap">
+          <button class="savings-tab-btn active flex-1 py-4 px-4 md:px-6 text-center font-semibold border-b-2 border-green-600 text-sm md:text-base" data-tab="proyeccion">
+            <i class="fas fa-chart-line mr-2"></i>Proyección
+          </button>
+          <button class="savings-tab-btn flex-1 py-4 px-4 md:px-6 text-center font-semibold text-gray-600 hover:text-gray-800 text-sm md:text-base" data-tab="meta">
+            <i class="fas fa-target mr-2"></i>Alcanzar Meta
+          </button>
+          <button class="savings-tab-btn flex-1 py-4 px-4 md:px-6 text-center font-semibold text-gray-600 hover:text-gray-800 text-sm md:text-base" data-tab="comparador">
+            <i class="fas fa-balance-scale mr-2"></i>Comparador
+          </button>
+          <button class="savings-tab-btn flex-1 py-4 px-4 md:px-6 text-center font-semibold text-gray-600 hover:text-gray-800 text-sm md:text-base" data-tab="sensibilidad">
+            <i class="fas fa-flask-vial mr-2"></i>Sensibilidad
+          </button>
+        </div>
+
+        <!-- TAB 1: Proyección de Ahorro -->
+        <div id="proyeccion-tab" class="savings-tab-content p-8">
+          <form id="savings-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Monto Inicial -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill mr-2 text-green-600"></i>Monto Inicial (S/)
+                </label>
+                <input
+                  type="number"
+                  id="savings-monto-inicial"
+                  name="monto_inicial"
+                  required
+                  min="0"
+                  step="100"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="10000"
+                  value="10000"
+                >
+              </div>
+
+              <!-- Aporte Mensual -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-plus-circle mr-2 text-green-600"></i>Aporte Mensual (S/)
+                </label>
+                <input
+                  type="number"
+                  id="savings-aporte"
+                  name="aporte_mensual"
+                  required
+                  min="0"
+                  step="50"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="500"
+                  value="500"
+                >
+              </div>
+
+              <!-- Tasa Anual -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-percent mr-2 text-green-600"></i>Tasa Anual (%)
+                </label>
+                <input
+                  type="number"
+                  id="savings-tasa"
+                  name="tasa_anual"
+                  required
+                  min="0"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="8.0"
+                  value="8.0"
+                >
+              </div>
+
+              <!-- Período en Meses -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-calendar-alt mr-2 text-green-600"></i>Período (Meses)
+                </label>
+                <input
+                  type="number"
+                  id="savings-meses"
+                  name="meses"
+                  required
+                  min="1"
+                  max="1200"
+                  step="1"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="120"
+                  value="120"
+                >
+              </div>
+
+              <!-- Impuesto sobre Intereses -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-receipt mr-2 text-green-600"></i>Impuesto sobre Intereses (%)
+                </label>
+                <input
+                  type="number"
+                  id="savings-impuesto"
+                  name="tasa_impuesto"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="0"
+                  value="0"
+                >
+              </div>
+
+              <!-- Inflación Anual -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-chart-bar mr-2 text-green-600"></i>Inflación Anual (%)
+                </label>
+                <input
+                  type="number"
+                  id="savings-inflacion"
+                  name="inflacion_anual"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="3.0"
+                  value="3.0"
+                >
+              </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <div class="flex gap-4">
+              <button
+                type="submit"
+                class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg"
+              >
+                <i class="fas fa-chart-line mr-2"></i>Proyectar Ahorro
+              </button>
+              <button
+                type="reset"
+                class="px-6 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition duration-300"
+              >
+                <i class="fas fa-redo mr-2"></i>Limpiar
+              </button>
+            </div>
+          </form>
+
+          <!-- Results -->
+          <div id="savings-results" class="mt-8 hidden">
+            <!-- Summary Cards -->
+            <div class="grid md:grid-cols-3 gap-4 mb-8">
+              <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Saldo Final</div>
+                <div class="text-2xl font-bold text-green-600 mt-1" id="result-saldo-final">S/ 0.00</div>
+              </div>
+
+              <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Ganancia Neta</div>
+                <div class="text-2xl font-bold text-blue-600 mt-1" id="result-ganancia-neta">S/ 0.00</div>
+              </div>
+
+              <div class="bg-orange-50 border-l-4 border-orange-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Rendimiento (%)</div>
+                <div class="text-2xl font-bold text-orange-600 mt-1" id="result-rendimiento">0.00%</div>
+              </div>
+            </div>
+
+            <!-- Detailed Information -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2 text-green-600"></i>Resumen de la Proyección
+              </h3>
+              <div id="savings-summary" class="space-y-3">
+                <!-- Filled by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Inflation Impact -->
+            <div class="bg-amber-50 border-l-4 border-amber-600 p-6 rounded-lg mb-8">
+              <h3 class="text-lg font-semibold text-amber-900 mb-2">
+                <i class="fas fa-warning mr-2"></i>Impacto de la Inflación
+              </h3>
+              <p class="text-amber-800">
+                Con inflación, el poder adquisitivo real de tu dinero es menor. Tu saldo en valores actuales será: 
+                <strong id="poder-adquisitivo">S/ 0.00</strong>
+              </p>
+            </div>
+
+            <!-- Projection Chart -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-chart-area mr-2 text-green-600"></i>Evolución del Ahorro
+              </h3>
+              <canvas id="savings-chart" style="max-height: 300px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Alcanzar Meta -->
+        <div id="meta-tab" class="savings-tab-content p-8 hidden">
+          <form id="meta-form" class="space-y-6 mb-8">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto Objetivo (S/)</label>
+                <input type="number" name="monto_objetivo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="100000" value="100000" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto Inicial (S/)</label>
+                <input type="number" name="monto_inicial" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="10000" value="10000" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tasa Anual (%)</label>
+                <input type="number" name="tasa_anual" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="8.0" value="8.0" step="0.01" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Aporte Mensual (S/)</label>
+                <input type="number" name="aporte_mensual" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="500" value="500" step="50" min="0">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+              <i class="fas fa-bullseye mr-2"></i>Calcular Tiempo para Meta
+            </button>
+          </form>
+
+          <div id="meta-results" class="hidden bg-white rounded-lg border border-gray-200 p-6">
+            <div class="text-center mb-6">
+              <div class="text-5xl font-bold text-green-600 mb-2" id="meta-meses">0</div>
+              <div class="text-2xl text-gray-600">Meses necesarios</div>
+              <div class="text-lg text-gray-500" id="meta-anos">(0 años)</div>
+            </div>
+            <div id="meta-info" class="space-y-3 text-sm">
+              <!-- Filled by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Comparador de Instrumentos -->
+        <div id="comparador-tab" class="savings-tab-content p-8 hidden">
+          <form id="comparador-form" class="space-y-6 mb-8">
+            <div class="grid md:grid-cols-3 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto Inicial (S/)</label>
+                <input type="number" name="monto_inicial" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="100000" value="100000" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Aporte Mensual (S/)</label>
+                <input type="number" name="aporte_mensual" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="1000" value="1000" step="100" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Período (Meses)</label>
+                <input type="number" name="meses" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="24" value="24" min="1">
+              </div>
+            </div>
+
+            <!-- Predefined Instruments -->
+            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+              <h4 class="font-semibold text-gray-800 mb-4">Instrumentos Predefinidos</h4>
+              <div class="grid md:grid-cols-3 gap-4">
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" name="instrument" value="plazo_fijo" checked class="w-4 h-4">
+                  <span class="ml-2 text-sm">Plazo Fijo (5%)</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" name="instrument" value="fondo_mutuo" checked class="w-4 h-4">
+                  <span class="ml-2 text-sm">Fondo Mutuo (8.5%)</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" name="instrument" value="renta_fija" checked class="w-4 h-4">
+                  <span class="ml-2 text-sm">Renta Fija (6.5%)</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+              <i class="fas fa-chart-bar mr-2"></i>Comparar Instrumentos
+            </button>
+          </form>
+
+          <div id="comparador-results" class="hidden">
+            <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Mejor Opción</h3>
+              <div id="mejor-opcion" class="bg-green-50 p-4 rounded-lg">
+                <!-- Filled by JavaScript -->
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Comparativa Completa</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-green-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left font-semibold">Instrumento</th>
+                      <th class="px-4 py-3 text-right font-semibold">Tasa (%)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Saldo Final (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Ganancia Neta (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Rendimiento (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comparador-table" class="divide-y divide-gray-200">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Sensibilidad -->
+        <div id="sensibilidad-tab" class="savings-tab-content p-8 hidden">
+          <form id="sensibilidad-form" class="space-y-6 mb-8">
+            <div class="grid md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto Inicial (S/)</label>
+                <input type="number" name="monto_inicial" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="10000" value="10000">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Aporte (S/)</label>
+                <input type="number" name="aporte_mensual" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="500" value="500">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tasa (%)</label>
+                <input type="number" name="tasa_anual" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="8" value="8" step="0.01">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Meses</label>
+                <input type="number" name="meses" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="120" value="120">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+              Analizar Sensibilidad
+            </button>
+          </form>
+
+          <div id="sensibilidad-results" class="hidden bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Impacto de Cambios en Tasa</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-green-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left font-semibold">Tasa (%)</th>
+                    <th class="px-4 py-3 text-right font-semibold">Saldo Final (S/)</th>
+                    <th class="px-4 py-3 text-right font-semibold">Variación (%)</th>
+                    <th class="px-4 py-3 text-left font-semibold">Escenario</th>
+                  </tr>
+                </thead>
+                <tbody id="sensibilidad-table" class="divide-y divide-gray-200">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="grid md:grid-cols-3 gap-6 mt-8">
+        <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-600">
+          <h4 class="font-semibold text-green-900 mb-2">💡 Aportes Consistentes</h4>
+          <p class="text-sm text-green-800">Ahorrar regularmente es más importante que la tasa. El efecto compuesto multiplica tus ahorros con el tiempo.</p>
+        </div>
+        <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+          <h4 class="font-semibold text-blue-900 mb-2">✓ Inflación</h4>
+          <p class="text-sm text-blue-800">Tu dinero pierde poder adquisitivo con la inflación. Busca instrumentos que rindan por encima de la inflación.</p>
+        </div>
+        <div class="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-600">
+          <h4 class="font-semibold text-orange-900 mb-2">📈 Diversifica</h4>
+          <p class="text-sm text-orange-800">No concentres toda tu inversión en un solo instrumento. Compara opciones para optimizar tu rendimiento.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include Chart Library and JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/ahorro_inversion.js') }}"></script>
+{% endblock %}

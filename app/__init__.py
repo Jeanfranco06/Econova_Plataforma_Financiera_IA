@@ -133,6 +133,14 @@ def crear_app(config_name="development"):
     def benchmarking():
         return render_template("benchmarking.html")
 
+    @app.route("/prestamo")
+    def prestamo():
+        return render_template("prestamo.html")
+
+    @app.route("/ahorro-inversion")
+    def ahorro_inversion():
+        return render_template("ahorro_inversion.html")
+
     @app.route("/demo")
     def demo():
         return render_template("demo.html")

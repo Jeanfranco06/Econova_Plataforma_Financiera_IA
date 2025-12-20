@@ -105,8 +105,10 @@
                     <a href="/simulacion" class="{% if current_path == '/simulacion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Simulación</a>
                     <a href="/chatbot" class="{% if current_path == '/chatbot' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Chatbot</a>
                     <a href="/benchmarking" class="{% if current_path == '/benchmarking' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Benchmarking</a>
+                    <a href="/prestamo" class="{% if current_path == '/prestamo' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300"><i class="fas fa-file-invoice-dollar mr-1"></i>Préstamos</a>
+                    <a href="/ahorro-inversion" class="{% if current_path == '/ahorro-inversion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300"><i class="fas fa-piggy-bank mr-1"></i>Ahorro</a>
 
-                    {% if current_path not in ['/', '/chatbot', '/benchmarking', '/simulacion'] %}
+                    {% if current_path not in ['/', '/chatbot', '/benchmarking', '/simulacion', '/prestamo', '/ahorro-inversion'] %}
                         <a href="/" class="text-gray-700 hover:text-blue-600 transition duration-300">Inicio</a>
                     {% endif %}
 
@@ -176,8 +178,10 @@
                 <a href="/simulacion" class="block py-2 {% if current_path == '/simulacion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Simulación</a>
                 <a href="/chatbot" class="block py-2 {% if current_path == '/chatbot' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Chatbot</a>
                 <a href="/benchmarking" class="block py-2 {% if current_path == '/benchmarking' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Benchmarking</a>
+                <a href="/prestamo" class="block py-2 {% if current_path == '/prestamo' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}"><i class="fas fa-file-invoice-dollar mr-1"></i>Préstamos</a>
+                <a href="/ahorro-inversion" class="block py-2 {% if current_path == '/ahorro-inversion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}"><i class="fas fa-piggy-bank mr-1"></i>Ahorro</a>
 
-                {% if current_path not in ['/', '/chatbot', '/benchmarking', '/simulacion'] %}
+                {% if current_path not in ['/', '/chatbot', '/benchmarking', '/simulacion', '/prestamo', '/ahorro-inversion'] %}
                     <a href="/" class="block py-2 text-gray-700 hover:text-blue-600">Inicio</a>
                 {% endif %}
 

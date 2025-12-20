@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}Simulador de Préstamos - Econova{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <i class="fas fa-university mr-3"></i>Simulador de Préstamos
+    </h1>
+    <p class="text-xl text-blue-100 mb-4 max-w-2xl mx-auto">
+      Calcula cuotas, analiza tablas de amortización y comprende el costo real de tu crédito
+    </p>
+  </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-5xl mx-auto">
+      
+      <!-- Tabs for different loan analyses -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div class="flex border-b border-gray-200">
+          <button class="loan-tab-btn active flex-1 py-4 px-6 text-center font-semibold border-b-2 border-blue-600" data-tab="basico">
+            <i class="fas fa-calculator mr-2"></i>Cálculo Básico
+          </button>
+          <button class="loan-tab-btn flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-gray-800" data-tab="sensibilidad">
+            <i class="fas fa-chart-line mr-2"></i>Sensibilidad
+          </button>
+          <button class="loan-tab-btn flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-gray-800" data-tab="comparar">
+            <i class="fas fa-balance-scale mr-2"></i>Comparar Plazos
+          </button>
+        </div>
+
+        <!-- TAB 1: Cálculo Básico -->
+        <div id="basico-tab" class="loan-tab-content p-8">
+          <form id="loan-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Monto del Préstamo -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-money-bill mr-2 text-blue-600"></i>Monto del Préstamo (S/)
+                </label>
+                <input
+                  type="number"
+                  id="loan-monto"
+                  name="monto"
+                  required
+                  min="0"
+                  step="100"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="50000"
+                  value="50000"
+                >
+              </div>
+
+              <!-- Tasa Anual -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-percent mr-2 text-blue-600"></i>Tasa Anual (%)
+                </label>
+                <input
+                  type="number"
+                  id="loan-tasa"
+                  name="tasa_anual"
+                  required
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="12.5"
+                  value="12.5"
+                >
+              </div>
+
+              <!-- Plazo en Meses -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Plazo (Meses)
+                </label>
+                <input
+                  type="number"
+                  id="loan-plazo"
+                  name="plazo_meses"
+                  required
+                  min="1"
+                  max="600"
+                  step="1"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="60"
+                  value="60"
+                >
+              </div>
+
+              <!-- Comisión Inicial (Opcional) -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-fee mr-2 text-blue-600"></i>Comisión Inicial (%)
+                </label>
+                <input
+                  type="number"
+                  id="loan-comision"
+                  name="comision_inicial"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="2"
+                  value="0"
+                >
+              </div>
+
+              <!-- Impuesto (Opcional) -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-tax mr-2 text-blue-600"></i>Impuesto sobre Intereses (%)
+                </label>
+                <input
+                  type="number"
+                  id="loan-impuesto"
+                  name="tasa_impuesto"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
+                  value="0"
+                >
+              </div>
+
+              <!-- Nombre de Simulación -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-tag mr-2 text-blue-600"></i>Nombre de la Simulación
+                </label>
+                <input
+                  type="text"
+                  id="loan-nombre"
+                  name="nombre_simulacion"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Mi Préstamo Personal"
+                  value="Simulación Préstamo"
+                >
+              </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <div class="flex gap-4">
+              <button
+                type="submit"
+                class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg"
+              >
+                <i class="fas fa-calculator mr-2"></i>Calcular Préstamo
+              </button>
+              <button
+                type="reset"
+                class="px-6 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition duration-300"
+              >
+                <i class="fas fa-redo mr-2"></i>Limpiar
+              </button>
+            </div>
+          </form>
+
+          <!-- Results -->
+          <div id="loan-results" class="mt-8 hidden">
+            <!-- Summary Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Cuota Mensual</div>
+                <div class="text-2xl font-bold text-blue-600 mt-1" id="result-cuota">S/ 0.00</div>
+              </div>
+
+              <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Costo de Intereses</div>
+                <div class="text-2xl font-bold text-green-600 mt-1" id="result-interes">S/ 0.00</div>
+              </div>
+
+              <div class="bg-orange-50 border-l-4 border-orange-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">TED (Tasa Efectiva)</div>
+                <div class="text-2xl font-bold text-orange-600 mt-1" id="result-ted">0.00%</div>
+              </div>
+
+              <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded">
+                <div class="text-gray-600 text-sm font-semibold">Costo Total</div>
+                <div class="text-2xl font-bold text-red-600 mt-1" id="result-total">S/ 0.00</div>
+              </div>
+            </div>
+
+            <!-- Detailed Information -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Resumen de Costos
+              </h3>
+              <div id="loan-cost-summary" class="space-y-3">
+                <!-- Filled by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Amortization Table -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-table mr-2 text-blue-600"></i>Tabla de Amortización
+              </h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-blue-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left font-semibold text-gray-700">Mes</th>
+                      <th class="px-4 py-3 text-right font-semibold text-gray-700">Cuota (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold text-gray-700">Capital (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold text-gray-700">Interés (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold text-gray-700">Saldo (S/)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="loan-table-body" class="divide-y divide-gray-200">
+                    <!-- Filled by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="mt-4 text-sm text-gray-600">
+                <p><i class="fas fa-info-circle mr-2 text-blue-600"></i>Tabla mostrando los primeros 12 meses. Descarga para ver completa.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Sensibilidad -->
+        <div id="sensibilidad-tab" class="loan-tab-content p-8 hidden">
+          <form id="loan-sensibilidad-form" class="space-y-6 mb-8">
+            <div class="grid md:grid-cols-3 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto (S/)</label>
+                <input type="number" name="monto" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="50000" value="50000">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tasa Anual (%)</label>
+                <input type="number" name="tasa_anual" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="12.5" value="12.5" step="0.01">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Plazo (Meses)</label>
+                <input type="number" name="plazo_meses" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="60" value="60">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+              Analizar Sensibilidad
+            </button>
+          </form>
+
+          <div id="sensibilidad-results" class="hidden">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Escenarios de Tasa</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-blue-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left font-semibold">Tasa (%)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Cuota (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Costo Total (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Variación (%)</th>
+                      <th class="px-4 py-3 text-left font-semibold">Escenario</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sensibilidad-table" class="divide-y divide-gray-200">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Comparar Plazos -->
+        <div id="comparar-tab" class="loan-tab-content p-8 hidden">
+          <form id="loan-comparar-form" class="space-y-6 mb-8">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Monto (S/)</label>
+                <input type="number" name="monto" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="50000" value="50000">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tasa Anual (%)</label>
+                <input type="number" name="tasa_anual" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="12.5" value="12.5" step="0.01">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Plazos a Comparar (meses, separados por coma)</label>
+              <input type="text" id="plazos-input" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="24, 36, 48, 60, 72" value="24, 36, 48, 60">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+              Comparar Plazos
+            </button>
+          </form>
+
+          <div id="comparar-results" class="hidden">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Comparativa de Plazos</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-blue-50">
+                    <tr>
+                      <th class="px-4 py-3 text-center font-semibold">Plazo (años)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Cuota Mensual (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Costo Interés (S/)</th>
+                      <th class="px-4 py-3 text-right font-semibold">Costo Total (S/)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comparar-table" class="divide-y divide-gray-200">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600">
+          <h4 class="font-semibold text-blue-900 mb-2">💡 Consejo</h4>
+          <p class="text-sm text-blue-800">Compara diferentes plazos. Plazos más cortos ahorran intereses pero aumentan la cuota mensual.</p>
+        </div>
+        <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-600">
+          <h4 class="font-semibold text-green-900 mb-2">✓ TED</h4>
+          <p class="text-sm text-green-800">La Tasa Efectiva de Deuda incluye comisiones. Siempre es mayor que la tasa nominal.</p>
+        </div>
+        <div class="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-600">
+          <h4 class="font-semibold text-orange-900 mb-2">📊 Tabla</h4>
+          <p class="text-sm text-orange-800">La tabla de amortización muestra exactamente cómo se distribuye cada cuota entre capital e interés.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include JavaScript -->
+<script src="{{ url_for('static', filename='js/prestamo.js') }}"></script>
+{% endblock %}
