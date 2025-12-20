@@ -151,9 +151,9 @@ def crear_app(config_name="development"):
 def registrar_blueprints(app):
     """Registra todos los blueprints de la aplicación"""
 
-    # Rutas financieras (Germaín) - commented out due to import issues
-    # from app.rutas.financiero import bp_financiero
-    # app.register_blueprint(bp_financiero)
+    # Rutas financieras (Germaín)
+    from app.rutas.financiero import bp_financiero
+    app.register_blueprint(bp_financiero)
 
     # Rutas de usuarios (Germaín)
     from app.rutas.usuarios import usuarios_bp

@@ -1,13 +1,13 @@
 // JavaScript para Simulador de Préstamos
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const loanForm = document.getElementById('loan-form');
   const loanSensibilidadForm = document.getElementById('loan-sensibilidad-form');
   const loanCompararForm = document.getElementById('loan-comparar-form');
-  
+
   // Tab switching
   document.querySelectorAll('.loan-tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       const tabName = this.getAttribute('data-tab');
       switchLoanTab(tabName);
     });
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Main loan calculation
   if (loanForm) {
-    loanForm.addEventListener('submit', function(e) {
+    loanForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateLoan();
     });
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Sensibilidad calculation
   if (loanSensibilidadForm) {
-    loanSensibilidadForm.addEventListener('submit', function(e) {
+    loanSensibilidadForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateLoanSensibilidad();
     });
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Comparar plazos
   if (loanCompararForm) {
-    loanCompararForm.addEventListener('submit', function(e) {
+    loanCompararForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateCompararPlazos();
     });
@@ -95,18 +95,18 @@ function calculateLoan() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displayLoanResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular el préstamo');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displayLoanResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular el préstamo');
+    });
 }
 
 function displayLoanResults(resultado) {
@@ -137,31 +137,31 @@ function displayLoanResults(resultado) {
   const costSummaryHtml = `
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Monto Solicitado:</span>
-      <span class="font-semibold">S/ ${resumen.monto_solicitado.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.monto_solicitado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Monto Neto Desembolsado:</span>
-      <span class="font-semibold">S/ ${resumen.monto_neto_desembolsado.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.monto_neto_desembolsado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Cuota Mensual:</span>
-      <span class="font-semibold">S/ ${resumen.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.cuota_mensual.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b text-orange-600">
       <span>Comisión Inicial:</span>
-      <span class="font-semibold">S/ ${costos.comision_inicial.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${costos.comision_inicial.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b text-red-600">
       <span>Costo de Intereses (${resumen.plazo_meses} meses):</span>
-      <span class="font-semibold">S/ ${costos.costo_interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${costos.costo_interes.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Impuestos:</span>
-      <span class="font-semibold">S/ ${costos.impuestos.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${costos.impuestos.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-3 bg-blue-50 p-3 rounded text-lg font-bold text-blue-700">
       <span>COSTO TOTAL:</span>
-      <span>S/ ${costos.costo_total_desembolsado.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span>S/ ${costos.costo_total_desembolsado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
   `;
 
@@ -178,10 +178,10 @@ function displayLoanResults(resultado) {
     tr.className = 'hover:bg-gray-50';
     tr.innerHTML = `
       <td class="px-4 py-3 text-left">${row.mes}</td>
-      <td class="px-4 py-3 text-right">S/ ${row.cuota.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${row.capital.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${row.interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${row.saldo_restante.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+      <td class="px-4 py-3 text-right">S/ ${row.cuota.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${row.capital.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${row.interes.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${row.saldo_restante.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
     `;
     tableBody.appendChild(tr);
   }
@@ -207,18 +207,18 @@ function calculateLoanSensibilidad() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displaySensibilidadResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular sensibilidad');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displaySensibilidadResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular sensibilidad');
+    });
 }
 
 function displaySensibilidadResults(resultado) {
@@ -229,20 +229,19 @@ function displaySensibilidadResults(resultado) {
     const tr = document.createElement('tr');
     const isBase = escenario.escenario === 'Base';
     tr.className = isBase ? 'bg-blue-50 font-semibold' : '';
-    
+
     tr.innerHTML = `
       <td class="px-4 py-3">${escenario.tasa.toFixed(2)}%</td>
-      <td class="px-4 py-3 text-right">S/ ${escenario.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${escenario.costo_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+      <td class="px-4 py-3 text-right">S/ ${escenario.cuota_mensual.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${escenario.costo_total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
       <td class="px-4 py-3 text-right ${escenario.variacion_cuota_porcentaje > 0 ? 'text-red-600' : 'text-green-600'}">
         ${escenario.variacion_cuota_porcentaje > 0 ? '+' : ''}${escenario.variacion_cuota_porcentaje.toFixed(2)}%
       </td>
       <td class="px-4 py-3">
-        <span class="px-2 py-1 rounded text-xs font-semibold ${
-          escenario.escenario === 'Base' ? 'bg-blue-200 text-blue-800' :
-          escenario.escenario === 'Optimista' ? 'bg-green-200 text-green-800' :
+        <span class="px-2 py-1 rounded text-xs font-semibold ${escenario.escenario === 'Base' ? 'bg-blue-200 text-blue-800' :
+        escenario.escenario === 'Optimista' ? 'bg-green-200 text-green-800' :
           'bg-red-200 text-red-800'
-        }">${escenario.escenario}</span>
+      }">${escenario.escenario}</span>
       </td>
     `;
     tableBody.appendChild(tr);
@@ -269,18 +268,18 @@ function calculateCompararPlazos() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displayCompararResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al comparar plazos');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displayCompararResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al comparar plazos');
+    });
 }
 
 function displayCompararResults(resultado) {
@@ -290,12 +289,12 @@ function displayCompararResults(resultado) {
   resultado.comparativa_plazos.forEach((comparativa, index) => {
     const tr = document.createElement('tr');
     if (index === 0) tr.className = 'bg-green-50 font-semibold'; // Highlight shortest
-    
+
     tr.innerHTML = `
       <td class="px-4 py-3 text-center">${comparativa.plazo_anos} años</td>
-      <td class="px-4 py-3 text-right">S/ ${comparativa.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${comparativa.costo_interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right">S/ ${comparativa.costo_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+      <td class="px-4 py-3 text-right">S/ ${comparativa.cuota_mensual.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${comparativa.costo_interes.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right">S/ ${comparativa.costo_total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
     `;
     tableBody.appendChild(tr);
   });

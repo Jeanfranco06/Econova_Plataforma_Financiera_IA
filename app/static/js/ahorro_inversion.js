@@ -2,7 +2,7 @@
 
 let savingsChart = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const savingsForm = document.getElementById('savings-form');
   const metaForm = document.getElementById('meta-form');
   const comparadorForm = document.getElementById('comparador-form');
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Tab switching
   document.querySelectorAll('.savings-tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       const tabName = this.getAttribute('data-tab');
       switchSavingsTab(tabName);
     });
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Main savings calculation
   if (savingsForm) {
-    savingsForm.addEventListener('submit', function(e) {
+    savingsForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateSavings();
     });
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Meta calculation
   if (metaForm) {
-    metaForm.addEventListener('submit', function(e) {
+    metaForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateMeta();
     });
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Comparador
   if (comparadorForm) {
-    comparadorForm.addEventListener('submit', function(e) {
+    comparadorForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateComparador();
     });
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Sensibilidad
   if (sensibilidadForm) {
-    sensibilidadForm.addEventListener('submit', function(e) {
+    sensibilidadForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calculateSensibilidad();
     });
@@ -105,18 +105,18 @@ function calculateSavings() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displaySavingsResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular el ahorro');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displaySavingsResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular el ahorro');
+    });
 }
 
 function displaySavingsResults(resultado) {
@@ -146,27 +146,27 @@ function displaySavingsResults(resultado) {
   const summaryHtml = `
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Monto Inicial:</span>
-      <span class="font-semibold">S/ ${resumen.monto_inicial.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.monto_inicial.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Aportes Totales:</span>
-      <span class="font-semibold">S/ ${resumen.aporte_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.aporte_total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b">
       <span class="text-gray-700">Capital Invertido:</span>
-      <span class="font-semibold">S/ ${(resumen.monto_inicial + resumen.aporte_total).toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${(resumen.monto_inicial + resumen.aporte_total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b text-green-600">
       <span>Intereses Ganados:</span>
-      <span class="font-semibold">S/ ${resumen.interes_ganado.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.interes_ganado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 border-b text-orange-600">
       <span>Impuestos Pagados:</span>
-      <span class="font-semibold">S/ ${resumen.impuestos_pagados.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span class="font-semibold">S/ ${resumen.impuestos_pagados.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-3 bg-green-50 p-3 rounded text-lg font-bold text-green-700">
       <span>SALDO FINAL:</span>
-      <span>S/ ${resumen.saldo_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+      <span>S/ ${resumen.saldo_final.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
     </div>
     <div class="flex justify-between py-2 mt-3 text-sm text-gray-600">
       <span>Período:</span>
@@ -190,7 +190,7 @@ function displaySavingsResults(resultado) {
 
 function createSavingsChart(proyeccion) {
   const ctx = document.getElementById('savings-chart');
-  
+
   if (savingsChart) {
     savingsChart.destroy();
   }
@@ -241,8 +241,8 @@ function createSavingsChart(proyeccion) {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
-              return 'S/ ' + value.toLocaleString('es-PE', {maximumFractionDigits: 0});
+            callback: function (value) {
+              return 'S/ ' + value.toLocaleString('es-PE', { maximumFractionDigits: 0 });
             }
           }
         }
@@ -267,18 +267,18 @@ function calculateMeta() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displayMetaResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular meta');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displayMetaResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular meta');
+    });
 }
 
 function displayMetaResults(resultado) {
@@ -297,23 +297,23 @@ function displayMetaResults(resultado) {
     const infoHtml = `
       <div class="flex justify-between py-2 border-b">
         <span class="text-gray-700">Meta Objetivo:</span>
-        <span class="font-semibold">S/ ${resultado.saldo_objetivo.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+        <span class="font-semibold">S/ ${resultado.saldo_objetivo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
       </div>
       <div class="flex justify-between py-2 border-b">
         <span class="text-gray-700">Saldo Alcanzado:</span>
-        <span class="font-semibold text-green-600">S/ ${resultado.saldo_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+        <span class="font-semibold text-green-600">S/ ${resultado.saldo_final.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
       </div>
       <div class="flex justify-between py-2 border-b">
         <span class="text-gray-700">Diferencia:</span>
-        <span class="font-semibold">S/ ${resultado.diferencia.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+        <span class="font-semibold">S/ ${resultado.diferencia.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
       </div>
       <div class="flex justify-between py-2 border-b">
         <span class="text-gray-700">Aporte Total a Realizar:</span>
-        <span class="font-semibold">S/ ${resultado.aporte_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+        <span class="font-semibold">S/ ${resultado.aporte_total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
       </div>
       <div class="flex justify-between py-2 bg-green-50 p-2 rounded">
         <span class="text-gray-700">Intereses Ganados:</span>
-        <span class="font-semibold text-green-600">S/ ${resultado.interes_ganado.toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
+        <span class="font-semibold text-green-600">S/ ${resultado.interes_ganado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
       </div>
     `;
 
@@ -363,18 +363,18 @@ function calculateComparador() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displayComparadorResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al comparar instrumentos');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displayComparadorResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al comparar instrumentos');
+    });
 }
 
 function displayComparadorResults(resultado) {
@@ -389,11 +389,11 @@ function displayComparadorResults(resultado) {
       <div class="grid md:grid-cols-3 gap-3 mt-3">
         <div class="bg-green-100 p-3 rounded">
           <div class="text-xs text-green-700">Saldo Final</div>
-          <div class="font-bold text-green-900">S/ ${mejorOpcion.saldo_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</div>
+          <div class="font-bold text-green-900">S/ ${mejorOpcion.saldo_final.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div>
         </div>
         <div class="bg-blue-100 p-3 rounded">
           <div class="text-xs text-blue-700">Ganancia Neta</div>
-          <div class="font-bold text-blue-900">S/ ${mejorOpcion.ganancia_neta.toLocaleString('es-PE', {minimumFractionDigits: 2})}</div>
+          <div class="font-bold text-blue-900">S/ ${mejorOpcion.ganancia_neta.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div>
         </div>
         <div class="bg-orange-100 p-3 rounded">
           <div class="text-xs text-orange-700">Rendimiento</div>
@@ -416,8 +416,8 @@ function displayComparadorResults(resultado) {
     tr.innerHTML = `
       <td class="px-4 py-3">${instrumento.nombre}</td>
       <td class="px-4 py-3 text-right">${instrumento.tasa_anual.toFixed(2)}%</td>
-      <td class="px-4 py-3 text-right">S/ ${instrumento.saldo_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
-      <td class="px-4 py-3 text-right text-green-600">S/ ${instrumento.ganancia_neta.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+      <td class="px-4 py-3 text-right">S/ ${instrumento.saldo_final.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+      <td class="px-4 py-3 text-right text-green-600">S/ ${instrumento.ganancia_neta.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
       <td class="px-4 py-3 text-right">${instrumento.rendimiento_porcentaje.toFixed(2)}%</td>
     `;
     tableBody.appendChild(tr);
@@ -443,18 +443,18 @@ function calculateSensibilidad() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      displaySensibilidadResults(result.data);
-    } else {
-      alert('Error: ' + result.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular sensibilidad');
-  });
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        displaySensibilidadResults(result.data);
+      } else {
+        alert('Error: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular sensibilidad');
+    });
 }
 
 function displaySensibilidadResults(resultado) {
@@ -469,16 +469,15 @@ function displaySensibilidadResults(resultado) {
 
     tr.innerHTML = `
       <td class="px-4 py-3">${escenario.tasa.toFixed(2)}%</td>
-      <td class="px-4 py-3 text-right">S/ ${escenario.saldo_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+      <td class="px-4 py-3 text-right">S/ ${escenario.saldo_final.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
       <td class="px-4 py-3 text-right ${escenario.variacion_porcentaje > 0 ? 'text-green-600' : 'text-red-600'}">
         ${escenario.variacion_porcentaje > 0 ? '+' : ''}${escenario.variacion_porcentaje.toFixed(2)}%
       </td>
       <td class="px-4 py-3">
-        <span class="px-2 py-1 rounded text-xs font-semibold ${
-          escenario.escenario === 'Base' ? 'bg-green-200 text-green-800' :
-          escenario.escenario === 'Optimista' ? 'bg-blue-200 text-blue-800' :
+        <span class="px-2 py-1 rounded text-xs font-semibold ${escenario.escenario === 'Base' ? 'bg-green-200 text-green-800' :
+        escenario.escenario === 'Optimista' ? 'bg-blue-200 text-blue-800' :
           'bg-red-200 text-red-800'
-        }">${escenario.escenario}</span>
+      }">${escenario.escenario}</span>
       </td>
     `;
     tableBody.appendChild(tr);

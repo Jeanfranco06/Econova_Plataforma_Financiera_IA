@@ -12,17 +12,20 @@ from app.servicios.ahorro_inversion_servicio import ServicioAhorroInversion
 from app.modelos.simulacion import Simulacion
 from app.modelos.logro import Logro
 from app.utils.exportar import (
-    formatear_resultado_van, formatear_resultado_tir,
-    formatear_resultado_wacc, formatear_resultado_portafolio
+    formatear_resultado_van,
+    formatear_resultado_tir,
+    formatear_resultado_wacc,
+    formatear_resultado_portafolio,
 )
 
-bp_financiero = Blueprint('financiero', __name__, url_prefix='/api/v1/financiero')
+bp_financiero = Blueprint("financiero", __name__, url_prefix="/api/v1/financiero")
 
-@bp_financiero.route('/van', methods=['POST'])
+
+@bp_financiero.route("/van", methods=["POST"])
 def calcular_van():
     """
     Calcula el VAN (Valor Actual Neto)
-    
+
     Body JSON:
     {
         "inversion_inicial": 100000,
@@ -31,70 +34,75 @@ def calcular_van():
         "usuario_id": 1,
         "nombre_simulacion": "Proyecto Solar"
     }
-    
+
     Returns:
         JSON con resultado del VAN
     """
     try:
         datos = request.get_json()
-        
+
         # Extraer parámetros
-        inversion = datos.get('inversion_inicial')
-        flujos = datos.get('flujos_caja')
-        tasa = datos.get('tasa_descuento', 0.10)
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación VAN')
-        
+        inversion = datos.get("inversion_inicial")
+        flujos = datos.get("flujos_caja")
+        tasa = datos.get("tasa_descuento", 0.10)
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación VAN")
+
         # Validar que existan los datos requeridos
         if inversion is None or flujos is None:
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: inversion_inicial, flujos_caja'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: inversion_inicial, flujos_caja"
+                }
+            ), 400
+
         # Calcular VAN
         resultado = ServicioFinanciero.calcular_van(inversion, flujos, tasa)
-        
+
         # Guardar simulación si hay usuario_id
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='VAN',
+                tipo_simulacion="VAN",
                 parametros={
-                    'inversion_inicial': inversion,
-                    'flujos_caja': flujos,
-                    'tasa_descuento': tasa
+                    "inversion_inicial": inversion,
+                    "flujos_caja": flujos,
+                    "tasa_descuento": tasa,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro si es la primera simulación de VAN
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_van'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_van"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_van',
-                    nombre='Primera Simulación VAN',
-                    descripcion='Realizaste tu primer análisis de Valor Actual Neto',
-                    puntos=10
+                    tipo_logro="primera_van",
+                    nombre="Primera Simulación VAN",
+                    descripcion="Realizaste tu primer análisis de Valor Actual Neto",
+                    puntos=10,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado,
-            'formatted': formatear_resultado_van(resultado)
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-@bp_financiero.route('/tir', methods=['POST'])
+        return jsonify(
+            {
+                "success": True,
+                "data": resultado,
+                "formatted": formatear_resultado_van(resultado),
+            }
+        ), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/tir", methods=["POST"])
 def calcular_tir():
     """
     Calcula la TIR (Tasa Interna de Retorno)
-    
+
     Body JSON:
     {
         "inversion_inicial": 100000,
@@ -103,68 +111,73 @@ def calcular_tir():
         "usuario_id": 1,
         "nombre_simulacion": "Proyecto Industrial"
     }
-    
+
     Returns:
         JSON con resultado de la TIR
     """
     try:
         datos = request.get_json()
-        
-        inversion = datos.get('inversion_inicial')
-        flujos = datos.get('flujos_caja')
-        tasa_ref = datos.get('tasa_referencia', 0.10)
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación TIR')
-        
+
+        inversion = datos.get("inversion_inicial")
+        flujos = datos.get("flujos_caja")
+        tasa_ref = datos.get("tasa_referencia", 0.10)
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación TIR")
+
         if inversion is None or flujos is None:
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: inversion_inicial, flujos_caja'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: inversion_inicial, flujos_caja"
+                }
+            ), 400
+
         # Calcular TIR
         resultado = ServicioFinanciero.calcular_tir(inversion, flujos, tasa_ref)
-        
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='TIR',
+                tipo_simulacion="TIR",
                 parametros={
-                    'inversion_inicial': inversion,
-                    'flujos_caja': flujos,
-                    'tasa_referencia': tasa_ref
+                    "inversion_inicial": inversion,
+                    "flujos_caja": flujos,
+                    "tasa_referencia": tasa_ref,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_tir'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_tir"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_tir',
-                    nombre='Primera Simulación TIR',
-                    descripcion='Calculaste tu primera Tasa Interna de Retorno',
-                    puntos=10
+                    tipo_logro="primera_tir",
+                    nombre="Primera Simulación TIR",
+                    descripcion="Calculaste tu primera Tasa Interna de Retorno",
+                    puntos=10,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado,
-            'formatted': formatear_resultado_tir(resultado)
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-@bp_financiero.route('/wacc', methods=['POST'])
+        return jsonify(
+            {
+                "success": True,
+                "data": resultado,
+                "formatted": formatear_resultado_tir(resultado),
+            }
+        ), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/wacc", methods=["POST"])
 def calcular_wacc():
     """
     Calcula el WACC (Costo Promedio Ponderado de Capital)
-    
+
     Body JSON:
     {
         "capital_propio": 500000,
@@ -175,72 +188,79 @@ def calcular_wacc():
         "usuario_id": 1,
         "nombre_simulacion": "WACC Empresa XYZ"
     }
-    
+
     Returns:
         JSON con resultado del WACC
     """
     try:
         datos = request.get_json()
-        
-        capital = datos.get('capital_propio')
-        deuda = datos.get('deuda')
-        costo_cap = datos.get('costo_capital')
-        costo_deu = datos.get('costo_deuda')
-        tasa_imp = datos.get('tasa_impuesto')
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación WACC')
-        
+
+        capital = datos.get("capital_propio")
+        deuda = datos.get("deuda")
+        costo_cap = datos.get("costo_capital")
+        costo_deu = datos.get("costo_deuda")
+        tasa_imp = datos.get("tasa_impuesto")
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación WACC")
+
         if any(x is None for x in [capital, deuda, costo_cap, costo_deu, tasa_imp]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: capital_propio, deuda, costo_capital, costo_deuda, tasa_impuesto'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: capital_propio, deuda, costo_capital, costo_deuda, tasa_impuesto"
+                }
+            ), 400
+
         # Calcular WACC
-        resultado = ServicioFinanciero.calcular_wacc(capital, deuda, costo_cap, costo_deu, tasa_imp)
-        
+        resultado = ServicioFinanciero.calcular_wacc(
+            capital, deuda, costo_cap, costo_deu, tasa_imp
+        )
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='WACC',
+                tipo_simulacion="WACC",
                 parametros={
-                    'capital_propio': capital,
-                    'deuda': deuda,
-                    'costo_capital': costo_cap,
-                    'costo_deuda': costo_deu,
-                    'tasa_impuesto': tasa_imp
+                    "capital_propio": capital,
+                    "deuda": deuda,
+                    "costo_capital": costo_cap,
+                    "costo_deuda": costo_deu,
+                    "tasa_impuesto": tasa_imp,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_wacc'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_wacc"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_wacc',
-                    nombre='Primera Simulación WACC',
-                    descripcion='Calculaste tu primer Costo de Capital',
-                    puntos=15
+                    tipo_logro="primera_wacc",
+                    nombre="Primera Simulación WACC",
+                    descripcion="Calculaste tu primer Costo de Capital",
+                    puntos=15,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado,
-            'formatted': formatear_resultado_wacc(resultado)
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-@bp_financiero.route('/portafolio', methods=['POST'])
+        return jsonify(
+            {
+                "success": True,
+                "data": resultado,
+                "formatted": formatear_resultado_wacc(resultado),
+            }
+        ), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/portafolio", methods=["POST"])
 def analizar_portafolio():
     """
     Analiza un portafolio de inversión
-    
+
     Body JSON:
     {
         "retornos": [0.12, 0.15, 0.10],
@@ -250,72 +270,75 @@ def analizar_portafolio():
         "usuario_id": 1,
         "nombre_simulacion": "Portafolio Diversificado"
     }
-    
+
     Returns:
         JSON con análisis del portafolio
     """
     try:
         datos = request.get_json()
-        
-        retornos = datos.get('retornos')
-        ponderaciones = datos.get('ponderaciones')
-        volatilidades = datos.get('volatilidades')
-        matriz_corr = datos.get('matriz_correlacion')
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación Portafolio')
-        
+
+        retornos = datos.get("retornos")
+        ponderaciones = datos.get("ponderaciones")
+        volatilidades = datos.get("volatilidades")
+        matriz_corr = datos.get("matriz_correlacion")
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación Portafolio")
+
         if retornos is None or ponderaciones is None:
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: retornos, ponderaciones'
-            }), 400
-        
+            return jsonify(
+                {"error": "Faltan parámetros requeridos: retornos, ponderaciones"}
+            ), 400
+
         # Analizar portafolio
         resultado = ServicioFinanciero.analizar_portafolio(
             retornos, ponderaciones, volatilidades, matriz_corr
         )
-        
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='PORTAFOLIO',
+                tipo_simulacion="PORTAFOLIO",
                 parametros={
-                    'retornos': retornos,
-                    'ponderaciones': ponderaciones,
-                    'volatilidades': volatilidades,
-                    'matriz_correlacion': matriz_corr
+                    "retornos": retornos,
+                    "ponderaciones": ponderaciones,
+                    "volatilidades": volatilidades,
+                    "matriz_correlacion": matriz_corr,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_portafolio'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_portafolio"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_portafolio',
-                    nombre='Primera Simulación Portafolio',
-                    descripcion='Analizaste tu primer portafolio de inversión',
-                    puntos=15
+                    tipo_logro="primera_portafolio",
+                    nombre="Primera Simulación Portafolio",
+                    descripcion="Analizaste tu primer portafolio de inversión",
+                    puntos=15,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado,
-            'formatted': formatear_resultado_portafolio(resultado)
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-@bp_financiero.route('/reemplazo-activo', methods=['POST'])
+        return jsonify(
+            {
+                "success": True,
+                "data": resultado,
+                "formatted": formatear_resultado_portafolio(resultado),
+            }
+        ), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/reemplazo-activo", methods=["POST"])
 def analizar_reemplazo():
     """
     Analiza decisión de reemplazo de activo
-    
+
     Body JSON:
     {
         "costo_actual_anual": 50000,
@@ -327,137 +350,136 @@ def analizar_reemplazo():
         "usuario_id": 1,
         "nombre_simulacion": "Reemplazo Maquinaria"
     }
-    
+
     Returns:
         JSON con análisis de reemplazo
     """
     try:
         datos = request.get_json()
-        
-        costo_act = datos.get('costo_actual_anual')
-        costo_nue = datos.get('costo_nuevo_anual')
-        costo_comp = datos.get('costo_nuevo_compra')
-        salvamento = datos.get('valor_salvamento_actual')
-        vida_util = datos.get('vida_util_nuevo')
-        tasa = datos.get('tasa_descuento', 0.10)
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación Reemplazo')
-        
-        if any(x is None for x in [costo_act, costo_nue, costo_comp, salvamento, vida_util]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos'
-            }), 400
-        
+
+        costo_act = datos.get("costo_actual_anual")
+        costo_nue = datos.get("costo_nuevo_anual")
+        costo_comp = datos.get("costo_nuevo_compra")
+        salvamento = datos.get("valor_salvamento_actual")
+        vida_util = datos.get("vida_util_nuevo")
+        tasa = datos.get("tasa_descuento", 0.10)
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación Reemplazo")
+
+        if any(
+            x is None for x in [costo_act, costo_nue, costo_comp, salvamento, vida_util]
+        ):
+            return jsonify({"error": "Faltan parámetros requeridos"}), 400
+
         # Analizar reemplazo
         resultado = ServicioFinanciero.analizar_reemplazo_activo(
             costo_act, costo_nue, costo_comp, salvamento, vida_util, tasa
         )
-        
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='REEMPLAZO_ACTIVOS',
+                tipo_simulacion="REEMPLAZO_ACTIVOS",
                 parametros=datos,
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+            resultado["simulacion_id"] = simulacion.simulacion_id
 
-@bp_financiero.route('/periodo-recuperacion', methods=['POST'])
+        return jsonify({"success": True, "data": resultado}), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/periodo-recuperacion", methods=["POST"])
 def calcular_periodo_recuperacion():
     """
     Calcula el periodo de recuperación (Payback Period)
-    
+
     Body JSON:
     {
         "inversion_inicial": 100000,
         "flujos_caja": [25000, 30000, 35000, 40000],
         "usuario_id": 1
     }
-    
+
     Returns:
         JSON con periodo de recuperación
     """
     try:
         datos = request.get_json()
-        
-        inversion = datos.get('inversion_inicial')
-        flujos = datos.get('flujos_caja')
-        
+
+        inversion = datos.get("inversion_inicial")
+        flujos = datos.get("flujos_caja")
+
         if inversion is None or flujos is None:
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: inversion_inicial, flujos_caja'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: inversion_inicial, flujos_caja"
+                }
+            ), 400
+
         resultado = ServicioFinanciero.calcular_periodo_recuperacion(inversion, flujos)
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
 
 # Endpoints para consultar simulaciones guardadas
-@bp_financiero.route('/simulaciones/<int:simulacion_id>', methods=['GET'])
+@bp_financiero.route("/simulaciones/<int:simulacion_id>", methods=["GET"])
 def obtener_simulacion(simulacion_id):
     """Obtiene una simulación por ID"""
     try:
         simulacion = Simulacion.obtener_por_id(simulacion_id)
-        
-        if not simulacion:
-            return jsonify({'error': 'Simulación no encontrada'}), 404
-        
-        return jsonify({
-            'success': True,
-            'data': simulacion.to_dict()
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-@bp_financiero.route('/simulaciones/usuario/<int:usuario_id>', methods=['GET'])
+        if not simulacion:
+            return jsonify({"error": "Simulación no encontrada"}), 404
+
+        return jsonify({"success": True, "data": simulacion.to_dict()}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@bp_financiero.route("/simulaciones/usuario/<int:usuario_id>", methods=["GET"])
 def listar_simulaciones_usuario(usuario_id):
     """Lista simulaciones de un usuario"""
     try:
-        tipo = request.args.get('tipo')  # Filtro opcional por tipo
-        limit = int(request.args.get('limit', 50))
-        
+        tipo = request.args.get("tipo")  # Filtro opcional por tipo
+        limit = int(request.args.get("limit", 50))
+
         simulaciones = Simulacion.listar_por_usuario(usuario_id, tipo, limit)
-        
-        return jsonify({
-            'success': True,
-            'data': [s.to_dict() for s in simulaciones],
-            'total': len(simulaciones)
-        }), 200
-        
+
+        return jsonify(
+            {
+                "success": True,
+                "data": [s.to_dict() for s in simulaciones],
+                "total": len(simulaciones),
+            }
+        ), 200
+
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
 # ============================================================================
 # ENDPOINTS PARA SIMULACIÓN DE PRÉSTAMOS
 # ============================================================================
 
-@bp_financiero.route('/prestamo', methods=['POST'])
+
+@bp_financiero.route("/prestamo", methods=["POST"])
 def calcular_prestamo():
     """
     Calcula tabla de amortización y análisis de préstamo
-    
+
     Body JSON:
     {
         "monto": 50000,
@@ -468,81 +490,80 @@ def calcular_prestamo():
         "usuario_id": 1,
         "nombre_simulacion": "Préstamo Auto"
     }
-    
+
     Returns:
         JSON con tabla de amortización y análisis
     """
     try:
         datos = request.get_json()
-        
+
         # Extraer parámetros requeridos
-        monto = datos.get('monto')
-        tasa_anual = datos.get('tasa_anual')
-        plazo_meses = datos.get('plazo_meses')
-        
+        monto = datos.get("monto")
+        tasa_anual = datos.get("tasa_anual")
+        plazo_meses = datos.get("plazo_meses")
+
         if any(x is None for x in [monto, tasa_anual, plazo_meses]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: monto, tasa_anual, plazo_meses'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: monto, tasa_anual, plazo_meses"
+                }
+            ), 400
+
         # Parámetros opcionales
-        tasa_impuesto = datos.get('tasa_impuesto', 0)
-        comision_inicial = datos.get('comision_inicial', 0)
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación Préstamo')
-        
+        tasa_impuesto = datos.get("tasa_impuesto", 0)
+        comision_inicial = datos.get("comision_inicial", 0)
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación Préstamo")
+
         # Calcular préstamo
         resultado = ServicioPrestamo.calcular_prestamo_completo(
             monto=monto,
             tasa_anual=tasa_anual,
             plazo_meses=plazo_meses,
             tasa_impuesto=tasa_impuesto,
-            comision_inicial=comision_inicial
+            comision_inicial=comision_inicial,
         )
-        
+
         # Guardar simulación si hay usuario_id
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='PRESTAMO',
+                tipo_simulacion="PRESTAMO",
                 parametros={
-                    'monto': monto,
-                    'tasa_anual': tasa_anual,
-                    'plazo_meses': plazo_meses,
-                    'tasa_impuesto': tasa_impuesto,
-                    'comision_inicial': comision_inicial
+                    "monto": monto,
+                    "tasa_anual": tasa_anual,
+                    "plazo_meses": plazo_meses,
+                    "tasa_impuesto": tasa_impuesto,
+                    "comision_inicial": comision_inicial,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro si es la primera simulación de préstamo
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_prestamo'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_prestamo"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_prestamo',
-                    nombre='Primer Análisis de Préstamo',
-                    descripcion='Realizaste tu primer cálculo de amortización de préstamo',
-                    puntos=10
+                    tipo_logro="primera_prestamo",
+                    nombre="Primer Análisis de Préstamo",
+                    descripcion="Realizaste tu primer cálculo de amortización de préstamo",
+                    puntos=10,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
-@bp_financiero.route('/prestamo/sensibilidad', methods=['POST'])
+@bp_financiero.route("/prestamo/sensibilidad", methods=["POST"])
 def sensibilidad_prestamo():
     """
     Analiza sensibilidad del préstamo ante cambios en tasa
-    
+
     Body JSON:
     {
         "monto": 50000,
@@ -550,87 +571,80 @@ def sensibilidad_prestamo():
         "plazo_meses": 60,
         "variacion_tasa": 0.5
     }
-    
+
     Returns:
         JSON con escenarios de sensibilidad
     """
     try:
         datos = request.get_json()
-        
-        monto = datos.get('monto')
-        tasa_anual = datos.get('tasa_anual')
-        plazo_meses = datos.get('plazo_meses')
-        variacion_tasa = datos.get('variacion_tasa', 0.5)
-        
+
+        monto = datos.get("monto")
+        tasa_anual = datos.get("tasa_anual")
+        plazo_meses = datos.get("plazo_meses")
+        variacion_tasa = datos.get("variacion_tasa", 0.5)
+
         if any(x is None for x in [monto, tasa_anual, plazo_meses]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos'
-            }), 400
-        
+            return jsonify({"error": "Faltan parámetros requeridos"}), 400
+
         resultado = ServicioPrestamo.analizar_sensibilidad_prestamo(
             monto, tasa_anual, plazo_meses, variacion_tasa
         )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
-@bp_financiero.route('/prestamo/comparar-plazos', methods=['POST'])
+@bp_financiero.route("/prestamo/comparar-plazos", methods=["POST"])
 def comparar_plazos_prestamo():
     """
     Compara cuota y costo total para diferentes plazos
-    
+
     Body JSON:
     {
         "monto": 50000,
         "tasa_anual": 12.5,
         "plazos": [24, 36, 48, 60]
     }
-    
+
     Returns:
         JSON con comparativa de plazos
     """
     try:
         datos = request.get_json()
-        
-        monto = datos.get('monto')
-        tasa_anual = datos.get('tasa_anual')
-        plazos = datos.get('plazos', [24, 36, 48, 60])
-        
+
+        monto = datos.get("monto")
+        tasa_anual = datos.get("tasa_anual")
+        plazos = datos.get("plazos", [24, 36, 48, 60])
+
         if any(x is None for x in [monto, tasa_anual]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: monto, tasa_anual'
-            }), 400
-        
+            return jsonify(
+                {"error": "Faltan parámetros requeridos: monto, tasa_anual"}
+            ), 400
+
         resultado = ServicioPrestamo.comparar_plazos(monto, tasa_anual, plazos)
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
 # ============================================================================
 # ENDPOINTS PARA SIMULACIÓN DE AHORRO E INVERSIÓN
 # ============================================================================
 
-@bp_financiero.route('/ahorro', methods=['POST'])
+
+@bp_financiero.route("/ahorro", methods=["POST"])
 def calcular_ahorro():
     """
     Simula crecimiento de ahorro con aportes periódicos
-    
+
     Body JSON:
     {
         "monto_inicial": 10000,
@@ -642,30 +656,32 @@ def calcular_ahorro():
         "usuario_id": 1,
         "nombre_simulacion": "Ahorro Jubilación"
     }
-    
+
     Returns:
         JSON con proyección de ahorro
     """
     try:
         datos = request.get_json()
-        
+
         # Parámetros requeridos
-        monto_inicial = datos.get('monto_inicial')
-        aporte_mensual = datos.get('aporte_mensual')
-        tasa_anual = datos.get('tasa_anual')
-        meses = datos.get('meses')
-        
+        monto_inicial = datos.get("monto_inicial")
+        aporte_mensual = datos.get("aporte_mensual")
+        tasa_anual = datos.get("tasa_anual")
+        meses = datos.get("meses")
+
         if any(x is None for x in [monto_inicial, aporte_mensual, tasa_anual, meses]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos: monto_inicial, aporte_mensual, tasa_anual, meses'
-            }), 400
-        
+            return jsonify(
+                {
+                    "error": "Faltan parámetros requeridos: monto_inicial, aporte_mensual, tasa_anual, meses"
+                }
+            ), 400
+
         # Parámetros opcionales
-        tasa_impuesto = datos.get('tasa_impuesto', 0)
-        inflacion_anual = datos.get('inflacion_anual', 0)
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Simulación Ahorro')
-        
+        tasa_impuesto = datos.get("tasa_impuesto", 0)
+        inflacion_anual = datos.get("inflacion_anual", 0)
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Simulación Ahorro")
+
         # Calcular ahorro
         resultado = ServicioAhorroInversion.calcular_ahorro_con_aportes(
             monto_inicial=monto_inicial,
@@ -673,53 +689,50 @@ def calcular_ahorro():
             tasa_anual=tasa_anual,
             meses=meses,
             tasa_impuesto=tasa_impuesto,
-            inflacion_anual=inflacion_anual
+            inflacion_anual=inflacion_anual,
         )
-        
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='AHORRO',
+                tipo_simulacion="AHORRO",
                 parametros={
-                    'monto_inicial': monto_inicial,
-                    'aporte_mensual': aporte_mensual,
-                    'tasa_anual': tasa_anual,
-                    'meses': meses,
-                    'tasa_impuesto': tasa_impuesto,
-                    'inflacion_anual': inflacion_anual
+                    "monto_inicial": monto_inicial,
+                    "aporte_mensual": aporte_mensual,
+                    "tasa_anual": tasa_anual,
+                    "meses": meses,
+                    "tasa_impuesto": tasa_impuesto,
+                    "inflacion_anual": inflacion_anual,
                 },
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-            
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, 'primera_ahorro'):
+            if not Logro.verificar_logro_existe(usuario_id, "primera_ahorro"):
                 Logro.otorgar_logro(
                     usuario_id=usuario_id,
-                    tipo_logro='primera_ahorro',
-                    nombre='Primer Plan de Ahorro',
-                    descripcion='Creaste tu primera proyección de ahorro e inversión',
-                    puntos=10
+                    tipo_logro="primera_ahorro",
+                    nombre="Primer Plan de Ahorro",
+                    descripcion="Creaste tu primera proyección de ahorro e inversión",
+                    puntos=10,
                 )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
-@bp_financiero.route('/ahorro/meta', methods=['POST'])
+@bp_financiero.route("/ahorro/meta", methods=["POST"])
 def calcular_meta_ahorro():
     """
     Calcula tiempo necesario para alcanzar una meta de ahorro
-    
+
     Body JSON:
     {
         "monto_objetivo": 100000,
@@ -727,43 +740,41 @@ def calcular_meta_ahorro():
         "tasa_anual": 8.0,
         "aporte_mensual": 500
     }
-    
+
     Returns:
         JSON con tiempo necesario y proyección
     """
     try:
         datos = request.get_json()
-        
-        monto_objetivo = datos.get('monto_objetivo')
-        monto_inicial = datos.get('monto_inicial')
-        tasa_anual = datos.get('tasa_anual')
-        aporte_mensual = datos.get('aporte_mensual')
-        
-        if any(x is None for x in [monto_objetivo, monto_inicial, tasa_anual, aporte_mensual]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos'
-            }), 400
-        
+
+        monto_objetivo = datos.get("monto_objetivo")
+        monto_inicial = datos.get("monto_inicial")
+        tasa_anual = datos.get("tasa_anual")
+        aporte_mensual = datos.get("aporte_mensual")
+
+        if any(
+            x is None
+            for x in [monto_objetivo, monto_inicial, tasa_anual, aporte_mensual]
+        ):
+            return jsonify({"error": "Faltan parámetros requeridos"}), 400
+
         resultado = ServicioAhorroInversion.analizar_meta_ahorro(
             monto_objetivo, monto_inicial, tasa_anual, aporte_mensual
         )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
-@bp_financiero.route('/ahorro/comparar-instrumentos', methods=['POST'])
+@bp_financiero.route("/ahorro/comparar-instrumentos", methods=["POST"])
 def comparar_instrumentos():
     """
     Compara diferentes opciones de inversión
-    
+
     Body JSON:
     {
         "monto_inicial": 100000,
@@ -786,56 +797,51 @@ def comparar_instrumentos():
         "usuario_id": 1,
         "nombre_simulacion": "Comparador Instrumentos"
     }
-    
+
     Returns:
         JSON con comparativa de instrumentos
     """
     try:
         datos = request.get_json()
-        
-        monto_inicial = datos.get('monto_inicial')
-        aporte_mensual = datos.get('aporte_mensual')
-        meses = datos.get('meses')
-        instrumentos = datos.get('instrumentos')
-        usuario_id = datos.get('usuario_id')
-        nombre = datos.get('nombre_simulacion', 'Comparador Instrumentos')
-        
+
+        monto_inicial = datos.get("monto_inicial")
+        aporte_mensual = datos.get("aporte_mensual")
+        meses = datos.get("meses")
+        instrumentos = datos.get("instrumentos")
+        usuario_id = datos.get("usuario_id")
+        nombre = datos.get("nombre_simulacion", "Comparador Instrumentos")
+
         if any(x is None for x in [monto_inicial, aporte_mensual, meses, instrumentos]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos'
-            }), 400
-        
+            return jsonify({"error": "Faltan parámetros requeridos"}), 400
+
         resultado = ServicioAhorroInversion.comparar_instrumentos(
             monto_inicial, aporte_mensual, meses, instrumentos
         )
-        
+
         # Guardar simulación
         if usuario_id:
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
-                tipo_simulacion='COMPARADOR',
+                tipo_simulacion="COMPARADOR",
                 parametros=datos,
-                resultados=resultado
+                resultados=resultado,
             )
-            resultado['simulacion_id'] = simulacion.simulacion_id
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+            resultado["simulacion_id"] = simulacion.simulacion_id
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
-@bp_financiero.route('/ahorro/sensibilidad', methods=['POST'])
+@bp_financiero.route("/ahorro/sensibilidad", methods=["POST"])
 def sensibilidad_ahorro():
     """
     Analiza sensibilidad del ahorro ante cambios en tasa
-    
+
     Body JSON:
     {
         "monto_inicial": 10000,
@@ -844,34 +850,29 @@ def sensibilidad_ahorro():
         "meses": 120,
         "variacion_tasa": 1.0
     }
-    
+
     Returns:
         JSON con escenarios de sensibilidad
     """
     try:
         datos = request.get_json()
-        
-        monto_inicial = datos.get('monto_inicial')
-        aporte_mensual = datos.get('aporte_mensual')
-        tasa_anual = datos.get('tasa_anual')
-        meses = datos.get('meses')
-        variacion_tasa = datos.get('variacion_tasa', 1.0)
-        
+
+        monto_inicial = datos.get("monto_inicial")
+        aporte_mensual = datos.get("aporte_mensual")
+        tasa_anual = datos.get("tasa_anual")
+        meses = datos.get("meses")
+        variacion_tasa = datos.get("variacion_tasa", 1.0)
+
         if any(x is None for x in [monto_inicial, aporte_mensual, tasa_anual, meses]):
-            return jsonify({
-                'error': 'Faltan parámetros requeridos'
-            }), 400
-        
+            return jsonify({"error": "Faltan parámetros requeridos"}), 400
+
         resultado = ServicioAhorroInversion.analizar_sensibilidad_ahorro(
             monto_inicial, aporte_mensual, tasa_anual, meses, variacion_tasa
         )
-        
-        return jsonify({
-            'success': True,
-            'data': resultado
-        }), 200
-        
+
+        return jsonify({"success": True, "data": resultado}), 200
+
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
