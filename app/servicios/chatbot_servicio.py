@@ -16,29 +16,37 @@ class ChatbotFinanciero:
 
     def __init__(self):
         self.patrones_ingresos = [
-            r"predic.*ingreso",
-            r"estimar.*ingreso",
-            r"cuanto.*ingreso",
-            r"ingreso.*futuro",
-            r"ingreso.*próximo",
-            r"ingreso.*año",
+            r"predic.*ingreso[s]?",
+            r"estimar.*ingreso[s]?",
+            r"cuanto.*ingreso[s]?",
+            r"ingreso[s]?.*futuro",
+            r"ingreso[s]?.*próximo",
+            r"ingreso[s]?.*año",
+            r"proyec.*ingreso[s]?",
+            r"calcul.*ingreso[s]?",
         ]
 
         self.patrones_riesgo = [
-            r"riesgo",
-            r"evaluar.*riesgo",
-            r"analizar.*riesgo",
-            r"nivel.*riesgo",
-            r"qué.*riesgo",
-            r"clasificar.*riesgo",
+            r"riesgo[s]?",
+            r"evaluar.*riesgo[s]?",
+            r"evalúa.*riesgo[s]?",
+            r"analizar.*riesgo[s]?",
+            r"analiza.*riesgo[s]?",
+            r"nivel.*riesgo[s]?",
+            r"qué.*riesgo[s]?",
+            r"clasificar.*riesgo[s]?",
+            r"clasificación.*riesgo[s]?",
         ]
 
         self.patrones_crecimiento = [
-            r"crecimiento",
-            r"tasa.*crecimiento",
+            r"crecimiento[s]?",
+            r"tasa[s]?.*crecimiento",
             r"crecer",
+            r"crece",
             r"expansión",
             r"proyección.*crecimiento",
+            r"calcul.*crecimiento",
+            r"calcular.*tasa[s]?",
         ]
 
     def procesar_mensaje(
@@ -59,24 +67,90 @@ class ChatbotFinanciero:
         # Extraer datos financieros del mensaje
         datos_empresa = self._extraer_datos_financieros(mensaje)
 
-        # Determinar intención
-        if self._match_patron(mensaje_lower, self.patrones_ingresos):
+        # DEBUG: Ver qué datos se extrajeron
+        print(f"🔍 DEBUG - Mensaje: {mensaje_lower[:100]}...")
+        print(f"🔍 DEBUG - Datos extraídos: {datos_empresa}")
+
+        # Determinar intención usando palabras clave simples
+        # Detección de INGRESOS - buscar palabras completas
+        palabras_ingresos = [
+            "predecir",
+            "estimar",
+            "proyectar",
+            "calcular",
+            "prediccion",
+            "estimacion",
+        ]
+
+        # DEBUG detallado: probar cada palabra
+        print(f"🔍 DEBUG - Mensaje completo lower: '{mensaje_lower}'")
+        print(f"🔍 DEBUG - Longitud: {len(mensaje_lower)}")
+        for palabra in palabras_ingresos:
+            resultado = palabra in mensaje_lower
+            print(f"🔍 DEBUG - '{palabra}' in mensaje: {resultado}")
+
+        match_ingresos = (
+            any(palabra in mensaje_lower for palabra in palabras_ingresos)
+            and "ingreso" in mensaje_lower
+        )
+
+        # Detección de RIESGO
+        match_riesgo = "riesgo" in mensaje_lower
+
+        # Detección de CRECIMIENTO
+        palabras_crecimiento = ["crecimiento", "crecer", "crece", "tasa"]
+        match_crecimiento = any(
+            palabra in mensaje_lower for palabra in palabras_crecimiento
+        )
+
+        # DEBUG: Ver valores finales de match
+        print(f"🔍 DEBUG - Match ingresos: {match_ingresos}")
+        print(f"🔍 DEBUG - Match riesgo: {match_riesgo}")
+        print(f"🔍 DEBUG - Match crecimiento: {match_crecimiento}")
+
+        # Determinar qué tipo de análisis realizar
+        if match_ingresos:
+            print("✅ Detectado: INGRESOS")
             return self._responder_ingresos(datos_empresa)
 
-        elif self._match_patron(mensaje_lower, self.patrones_riesgo):
+        elif match_riesgo:
+            print("✅ Detectado: RIESGO")
             return self._responder_riesgo(datos_empresa)
 
-        elif self._match_patron(mensaje_lower, self.patrones_crecimiento):
+        elif match_crecimiento:
+            print("✅ Detectado: CRECIMIENTO")
             return self._responder_crecimiento(datos_empresa)
 
         else:
+            print("⚪ No se detectó intención específica - Respuesta general")
             return self._respuesta_general(mensaje, datos_empresa)
 
     def _match_patron(self, texto: str, patrones: List[str]) -> bool:
         """Verifica si el texto coincide con algún patrón."""
+        # Enfoque simple: buscar palabras clave en el texto
+        # En lugar de regex complejos, usar palabras clave directas
         for patron in patrones:
-            if re.search(patron, texto, re.IGNORECASE):
-                return True
+            # Convertir el patrón en búsqueda simple de palabras
+            if patron == r"predic.*ingreso[s]?":
+                if ("predic" in texto or "estim" in texto) and "ingreso" in texto:
+                    print(f"  ✅ Detectado: predicción de ingresos")
+                    return True
+            elif patron == r"riesgo[s]?":
+                if "riesgo" in texto:
+                    print(f"  ✅ Detectado: riesgo")
+                    return True
+            elif patron == r"crecimiento[s]?":
+                if "crecimiento" in texto or "crece" in texto:
+                    print(f"  ✅ Detectado: crecimiento")
+                    return True
+            elif patron in [r"analizar.*riesgo[s]?", r"analiza.*riesgo[s]?"]:
+                if "analiz" in texto and "riesgo" in texto:
+                    print(f"  ✅ Detectado: analizar riesgo")
+                    return True
+            elif patron in [r"calcul.*crecimiento", r"calcular.*tasa[s]?"]:
+                if "calcul" in texto and ("crecimiento" in texto or "tasa" in texto):
+                    print(f"  ✅ Detectado: calcular crecimiento/tasa")
+                    return True
         return False
 
     def _extraer_datos_financieros(self, mensaje: str) -> Dict[str, float]:
@@ -139,10 +213,30 @@ class ChatbotFinanciero:
             # Realizar predicción
             resultado = predecir_ingresos(datos_empresa)
 
+            # DEBUG: Ver qué está devolviendo
+            print("🔍 DEBUG - Resultado predecir_ingresos:", resultado)
+            print("🔍 DEBUG - Claves disponibles:", resultado.keys())
+
             # Formatear respuesta
             prediccion_soles = resultado["ingresos_predichos"]
-            limite_inferior = resultado["limite_inferior_95"]
-            limite_superior = resultado["limite_superior_95"]
+
+            # Manejar diferentes formatos de intervalos de confianza
+            if "limite_inferior_95" in resultado and "limite_superior_95" in resultado:
+                # Formato simple
+                limite_inferior = resultado["limite_inferior_95"]
+                limite_superior = resultado["limite_superior_95"]
+                confianza_pct = 95
+            elif "intervalo_confianza_90" in resultado:
+                # Formato del servicio ML
+                intervalo = resultado["intervalo_confianza_90"]
+                limite_inferior = intervalo["inferior"]
+                limite_superior = intervalo["superior"]
+                confianza_pct = 90
+            else:
+                # Calcular intervalo aproximado si no existe
+                limite_inferior = prediccion_soles * 0.85
+                limite_superior = prediccion_soles * 1.15
+                confianza_pct = 95
 
             respuesta = f"""Basándome en los datos proporcionados, he analizado la situación financiera de tu empresa:
 
@@ -153,7 +247,7 @@ Según nuestro modelo de Machine Learning, se estima que los ingresos alcanzará
 📊 **Análisis Detallado:**
 - Ingresos actuales: S/ {datos_empresa["ingresos_anuales"]:,.0f}
 - Crecimiento esperado: {((prediccion_soles / datos_empresa["ingresos_anuales"] - 1) * 100):.1f}%
-- Rango de confianza (95%): S/ {limite_inferior:,.0f} - S/ {limite_superior:,.0f}
+- Rango de confianza ({confianza_pct}%): S/ {limite_inferior:,.0f} - S/ {limite_superior:,.0f}
 
 **Factores Considerados:**
 - Margen operativo actual
@@ -198,9 +292,35 @@ Según nuestro modelo de Machine Learning, se estima que los ingresos alcanzará
         try:
             resultado = clasificar_riesgo(datos_empresa)
 
+            # DEBUG: Ver qué está devolviendo
+            print("🔍 DEBUG - Resultado clasificar_riesgo:", resultado)
+            print("🔍 DEBUG - Claves disponibles:", resultado.keys())
+
             nivel = resultado["nivel_riesgo"]
-            probabilidad = resultado["probabilidad"]
-            recomendacion = resultado["recomendacion"]
+
+            # Manejar tanto 'probabilidad' (simple) como 'probabilidades' (servicio ML)
+            if "probabilidad" in resultado:
+                probabilidad = resultado["probabilidad"]
+            elif "probabilidades" in resultado:
+                # Tomar la probabilidad del nivel predicho
+                probabilidad = resultado["probabilidades"].get(nivel, 0.5)
+            else:
+                probabilidad = 0.5
+
+            # Manejar tanto 'recomendacion' (simple) como 'recomendaciones' (servicio ML)
+            if "recomendacion" in resultado:
+                recomendacion = resultado["recomendacion"]
+            elif "recomendaciones" in resultado:
+                # Unir todas las recomendaciones en una sola
+                recomendaciones_lista = resultado["recomendaciones"]
+                if isinstance(recomendaciones_lista, list):
+                    recomendacion = "\n- ".join([""] + recomendaciones_lista)
+                else:
+                    recomendacion = str(recomendaciones_lista)
+            else:
+                recomendacion = (
+                    "Monitoree constantemente los indicadores financieros clave."
+                )
 
             # Calcular métricas adicionales
             ratio_endeudamiento = (
@@ -261,7 +381,17 @@ Sugerencias: Considera reestructuración de deuda y reducción de costos urgente
                     "recomendacion": recomendacion,
                 },
             }
+        except KeyError as e:
+            print(f"❌ DEBUG - KeyError en riesgo: {e}")
+            print(
+                f"❌ DEBUG - Datos recibidos: {resultado if 'resultado' in locals() else 'No resultado'}"
+            )
+            return {
+                "respuesta": f"Error al analizar el riesgo: Falta la clave '{str(e)}' en la respuesta del modelo. Claves disponibles: {list(resultado.keys()) if 'resultado' in locals() else 'N/A'}",
+                "prediccion": None,
+            }
         except Exception as e:
+            print(f"❌ DEBUG - Error general en riesgo: {type(e).__name__}: {str(e)}")
             return {
                 "respuesta": f"Error al analizar el riesgo: {str(e)}",
                 "prediccion": None,
@@ -287,8 +417,25 @@ Sugerencias: Considera reestructuración de deuda y reducción de costos urgente
         try:
             resultado = predecir_crecimiento(datos_empresa)
 
+            # DEBUG: Ver qué está devolviendo
+            print("🔍 DEBUG - Resultado predecir_crecimiento:", resultado)
+            print("🔍 DEBUG - Claves disponibles:", resultado.keys())
+
             crecimiento = resultado["crecimiento_porcentaje"]
-            categoria = resultado["categoria_crecimiento"]
+
+            # Manejar tanto 'categoria' (servicio ML) como 'categoria_crecimiento' (simple)
+            if "categoria_crecimiento" in resultado:
+                categoria = resultado["categoria_crecimiento"]
+            elif "categoria" in resultado:
+                categoria = resultado["categoria"]
+            else:
+                # Clasificar basado en el porcentaje
+                if crecimiento > 15:
+                    categoria = "Alto"
+                elif crecimiento > 5:
+                    categoria = "Moderado"
+                else:
+                    categoria = "Bajo"
 
             respuesta = f"""He analizado el potencial de crecimiento de tu empresa:
 
@@ -338,7 +485,19 @@ Sugerencias: Considera reestructuración de deuda y reducción de costos urgente
                     "confianza": 0.85,
                 },
             }
+        except KeyError as e:
+            print(f"❌ DEBUG - KeyError en crecimiento: {e}")
+            print(
+                f"❌ DEBUG - Datos recibidos: {resultado if 'resultado' in locals() else 'No resultado'}"
+            )
+            return {
+                "respuesta": f"Error al calcular crecimiento: Falta la clave '{str(e)}' en la respuesta del modelo. Claves disponibles: {list(resultado.keys()) if 'resultado' in locals() else 'N/A'}",
+                "prediccion": None,
+            }
         except Exception as e:
+            print(
+                f"❌ DEBUG - Error general en crecimiento: {type(e).__name__}: {str(e)}"
+            )
             return {
                 "respuesta": f"Error al calcular crecimiento: {str(e)}",
                 "prediccion": None,

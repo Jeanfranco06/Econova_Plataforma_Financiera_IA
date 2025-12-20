@@ -167,6 +167,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Chatbot IA -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 cursor-pointer" onclick="irAlChatbot()">
+            <div class="card-body text-center">
+                <i class="fas fa-comments fa-3x text-purple mb-3"></i>
+                <h5 class="card-title">Asistente IA</h5>
+                <p class="card-text">Chatbot Financiero</p>
+                <p class="small text-muted">Consulta tus dudas con nuestro asistente inteligente</p>
+                <button class="btn btn-sm btn-purple mt-2" onclick="event.stopPropagation()">Ir al Chatbot</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Sección de Logros -->
@@ -195,6 +208,22 @@
 
     .card:hover {
         cursor: pointer;
+    }
+
+    .text-purple {
+        color: #6f42c1;
+    }
+
+    .btn-purple {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
+
+    .btn-purple:hover {
+        background-color: #5a32a3;
+        border-color: #5a32a3;
+        color: white;
     }
 </style>
 
@@ -347,6 +376,13 @@
      */
     function duplicarSimulacion(simulacionId) {
         window.location.href = `/simulacion?duplicar=${simulacionId}`;
+    }
+
+    /**
+     * Navegar al chatbot
+     */
+    function irAlChatbot() {
+        window.location.href = '/chatbot';
     }
 </script>
 {% endblock %}
