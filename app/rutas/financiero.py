@@ -10,13 +10,7 @@ from app.servicios.financiero_servicio import ServicioFinanciero
 from app.servicios.prestamo_servicio import ServicioPrestamo
 from app.servicios.ahorro_inversion_servicio import ServicioAhorroInversion
 from app.modelos.simulacion import Simulacion
-from app.modelos.logro import Logro
-from app.utils.exportar import (
-    formatear_resultado_van,
-    formatear_resultado_tir,
-    formatear_resultado_wacc,
-    formatear_resultado_portafolio,
-)
+from app.modelos.logro import Usuario_Insignia
 
 bp_financiero = Blueprint("financiero", __name__, url_prefix="/api/v1/financiero")
 
@@ -75,14 +69,9 @@ def calcular_van():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro si es la primera simulación de VAN
-            if not Logro.verificar_logro_existe(usuario_id, "primera_van"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_van",
-                    nombre="Primera Simulación VAN",
-                    descripcion="Realizaste tu primer análisis de Valor Actual Neto",
-                    puntos=10,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_van"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify(
             {
@@ -150,14 +139,9 @@ def calcular_tir():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, "primera_tir"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_tir",
-                    nombre="Primera Simulación TIR",
-                    descripcion="Calculaste tu primera Tasa Interna de Retorno",
-                    puntos=10,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_tir"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify(
             {
@@ -233,14 +217,9 @@ def calcular_wacc():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, "primera_wacc"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_wacc",
-                    nombre="Primera Simulación WACC",
-                    descripcion="Calculaste tu primer Costo de Capital",
-                    puntos=15,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_wacc"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify(
             {
@@ -311,14 +290,9 @@ def analizar_portafolio():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, "primera_portafolio"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_portafolio",
-                    nombre="Primera Simulación Portafolio",
-                    descripcion="Analizaste tu primer portafolio de inversión",
-                    puntos=15,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_portafolio"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify(
             {
@@ -542,14 +516,9 @@ def calcular_prestamo():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro si es la primera simulación de préstamo
-            if not Logro.verificar_logro_existe(usuario_id, "primera_prestamo"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_prestamo",
-                    nombre="Primer Análisis de Préstamo",
-                    descripcion="Realizaste tu primer cálculo de amortización de préstamo",
-                    puntos=10,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_prestamo"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify({"success": True, "data": resultado}), 200
 
@@ -711,14 +680,9 @@ def calcular_ahorro():
             resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
-            if not Logro.verificar_logro_existe(usuario_id, "primera_ahorro"):
-                Logro.otorgar_logro(
-                    usuario_id=usuario_id,
-                    tipo_logro="primera_ahorro",
-                    nombre="Primer Plan de Ahorro",
-                    descripcion="Creaste tu primera proyección de ahorro e inversión",
-                    puntos=10,
-                )
+            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
+            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_ahorro"):
+            #     Usuario_Insignia.otorgar_insignia(...)
 
         return jsonify({"success": True, "data": resultado}), 200
 
