@@ -155,3 +155,44 @@ docs/_build/
 
 # Render/Heroku
 .render/
+
+# Secrets and credentials
+secrets/
+*.pem
+*.key
+credentials.json
+token.json
+
+# Data files (keep structure but ignore content)
+*.csv
+*.xlsx
+*.xls
+data/
+
+# Python wheels
+share/python-wheels/
+*.py,cover
+
+# PEP 582
+__pypackages__/
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyBuilder
+.pybuilder/
+
+# Celery
+celerybeat.pid
+
+# XGBoost models
+*.bin
+
+# OpenAI cache
+.openai_cache/
