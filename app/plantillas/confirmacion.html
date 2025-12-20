@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Cuenta Confirmada - Econova{% endblock %}
+
+{% block content %}
+<!-- Confirmation Hero -->
+<section class="bg-gradient-to-br from-green-600 to-green-800 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
+      <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      ¡Cuenta Confirmada!
+    </h1>
+    <p class="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+      Tu cuenta en Econova ha sido activada exitosamente. Ya puedes comenzar a usar todas las funcionalidades de la plataforma.
+    </p>
+  </div>
+</section>
+
+<!-- Confirmation Details -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          ¡Bienvenido a Econova!
+        </h2>
+
+        <p class="text-gray-600 mb-8">
+          Tu dirección de correo electrónico ha sido verificada y tu cuenta está ahora completamente activada.
+          Puedes comenzar a explorar todas las herramientas que tenemos para ti.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-chart-line text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Simulaciones</h3>
+            <p class="text-sm text-gray-600">Crea y ejecuta simulaciones financieras avanzadas</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-brain text-green-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">IA Asistente</h3>
+            <p class="text-sm text-gray-600">Obtén insights inteligentes de tus datos</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-users text-purple-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Benchmarking</h3>
+            <p class="text-sm text-gray-600">Compara tu rendimiento con otros empresarios</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-trophy text-orange-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Gamificación</h3>
+            <p class="text-sm text-gray-600">Gana insignias y mejora tu perfil</p>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <h3 class="font-semibold text-blue-800 mb-2">Token de Confirmación</h3>
+          <p class="text-sm text-blue-600 mb-3">
+            Tu token único de confirmación:
+          </p>
+          <code class="bg-blue-100 px-3 py-1 rounded text-blue-800 font-mono text-sm">
+            {{ token }}
+          </code>
+        </div>
+
+        <div class="space-y-4">
+          <a href="/" class="inline-block w-full bg-green-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition duration-300 text-center">
+            <i class="fas fa-rocket mr-2"></i>
+            Comenzar a Explorar Econova
+          </a>
+
+          <a href="/api/v1/login" class="inline-block w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 transition duration-300 text-center">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Ir al Inicio de Sesión
+          </a>
+        </div>
+
+        <p class="text-sm text-gray-500 mt-6">
+          ¿Necesitas ayuda? <a href="mailto:soporte@econova.com" class="text-blue-600 hover:text-blue-800">Contáctanos</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

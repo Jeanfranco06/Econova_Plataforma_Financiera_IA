@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+
+{% block title %}Econova - Plataforma Inteligente de Simulación Financiera{% endblock %}
+
+{% block content %}
+<!-- Welcome Modal -->
+<div id="welcome-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg mx-4 transform scale-95 transition-transform duration-500">
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl relative overflow-hidden">
+      <div class="absolute inset-0 bg-black opacity-10"></div>
+      <div class="relative z-10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-rocket text-2xl mr-3"></i>
+            <h3 class="text-xl font-bold">¡Bienvenido a Econova!</h3>
+          </div>
+          <button id="close-modal" class="text-white hover:text-gray-200 text-xl">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Floating elements in header -->
+      <div class="absolute top-4 right-4 opacity-20">
+        <i class="fas fa-chart-line text-white text-lg"></i>
+      </div>
+      <div class="absolute bottom-4 left-4 opacity-20">
+        <i class="fas fa-dollar-sign text-white text-lg"></i>
+      </div>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="p-6">
+      <!-- Key Value Proposition -->
+      <div class="text-center mb-6">
+        <div class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+          <i class="fas fa-check-circle mr-1"></i>¡Valor Diferencial Exclusivo!
+        </div>
+        <h4 class="text-lg font-bold text-gray-800 mb-2">Optimización Financiera Inteligente</h4>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Tecnología avanzada con <strong class="text-green-600">potencial para optimizar</strong> decisiones financieras
+          de <strong class="text-blue-600">emprendedores peruanos</strong> con precisión predictiva.
+        </p>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-blue-50 p-4 rounded-lg text-center">
+          <div class="text-2xl font-bold text-blue-600 mb-1">98%</div>
+          <div class="text-xs text-blue-800">Precisión en predicciones</div>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg text-center">
+          <div class="text-2xl font-bold text-green-600 mb-1">85%</div>
+          <div class="text-xs text-green-800">Mejora en rentabilidad</div>
+        </div>
+      </div>
+
+      <!-- Special Offer -->
+      <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div class="flex items-start">
+          <i class="fas fa-gift text-yellow-500 text-xl mr-3 mt-1"></i>
+          <div>
+            <h5 class="font-semibold text-gray-800 mb-1">¡Oferta Especial de Lanzamiento!</h5>
+            <p class="text-sm text-gray-600 mb-2">
+              Primer mes <strong>GRATIS</strong> + consultoría financiera personalizada valorizada en S/ 2,500
+            </p>
+            <div class="text-xs text-gray-500">*Válido para los primeros 50 registros</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a href="/api/v1/registro" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold text-center hover:bg-blue-700 transition duration-300">
+          <i class="fas fa-user-plus mr-2"></i>Comenzar Gratis
+        </a>
+        <a href="/api/v1/login" class="flex-1 border-2 border-blue-600 text-blue-600 py-3 px-6 rounded-lg font-semibold text-center hover:bg-blue-700 hover:text-white transition duration-300">
+          <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+        </a>
+      </div>
+
+      <!-- Login Link for Existing Users -->
+      <div class="mt-4 text-center">
+        <p class="text-sm text-gray-600">
+          ¿Ya tienes cuenta?
+          <a href="/api/v1/login" class="text-blue-600 hover:text-blue-800 font-medium">Inicia sesión aquí</a>
+        </p>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-center space-x-4 text-xs text-gray-500">
+          <div class="flex items-center">
+            <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+            SSL Seguro
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-lock text-blue-500 mr-1"></i>
+            Datos Protegidos
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-award text-purple-500 mr-1"></i>
+            Certificado
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Hero Section -->
+<section class="bg-slate-900 text-white py-20 relative overflow-hidden">
+  <!-- Floating Economic Elements -->
+  <div class="absolute inset-0 pointer-events-none">
+    <!-- Money Bills -->
+    <div class="floating-element top-20 left-10">
+      <i class="fas fa-money-bill-wave economic-icon"></i>
+    </div>
+    <div class="floating-element top-32 right-16">
+      <i class="fas fa-coins economic-icon"></i>
+    </div>
+
+    <!-- Charts and Graphs -->
+    <div class="floating-element top-40 left-1/4">
+      <i class="fas fa-chart-line economic-icon"></i>
+    </div>
+    <div class="floating-element top-60 right-1/3">
+      <i class="fas fa-chart-bar economic-icon"></i>
+    </div>
+
+    <!-- Calculator and Piggy Bank -->
+    <div class="floating-element bottom-40 left-16">
+      <i class="fas fa-calculator economic-icon"></i>
+    </div>
+    <div class="floating-element bottom-32 right-10">
+      <i class="fas fa-piggy-bank economic-icon"></i>
+    </div>
+
+    <!-- Briefcase and Building -->
+    <div class="floating-element top-1/2 left-8">
+      <i class="fas fa-briefcase economic-icon"></i>
+    </div>
+    <div class="floating-element bottom-20 right-1/4">
+      <i class="fas fa-building economic-icon"></i>
+    </div>
+
+    <!-- Dollar Sign -->
+    <div class="floating-element top-16 right-8">
+      <i class="fas fa-dollar-sign economic-icon text-green-300"></i>
+    </div>
+    <div class="floating-element bottom-16 left-1/3">
+      <i class="fas fa-percentage economic-icon text-yellow-300"></i>
+    </div>
+  </div>
+
+  <!-- Animated Chart Background -->
+  <div class="absolute inset-0 opacity-5 pointer-events-none">
+    <svg class="w-full h-full" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,400 Q300,300 600,350 T1200,320" fill="none" stroke="white" stroke-width="2" class="chart-line"/>
+      <path d="M0,500 Q300,450 600,480 T1200,460" fill="none" stroke="white" stroke-width="2" class="chart-line" style="animation-delay: 1s;"/>
+      <path d="M0,600 Q300,550 600,520 T1200,540" fill="none" stroke="white" stroke-width="2" class="chart-line" style="animation-delay: 2s;"/>
+    </svg>
+  </div>
+
+  <div class="container mx-auto px-6 text-center relative z-10">
+    <div class="inline-block mb-6">
+      <h1 class="text-5xl md:text-6xl font-bold mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+        Econova
+      </h1>
+      <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-green-400 mx-auto rounded-full"></div>
+    </div>
+
+    <p class="text-xl md:text-2xl mb-8 text-blue-100 font-light">
+      Plataforma Inteligente de Simulación Financiera Empresarial
+    </p>
+    <p class="text-lg mb-12 max-w-3xl mx-auto text-blue-200 leading-relaxed">
+      Optimiza tus decisiones financieras con IA avanzada. Simula VAN, TIR, portafolios y más,
+      guiado por nuestro chatbot asesor inteligente.
+    </p>
+
+    <!-- Interactive CTA Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#simulacion" class="bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl pulse-glow">
+        <i class="fas fa-play-circle mr-2"></i>Comenzar Simulación
+      </a>
+      <a href="#caracteristicas" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-900 transition duration-300 transform hover:scale-105">
+        <i class="fas fa-info-circle mr-2"></i>Conocer Más
+      </a>
+    </div>
+
+    <!-- Economic Stats -->
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+        <div class="text-3xl font-bold text-green-300 mb-2">98%</div>
+        <div class="text-sm text-blue-200">Precisión en simulaciones</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+        <div class="text-3xl font-bold text-blue-300 mb-2">24/7</div>
+        <div class="text-sm text-blue-200">Asistencia del chatbot</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+        <div class="text-3xl font-bold text-purple-300 mb-2">500+</div>
+        <div class="text-sm text-blue-200">Empresas usuarias</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Características Principales -->
+<section id="caracteristicas" class="py-20 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">
+      Diferenciadores Clave
+    </h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- Chatbot Asesor -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Chatbot Copiloto</h3>
+        <p class="text-gray-600">
+          Tu asistente financiero inteligente te guía paso a paso, interpreta resultados
+          y propone caminos alternativos según tu perfil y contexto de negocio.
+        </p>
+      </div>
+
+      <!-- Simulación Avanzada -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Simulación Avanzada</h3>
+        <p class="text-gray-600">
+          Cálculo automático de VAN, TIR, riesgo, portafolio óptimo usando machine learning
+          y datos históricos para predicciones precisas.
+        </p>
+      </div>
+
+      <!-- Crowdsourcing -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Crowdsourcing Anónimo</h3>
+        <p class="text-gray-600">
+          Compara tus resultados con estrategias reales de otros empresarios.
+          Benchmarking local y nacional para tomar mejores decisiones.
+        </p>
+      </div>
+
+      <!-- Storytelling Interactivo -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Storytelling Interactivo</h3>
+        <p class="text-gray-600">
+          Convierte resultados en historias visuales y experimentables.
+          Explora "qué pasaría si..." en diferentes caminos de decisión.
+        </p>
+      </div>
+
+      <!-- Gamificación -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Gamificación</h3>
+        <p class="text-gray-600">
+          Rankings, insignias y retroalimentación según logros y rendimiento.
+          Compite con el promedio del sector en innovación financiera.
+        </p>
+      </div>
+
+      <!-- Comunicación Directa -->
+      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Comunicación Directa</h3>
+        <p class="text-gray-600">
+          Reportes y alertas personalizadas vía WhatsApp/email.
+          Exportación directa a Excel o Google Sheets.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Resultados Reales - Impact Section -->
+<section class="py-20 bg-white">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold mb-4 text-gray-800">
+        Resultados que Transforman Negocios
+      </h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Tecnología avanzada para optimizar decisiones financieras empresariales
+      </p>
+    </div>
+
+    <!-- General Benefits -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Decisiones Informadas</h3>
+        <p class="text-gray-600 text-sm">Toma decisiones basadas en análisis precisos y proyecciones realistas</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Reducción de Riesgos</h3>
+        <p class="text-gray-600 text-sm">Identifica y mitiga riesgos financieros antes de tomar acciones</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-rocket text-purple-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Optimización de Recursos</h3>
+        <p class="text-gray-600 text-sm">Maximiza el retorno de tus inversiones y recursos disponibles</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-brain text-orange-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Inteligencia Artificial</h3>
+        <p class="text-gray-600 text-sm">Análisis avanzado con machine learning para predicciones precisas</p>
+      </div>
+    </div>
+
+    <!-- General Use Cases -->
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl border-l-4 border-green-500">
+        <div class="flex items-center mb-4">
+          <i class="fas fa-industry text-green-600 text-2xl mr-3"></i>
+          <div>
+            <h4 class="font-semibold text-gray-800">Sector Industrial</h4>
+            <p class="text-sm text-gray-600">Manufactura y Producción</p>
+          </div>
+        </div>
+        <p class="text-gray-700 mb-4">
+          Evalúa inversiones en maquinaria, expansión de capacidad y
+          optimización de procesos productivos con análisis detallado.
+        </p>
+        <div class="text-green-600 font-semibold">
+          <i class="fas fa-cogs mr-1"></i>Análisis de eficiencia operativa
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl border-l-4 border-blue-500">
+        <div class="flex items-center mb-4">
+          <i class="fas fa-shopping-bag text-blue-600 text-2xl mr-3"></i>
+          <div>
+            <h4 class="font-semibold text-gray-800">Comercio y Retail</h4>
+            <p class="text-sm text-gray-600">Venta Minorista</p>
+          </div>
+        </div>
+        <p class="text-gray-700 mb-4">
+          Optimiza inventarios, evalúa aperturas de locales y analiza
+          la rentabilidad de diferentes líneas de productos.
+        </p>
+        <div class="text-blue-600 font-semibold">
+          <i class="fas fa-store mr-1"></i>Gestión inteligente de inventarios
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-xl border-l-4 border-purple-500">
+        <div class="flex items-center mb-4">
+          <i class="fas fa-utensils text-purple-600 text-2xl mr-3"></i>
+          <div>
+            <h4 class="font-semibold text-gray-800">Servicios y Turismo</h4>
+            <p class="text-sm text-gray-600">Hospitality y Servicios</p>
+          </div>
+        </div>
+        <p class="text-gray-700 mb-4">
+          Evalúa inversiones en franquicias, expansión de servicios y
+          análisis de costos operativos para maximizar rentabilidad.
+        </p>
+        <div class="text-purple-600 font-semibold">
+          <i class="fas fa-concierge-bell mr-1"></i>Optimización de servicios
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Demo Preview -->
+<section class="py-20 bg-gradient-to-r from-slate-50 to-blue-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-4xl font-bold mb-6 text-gray-800">
+            Ve Econova en Acción
+          </h2>
+          <p class="text-lg text-gray-600 mb-8">
+            Experimenta cómo nuestro chatbot te guía paso a paso en simulaciones
+            financieras complejas con explicaciones claras y recomendaciones inteligentes.
+          </p>
+
+          <!-- Interactive Features -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center p-4 bg-white rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-robot text-blue-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Chatbot Interactivo</h4>
+                <p class="text-sm text-gray-600">Asistente IA que entiende tu contexto</p>
+              </div>
+            </div>
+
+            <div class="flex items-center p-4 bg-white rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-chart-bar text-green-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Visualizaciones 3D</h4>
+                <p class="text-sm text-gray-600">Gráficos interactivos y análisis detallado</p>
+              </div>
+            </div>
+
+            <div class="flex items-center p-4 bg-white rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-users text-purple-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Benchmarking Anónimo</h4>
+                <p class="text-sm text-gray-600">Compara con miles de empresas similares</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="/demo" class="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-300 inline-flex items-center">
+            <i class="fas fa-play-circle mr-2"></i>
+            Ver Demo Interactiva
+          </a>
+        </div>
+
+        <!-- Mock Dashboard Preview -->
+        <div class="relative">
+          <div class="bg-white rounded-xl shadow-2xl p-6 transform hover:scale-105 transition duration-500">
+            <!-- Mock Browser Header -->
+            <div class="flex items-center mb-4 pb-4 border-b">
+              <div class="flex space-x-2">
+                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+              </div>
+              <div class="flex-1 text-center">
+                <div class="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 mx-auto max-w-xs">
+                  econova.com/simulacion
+                </div>
+              </div>
+            </div>
+
+            <!-- Mock Dashboard Content -->
+            <div class="space-y-4">
+              <div class="bg-blue-50 p-4 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium text-blue-800">VAN del Proyecto</span>
+                  <span class="text-lg font-bold text-green-600">S/ 1,250,000</span>
+                </div>
+                <div class="w-full bg-blue-200 rounded-full h-2">
+                  <div class="bg-green-500 h-2 rounded-full w-3/4 animate-pulse"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <div class="text-2xl font-bold text-green-600 mb-1">18.5%</div>
+                  <div class="text-xs text-green-800">TIR Esperado</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                  <div class="text-2xl font-bold text-purple-600 mb-1">2.3 años</div>
+                  <div class="text-xs text-purple-800">Periodo Recuperación</div>
+                </div>
+              </div>
+
+              <!-- Mock Chat -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex items-start space-x-3 mb-3">
+                  <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-800">¿Te gustaría explorar escenarios alternativos con diferentes tasas de descuento?</p>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Sí, explorar</button>
+                  <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-300">Ver resultados</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Achievement Badge -->
+          <div class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold shadow-lg animate-bounce">
+            <i class="fas fa-trophy mr-1"></i>¡Excelente decisión!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Indicators -->
+<section class="py-16 bg-gray-900 text-white">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-12">
+      <h3 class="text-2xl font-bold mb-4">Confían en Econova</h3>
+      <p class="text-gray-400">Empresas líderes que han transformado su toma de decisiones financieras</p>
+    </div>
+
+    <!-- Company Logos/Trust Indicators -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60">
+      <div class="text-center">
+        <i class="fas fa-building text-4xl text-blue-400 mb-2"></i>
+        <div class="text-sm">Corporaciones</div>
+      </div>
+      <div class="text-center">
+        <i class="fas fa-industry text-4xl text-green-400 mb-2"></i>
+        <div class="text-sm">Industria</div>
+      </div>
+      <div class="text-center">
+        <i class="fas fa-shopping-bag text-4xl text-purple-400 mb-2"></i>
+        <div class="text-sm">Retail</div>
+      </div>
+      <div class="text-center">
+        <i class="fas fa-utensils text-4xl text-orange-400 mb-2"></i>
+        <div class="text-sm">Hospitality</div>
+      </div>
+      <div class="text-center">
+        <i class="fas fa-code text-4xl text-red-400 mb-2"></i>
+        <div class="text-sm">Tecnología</div>
+      </div>
+    </div>
+
+    <!-- Certifications/Security -->
+    <div class="mt-12 flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400">
+      <div class="flex items-center">
+        <i class="fas fa-shield-alt text-green-400 mr-2"></i>
+        Datos Encriptados SSL
+      </div>
+      <div class="flex items-center">
+        <i class="fas fa-lock text-blue-400 mr-2"></i>
+        Cumple ISO 27001
+      </div>
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-purple-400 mr-2"></i>
+        Certificación SOC 2
+      </div>
+      <div class="flex items-center">
+        <i class="fas fa-euro-sign text-yellow-400 mr-2"></i>
+        Respaldado por BCP
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Simulaciones Disponibles -->
+<section id="simulacion" class="py-20 bg-white relative overflow-hidden">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px), radial-gradient(circle at 75% 75%, #10b981 2px, transparent 2px); background-size: 50px 50px;"></div>
+  </div>
+
+  <div class="container mx-auto px-6 relative z-10">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold mb-4 text-gray-800">
+        Simulaciones Financieras
+      </h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Herramientas avanzadas de análisis financiero con visualizaciones interactivas
+        y predicciones basadas en machine learning.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl text-center hover:shadow-lg transition duration-300 transform hover:scale-105 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+          <i class="fas fa-chart-line text-3xl mb-4 opacity-80"></i>
+          <h3 class="text-xl font-semibold mb-2">VAN</h3>
+          <p class="text-blue-100 text-sm">Valor Actual Neto</p>
+          <div class="mt-4 text-xs opacity-75">Análisis de rentabilidad</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl text-center hover:shadow-lg transition duration-300 transform hover:scale-105 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+          <i class="fas fa-percentage text-3xl mb-4 opacity-80"></i>
+          <h3 class="text-xl font-semibold mb-2">TIR</h3>
+          <p class="text-green-100 text-sm">Tasa Interna de Retorno</p>
+          <div class="mt-4 text-xs opacity-75">Rendimiento esperado</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl text-center hover:shadow-lg transition duration-300 transform hover:scale-105 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+          <i class="fas fa-balance-scale text-3xl mb-4 opacity-80"></i>
+          <h3 class="text-xl font-semibold mb-2">WACC</h3>
+          <p class="text-purple-100 text-sm">Costo Promedio Ponderado</p>
+          <div class="mt-4 text-xs opacity-75">Costos de capital</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl text-center hover:shadow-lg transition duration-300 transform hover:scale-105 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+          <i class="fas fa-chart-pie text-3xl mb-4 opacity-80"></i>
+          <h3 class="text-xl font-semibold mb-2">Portafolio</h3>
+          <p class="text-orange-100 text-sm">Optimización de Inversiones</p>
+          <div class="mt-4 text-xs opacity-75">Diversificación inteligente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Financial Tools -->
+    <div class="mt-12 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div class="bg-gray-50 p-6 rounded-lg text-center border border-gray-200 hover:border-blue-300 transition-colors duration-300">
+        <i class="fas fa-sync-alt text-blue-500 text-2xl mb-3"></i>
+        <h4 class="font-semibold text-gray-800 mb-2">Análisis de Sensibilidad</h4>
+        <p class="text-sm text-gray-600">Simulaciones Monte Carlo para evaluar riesgos</p>
+      </div>
+      <div class="bg-gray-50 p-6 rounded-lg text-center border border-gray-200 hover:border-green-300 transition-colors duration-300">
+        <i class="fas fa-history text-green-500 text-2xl mb-3"></i>
+        <h4 class="font-semibold text-gray-800 mb-2">Proyecciones Históricas</h4>
+        <p class="text-sm text-gray-600">Análisis basado en datos reales del mercado</p>
+      </div>
+      <div class="bg-gray-50 p-6 rounded-lg text-center border border-gray-200 hover:border-purple-300 transition-colors duration-300">
+        <i class="fas fa-robot text-purple-500 text-2xl mb-3"></i>
+        <h4 class="font-semibold text-gray-800 mb-2">IA Predictiva</h4>
+        <p class="text-sm text-gray-600">Machine Learning para pronósticos precisos</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-12">
+      <a href="/simulacion" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-blue-800 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center">
+        <i class="fas fa-rocket mr-2"></i>
+        Iniciar Simulación
+        <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-gray-900 text-white py-20">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-4xl font-bold mb-6">
+      ¿Listo para Optimizar tus Decisiones Financieras?
+    </h2>
+    <p class="text-xl mb-8 text-gray-300">
+      Únete a cientos de empresarios que ya confían en Econova para sus simulaciones financieras.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/api/v1/registro" class="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-300">
+        Registrarse Gratis
+      </a>
+      <a href="/api/v1/login" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition duration-300">
+        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+      </a>
+      <a href="/chatbot" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition duration-300">
+        Hablar con el Chatbot
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-gray-300 py-12">
+  <div class="container mx-auto px-6">
+    <div class="grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-white text-lg font-semibold mb-4">Econova</h3>
+        <p class="text-sm">
+          Plataforma inteligente de simulación financiera con IA para empresarios y emprendedores.
+        </p>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-4">Simulaciones</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white">VAN</a></li>
+          <li><a href="#" class="hover:text-white">TIR</a></li>
+          <li><a href="#" class="hover:text-white">WACC</a></li>
+          <li><a href="#" class="hover:text-white">Portafolio</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-4">Recursos</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white">Documentación</a></li>
+          <li><a href="#" class="hover:text-white">API</a></li>
+          <li><a href="#" class="hover:text-white">Tutoriales</a></li>
+          <li><a href="#" class="hover:text-white">Soporte</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-4">Contacto</h4>
+        <ul class="space-y-2 text-sm">
+          <li>Email: info@econova.com</li>
+          <li>WhatsApp: +51 999 999 999</li>
+          <li>Teléfono: (01) 123-4567</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
+      <p>&copy; 2025 Econova. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
+{% endblock %}

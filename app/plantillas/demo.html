@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Demo Interactiva - Econova{% endblock %}
+
+{% block content %}
+<!-- Demo Hero -->
+<section class="bg-slate-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Demo Interactiva
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Experimenta Econova en acción con simulaciones financieras en tiempo real
+    </p>
+  </div>
+</section>
+
+<!-- Demo Content -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Coming Soon Message -->
+      <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+        <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-play-circle text-purple-600 text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Demo en Desarrollo</h2>
+        <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
+          Estamos creando una experiencia de demo interactiva que te permitirá probar
+          todas las funcionalidades de Econova sin necesidad de registrarte.
+        </p>
+
+        <!-- Demo Features -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-calculator text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">VAN Calculator</h3>
+            <p class="text-sm text-gray-600">Calcula valor actual neto en tiempo real</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-percentage text-green-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">TIR Simulator</h3>
+            <p class="text-sm text-gray-600">Simula tasa interna de retorno</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-pie text-purple-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Portfolio Optimizer</h3>
+            <p class="text-sm text-gray-600">Optimización de portafolios de inversión</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-robot text-orange-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">AI Assistant</h3>
+            <p class="text-sm text-gray-600">Asistente inteligente integrado</p>
+          </div>
+        </div>
+
+        <!-- Interactive Demo Preview -->
+        <div class="bg-gray-50 p-8 rounded-lg mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 mb-6">Vista Previa Interactiva</h3>
+
+          <!-- Mock Calculator Interface -->
+          <div class="max-w-2xl mx-auto">
+            <div class="bg-white border-2 border-gray-200 rounded-lg p-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4 text-center">Calculadora VAN - Demo</h4>
+
+              <!-- Input Fields -->
+              <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Inversión Inicial</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-gray-500">S/</span>
+                    <input
+                      type="number"
+                      value="100000"
+                      class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled
+                    >
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Tasa de Descuento</label>
+                  <div class="relative">
+                    <input
+                      type="number"
+                      value="12"
+                      class="w-full pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled
+                    >
+                    <span class="absolute right-3 top-2 text-gray-500">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cash Flows -->
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Flujos de Caja (Años 1-5)</label>
+                <div class="grid grid-cols-5 gap-2">
+                  <input type="number" value="25000" class="px-2 py-2 border border-gray-300 rounded text-center" disabled>
+                  <input type="number" value="28000" class="px-2 py-2 border border-gray-300 rounded text-center" disabled>
+                  <input type="number" value="32000" class="px-2 py-2 border border-gray-300 rounded text-center" disabled>
+                  <input type="number" value="35000" class="px-2 py-2 border border-gray-300 rounded text-center" disabled>
+                  <input type="number" value="40000" class="px-2 py-2 border border-gray-300 rounded text-center" disabled>
+                </div>
+              </div>
+
+              <!-- Results -->
+              <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                <div class="text-center">
+                  <div class="text-sm text-blue-600 mb-1">Valor Actual Neto (VAN)</div>
+                  <div class="text-3xl font-bold text-blue-800">S/ 24,750</div>
+                  <div class="text-sm text-green-600 mt-1">✅ Proyecto Viable</div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex justify-center space-x-4">
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300" disabled>
+                  <i class="fas fa-sync-alt mr-2"></i>Recalcular
+                </button>
+                <button class="border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300" disabled>
+                  <i class="fas fa-save mr-2"></i>Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo Benefits -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg">
+            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-graduation-cap text-white"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2 text-center">Aprende Jugando</h3>
+            <p class="text-sm text-gray-600 text-center">
+              Experimenta con diferentes escenarios sin riesgo para entender conceptos financieros.
+            </p>
+          </div>
+
+          <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg">
+            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-lightbulb text-white"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2 text-center">Descubre Insights</h3>
+            <p class="text-sm text-gray-600 text-center">
+              La demo incluye explicaciones detalladas de cada resultado y sus implicaciones.
+            </p>
+          </div>
+
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
+            <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-rocket text-white"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2 text-center">Impulsa tu Crecimiento</h3>
+            <p class="text-sm text-gray-600 text-center">
+              Descubre el potencial de Econova antes de tomar tu decisión de registro.
+            </p>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 rounded-lg">
+          <h3 class="text-2xl font-bold mb-4 text-center">¿Listo para Probar Econova?</h3>
+          <p class="text-blue-100 mb-6 text-center max-w-2xl mx-auto">
+            Regístrate ahora y obtén acceso completo a todas las herramientas financieras,
+            incluyendo soporte prioritario y actualizaciones exclusivas.
+          </p>
+          <div class="flex justify-center space-x-4">
+            <a href="/api/v1/registro" class="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition duration-300 font-semibold">
+              <i class="fas fa-user-plus mr-2"></i>Registrarme Gratis
+            </a>
+            <a href="/" class="border-2 border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-blue-600 transition duration-300 font-semibold">
+              <i class="fas fa-home mr-2"></i>Volver al Inicio
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

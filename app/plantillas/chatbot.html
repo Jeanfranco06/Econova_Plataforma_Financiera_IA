@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Chatbot Asesor - Econova{% endblock %}
+
+{% block content %}
+<!-- Chatbot Hero -->
+<section class="bg-slate-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Chatbot Asesor Financiero
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Tu asistente inteligente para análisis financiero y toma de decisiones
+    </p>
+  </div>
+</section>
+
+<!-- Chatbot Interface -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-4xl mx-auto">
+
+      <!-- Chatbot Interface -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800">Chatbot Financiero IA</h2>
+            <p class="text-gray-600">Tu asistente inteligente especializado en finanzas empresariales</p>
+          </div>
+          <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-circle text-green-500 mr-1"></i>En Línea
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+          <div id="chat-messages" class="space-y-4 mb-4 max-h-96 overflow-y-auto">
+            <!-- Welcome Message -->
+            <div class="flex items-start space-x-3">
+              <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-white text-sm"></i>
+              </div>
+              <div class="bg-blue-50 p-4 rounded-lg max-w-lg">
+                <p class="text-gray-800">
+                  ¡Hola! Soy <strong>Econova AI</strong>, tu asesor financiero inteligente.
+                  Puedo ayudarte con análisis de VAN, TIR, WACC, presupuestos, inversiones y toma de decisiones financieras.
+                </p>
+                <p class="text-gray-600 text-sm mt-2">
+                  ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre conceptos financieros,
+                  interpretar resultados de tus simulaciones, o pedir recomendaciones para tu negocio.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div id="typing-indicator" class="hidden flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <i class="fas fa-robot text-white text-xs"></i>
+            </div>
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="flex space-x-3">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Escribe tu pregunta sobre finanzas..."
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              maxlength="500"
+            >
+            <button
+              id="send-button"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+
+          <!-- Quick Questions -->
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
+              ¿Qué es VAN?
+            </button>
+            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
+              TIR vs VAN
+            </button>
+            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
+              Costo de capital
+            </button>
+            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
+              Riesgo financiero
+            </button>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-brain text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">IA Avanzada</h3>
+            <p class="text-sm text-gray-600">Respuestas inteligentes y contextuales basadas en tu perfil empresarial</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-line text-green-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Análisis en Tiempo Real</h3>
+            <p class="text-sm text-gray-600">Interpretación instantánea de resultados y escenarios hipotéticos</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-lightbulb text-purple-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Recomendaciones</h3>
+            <p class="text-sm text-gray-600">Sugerencias personalizadas adaptadas a tu sector y tamaño de empresa</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to Dashboard -->
+      <div class="text-center mt-8">
+        <a href="/api/v1/dashboard" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 inline-flex items-center">
+          <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Chatbot functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const chatInput = document.getElementById('chat-input');
+  const sendButton = document.getElementById('send-button');
+  const chatMessages = document.getElementById('chat-messages');
+  const typingIndicator = document.getElementById('typing-indicator');
+  const quickQuestions = document.querySelectorAll('.quick-question');
+
+  // Quick questions functionality
+  quickQuestions.forEach(button => {
+    button.addEventListener('click', function() {
+      chatInput.value = this.textContent;
+      sendMessage();
+    });
+  });
+
+  // Send message on button click
+  sendButton.addEventListener('click', sendMessage);
+
+  // Send message on Enter key
+  chatInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // Add user message to chat
+    addMessage(message, 'user');
+    chatInput.value = '';
+
+    // Disable input while processing
+    chatInput.disabled = true;
+    sendButton.disabled = true;
+
+    // Show typing indicator
+    typingIndicator.classList.remove('hidden');
+
+    // Scroll to bottom
+    scrollToBottom();
+
+    // Send to backend and get response
+    fetch('/api/v1/chatbot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Hide typing indicator
+      typingIndicator.classList.add('hidden');
+
+      // Add bot response
+      if (data.success) {
+        addMessage(data.response, 'bot');
+      } else {
+        addMessage('Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.', 'bot');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      typingIndicator.classList.add('hidden');
+      addMessage('Lo siento, no pude conectarme al servidor. Por favor, verifica tu conexión a internet.', 'bot');
+    })
+    .finally(() => {
+      // Re-enable input
+      chatInput.disabled = false;
+      sendButton.disabled = false;
+      chatInput.focus();
+    });
+  }
+
+  function addMessage(text, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex items-start space-x-3 ${sender === 'user' ? 'justify-end' : ''}`;
+
+    if (sender === 'user') {
+      messageDiv.innerHTML = `
+        <div class="bg-green-50 p-4 rounded-lg max-w-lg">
+          <p class="text-gray-800">${escapeHtml(text)}</p>
+        </div>
+        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-white text-sm"></i>
+        </div>
+      `;
+    } else {
+      messageDiv.innerHTML = `
+        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+          <i class="fas fa-robot text-white text-sm"></i>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg max-w-lg">
+          <p class="text-gray-800">${formatBotResponse(text)}</p>
+        </div>
+      `;
+    }
+
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+  }
+
+  function formatBotResponse(text) {
+    // Simple formatting for bot responses
+    return escapeHtml(text)
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function scrollToBottom() {
+    setTimeout(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 100);
+  }
+
+  // Initialize
+  chatInput.focus();
+});
+</script>
+{% endblock %}

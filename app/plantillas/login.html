@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Econova{% endblock %}
+
+{% block content %}
+<!-- Login Hero -->
+<section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Inicia Sesión
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Accede a tu cuenta y continúa con tus simulaciones financieras
+    </p>
+  </div>
+</section>
+
+<!-- Login Form -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-md mx-auto">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Bienvenido de vuelta</h2>
+          <p class="text-gray-600">Ingresa tus credenciales para continuar</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" method="POST" action="/api/v1/login" class="space-y-6">
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              Correo Electrónico o Nombre de Usuario
+            </label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              required
+              value="{{ email_value or '' }}"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              placeholder="tu@email.com o tu_usuario"
+            >
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+              Contraseña
+            </label>
+            <div class="relative">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="••••••••"
+              >
+              <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="remember"
+                name="remember"
+                {% if remember_checked %}checked{% endif %}
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              >
+              <label for="remember" class="ml-2 text-sm text-gray-700">
+                Recordarme
+              </label>
+            </div>
+            <a href="/recuperar-password" class="text-sm text-blue-600 hover:text-blue-800">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <button
+            type="submit"
+            id="submit-btn"
+            class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Iniciar Sesión
+          </button>
+        </form>
+
+        <!-- Social Login (Opcional) -->
+        <div class="mt-8">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-gray-500">O continúa con</span>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 gap-3">
+            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <i class="fab fa-google mr-2 text-red-500"></i>
+              Google
+            </button>
+            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <i class="fab fa-facebook mr-2 text-blue-600"></i>
+              Facebook
+            </button>
+          </div>
+        </div>
+
+        <!-- Register Link -->
+        <div class="text-center mt-8">
+          <p class="text-gray-600">
+            ¿No tienes cuenta?
+            <a href="/api/v1/registro" class="text-blue-600 hover:text-blue-800 font-medium">Regístrate aquí</a>
+          </p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mt-6 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-green-50 text-green-800 border border-green-200{% endif %}">
+                <i class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Password visibility toggle
+document.getElementById('toggle-password').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  const icon = this.querySelector('i');
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+});
+
+// Form submission
+document.getElementById('login-form').addEventListener('submit', function(e) {
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Disable button and show loading
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...';
+});
+</script>
+{% endblock %}

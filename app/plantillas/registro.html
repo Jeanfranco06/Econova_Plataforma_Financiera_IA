@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}Registro - Econova{% endblock %}
+
+{% block head %}
+<style>
+@keyframes highlight {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+  100% { transform: scale(1); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Registration Hero -->
+<section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Únete a Econova
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Crea tu cuenta gratuita y comienza a optimizar tus decisiones financieras
+      con herramientas de IA avanzadas
+    </p>
+    <div class="flex items-center justify-center space-x-8 text-sm">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-green-300 mr-2"></i>
+        <span>100% Gratuito</span>
+      </div>
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-green-300 mr-2"></i>
+        <span>Sin compromiso</span>
+      </div>
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-green-300 mr-2"></i>
+        <span>Configuración rápida</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Registration Form -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+          <div class="flex items-center justify-center space-x-4">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                1
+              </div>
+              <span class="ml-2 text-gray-700 font-medium">Cuenta</span>
+            </div>
+            <div class="w-12 h-0.5 bg-gray-300"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                2
+              </div>
+              <span class="ml-2 text-gray-400">Perfil</span>
+            </div>
+            <div class="w-12 h-0.5 bg-gray-300"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                3
+              </div>
+              <span class="ml-2 text-gray-400">Empresa</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form id="registration-form" method="POST" action="/api/v1/registro" class="space-y-6">
+
+          <!-- Personal Information -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-user mr-2 text-blue-600"></i>
+              Información Personal
+            </h3>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label for="nombres" class="block text-sm font-medium text-gray-700 mb-2">
+                  Nombres *
+                </label>
+                <input
+                  type="text"
+                  id="nombres"
+                  name="nombres"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="Juan Carlos"
+                >
+              </div>
+
+              <div>
+                <label for="apellidos" class="block text-sm font-medium text-gray-700 mb-2">
+                  Apellidos *
+                </label>
+                <input
+                  type="text"
+                  id="apellidos"
+                  name="apellidos"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="Pérez Rodríguez"
+                >
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                Correo Electrónico *
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="juan.perez@email.com"
+              >
+            </div>
+
+            <div class="mt-6">
+              <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                id="telefono"
+                name="telefono"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="+51 999 999 999"
+              >
+            </div>
+          </div>
+
+          <!-- Account Information -->
+          <div class="pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-lock mr-2 text-blue-600"></i>
+              Información de Cuenta
+            </h3>
+
+            <div>
+              <label for="nombre_usuario" class="block text-sm font-medium text-gray-700 mb-2">
+                Nombre de Usuario *
+              </label>
+              <input
+                type="text"
+                id="nombre_usuario"
+                name="nombre_usuario"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="juanperez2025"
+              >
+              <p class="text-xs text-gray-500 mt-1">Este será tu nombre de usuario único</p>
+            </div>
+
+            <div class="mt-6">
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña *
+              </label>
+              <div class="relative">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="••••••••"
+                >
+                <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="mt-2">
+                <div class="text-xs text-gray-600 space-y-1">
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2 text-xs" id="length-check"></i>
+                    <span>Mínimo 8 caracteres</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2 text-xs" id="number-check"></i>
+                    <span>Al menos un número</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2 text-xs" id="special-check"></i>
+                    <span>Al menos un carácter especial</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+                Confirmar Contraseña *
+              </label>
+              <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="••••••••"
+              >
+            </div>
+          </div>
+
+          <!-- Business Information -->
+          <div class="pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-building mr-2 text-blue-600"></i>
+              Información Empresarial
+            </h3>
+
+            <div>
+              <label for="empresa" class="block text-sm font-medium text-gray-700 mb-2">
+                Nombre de la Empresa
+              </label>
+              <input
+                type="text"
+                id="empresa"
+                name="empresa"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                placeholder="Mi Empresa S.A.C."
+              >
+            </div>
+
+            <div class="mt-6">
+              <label for="sector" class="block text-sm font-medium text-gray-700 mb-2">
+                Sector Empresarial
+              </label>
+              <select
+                id="sector"
+                name="sector"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              >
+                <option value="">Seleccionar sector</option>
+                <option value="manufactura">Manufactura e Industria</option>
+                <option value="comercio">Comercio y Retail</option>
+                <option value="servicios">Servicios</option>
+                <option value="tecnologia">Tecnología</option>
+                <option value="construccion">Construcción</option>
+                <option value="agricultura">Agricultura</option>
+                <option value="turismo">Turismo y Hospitalidad</option>
+                <option value="financiero">Servicios Financieros</option>
+                <option value="salud">Salud</option>
+                <option value="educacion">Educación</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="mt-6">
+              <label for="tamano_empresa" class="block text-sm font-medium text-gray-700 mb-2">
+                Tamaño de la Empresa
+              </label>
+              <select
+                id="tamano_empresa"
+                name="tamano_empresa"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              >
+                <option value="">Seleccionar tamaño</option>
+                <option value="micro">Microempresa (1-10 empleados)</option>
+                <option value="pequena">Pequeña (11-50 empleados)</option>
+                <option value="mediana">Mediana (51-200 empleados)</option>
+                <option value="grande">Grande (201+ empleados)</option>
+                <option value="emprendedor">Emprendedor Individual</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="pt-6 border-t border-gray-200">
+            <div class="flex items-start">
+              <input
+                type="checkbox"
+                id="terminos"
+                name="terminos"
+                required
+                class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              >
+              <label for="terminos" class="ml-3 text-sm text-gray-700">
+                Acepto los <a href="/terminos" class="text-blue-600 hover:text-blue-800">Términos y Condiciones</a>
+                y la <a href="/privacidad" class="text-blue-600 hover:text-blue-800">Política de Privacidad</a> *
+              </label>
+            </div>
+
+            <div class="flex items-start mt-4">
+              <input
+                type="checkbox"
+                id="newsletter"
+                name="newsletter"
+                class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              >
+              <label for="newsletter" class="ml-3 text-sm text-gray-700">
+                Deseo recibir actualizaciones y consejos financieros por email
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-6">
+            <button
+              type="submit"
+              id="submit-btn"
+              class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-user-plus mr-2"></i>
+              Crear Mi Cuenta Gratuita
+            </button>
+          </div>
+
+          <!-- Login Link -->
+          <div class="text-center pt-4">
+            <p class="text-gray-600">
+              ¿Ya tienes cuenta?
+          <a href="/api/v1/login" class="text-blue-600 hover:text-blue-800 font-medium">Inicia sesión aquí</a>
+            </p>
+          </div>
+        </form>
+
+        <!-- Success/Error Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div id="flash-message" class="mt-6 p-6 rounded-lg {% if category == 'error' %}bg-red-50 text-red-800 border-2 border-red-200{% else %}bg-green-50 text-green-800 border-2 border-green-200{% endif %}">
+                <div class="flex items-center">
+                  <i class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} text-2xl mr-3"></i>
+                  <div>
+                    <h3 class="font-semibold text-lg mb-1">
+                      {% if category == 'error' %}Error en el registro{% else %}¡Registro exitoso!{% endif %}
+                    </h3>
+                    <p class="text-sm">{{ message }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div id="message" class="mt-6 hidden">
+          <div class="p-4 rounded-lg" id="message-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">
+        ¿Por qué registrarte en Econova?
+      </h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Accede a herramientas avanzadas que transformarán la forma en que tomas decisiones financieras
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-brain text-blue-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">IA Avanzada</h3>
+        <p class="text-gray-600 text-sm">Algoritmos de machine learning para predicciones precisas</p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Análisis Completo</h3>
+        <p class="text-gray-600 text-sm">VAN, TIR, WACC y análisis de portafolio en tiempo real</p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-users text-purple-600 text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Comunidad</h3>
+        <p class="text-gray-600 text-sm">Comparte experiencias y aprende de otros empresarios</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Scroll to flash message if it exists
+document.addEventListener('DOMContentLoaded', function() {
+  const flashMessage = document.getElementById('flash-message');
+  if (flashMessage) {
+    flashMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Add a highlight effect
+    flashMessage.style.animation = 'highlight 2s ease-in-out';
+  }
+});
+
+// Password visibility toggle
+document.getElementById('toggle-password').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  const icon = this.querySelector('i');
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+});
+
+// Password strength validation
+document.getElementById('password').addEventListener('input', function() {
+  const password = this.value;
+  const lengthCheck = document.getElementById('length-check');
+  const numberCheck = document.getElementById('number-check');
+  const specialCheck = document.getElementById('special-check');
+
+  // Length check
+  if (password.length >= 8) {
+    lengthCheck.classList.remove('fa-times', 'text-red-500');
+    lengthCheck.classList.add('fa-check', 'text-green-500');
+  } else {
+    lengthCheck.classList.remove('fa-check', 'text-green-500');
+    lengthCheck.classList.add('fa-times', 'text-red-500');
+  }
+
+  // Number check
+  if (/\d/.test(password)) {
+    numberCheck.classList.remove('fa-times', 'text-red-500');
+    numberCheck.classList.add('fa-check', 'text-green-500');
+  } else {
+    numberCheck.classList.remove('fa-check', 'text-green-500');
+    numberCheck.classList.add('fa-times', 'text-red-500');
+  }
+
+  // Special character check
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    specialCheck.classList.remove('fa-times', 'text-red-500');
+    specialCheck.classList.add('fa-check', 'text-green-500');
+  } else {
+    specialCheck.classList.remove('fa-check', 'text-green-500');
+    specialCheck.classList.add('fa-times', 'text-red-500');
+  }
+});
+
+// Form validation
+document.getElementById('registration-form').addEventListener('submit', function(e) {
+  const submitBtn = document.getElementById('submit-btn');
+  const messageDiv = document.getElementById('message');
+  const messageContent = document.getElementById('message-content');
+
+  // Basic validation
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirm_password').value;
+
+  if (password !== confirmPassword) {
+    e.preventDefault();
+    messageDiv.className = 'mt-6';
+    messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
+    messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Las contraseñas no coinciden.';
+    return;
+  }
+
+  if (password.length < 8) {
+    e.preventDefault();
+    messageDiv.className = 'mt-6';
+    messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
+    messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>La contraseña debe tener al menos 8 caracteres.';
+    return;
+  }
+
+  // Disable button and show loading
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando cuenta...';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Benchmarking Anónimo - Econova{% endblock %}
+
+{% block content %}
+<!-- Benchmarking Hero -->
+<section class="bg-slate-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Benchmarking Anónimo
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Compara tus resultados con otros empresarios de manera anónima y confidencial
+    </p>
+  </div>
+</section>
+
+<!-- Benchmarking Content -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Coming Soon Message -->
+      <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-users text-green-600 text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Benchmarking en Desarrollo</h2>
+        <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
+          Estamos creando una plataforma de benchmarking anónimo que te permitirá comparar
+          tus indicadores financieros con empresas similares, manteniendo la confidencialidad
+          de todos los datos.
+        </p>
+
+        <!-- Features Preview -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shield-alt text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">100% Anónimo</h3>
+            <p class="text-sm text-gray-600">Tus datos nunca se identifican personalmente</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-bar text-green-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Comparaciones Inteligentes</h3>
+            <p class="text-sm text-gray-600">Análisis por sector, tamaño y ubicación</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-trophy text-purple-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Insights Accionables</h3>
+            <p class="text-sm text-gray-600">Recomendaciones basadas en mejores prácticas</p>
+          </div>
+        </div>
+
+        <!-- Sample Benchmarking Data -->
+        <div class="bg-gray-50 p-6 rounded-lg mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Vista Previa de Comparaciones</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-lg">
+              <h4 class="font-semibold text-gray-800 mb-3">VAN Promedio por Sector</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Manufactura</span>
+                  <span class="font-semibold text-green-600">S/ 850,000</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Comercio</span>
+                  <span class="font-semibold text-blue-600">S/ 620,000</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Servicios</span>
+                  <span class="font-semibold text-purple-600">S/ 480,000</span>
+                </div>
+                <div class="flex justify-between border-t pt-2">
+                  <span class="text-sm font-medium text-gray-800">Tu Empresa</span>
+                  <span class="font-bold text-orange-600">S/ 720,000</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg">
+              <h4 class="font-semibold text-gray-800 mb-3">TIR Promedio por Tamaño</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Microempresa</span>
+                  <span class="font-semibold text-green-600">16.2%</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Pequeña</span>
+                  <span class="font-semibold text-blue-600">14.8%</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Mediana</span>
+                  <span class="font-semibold text-purple-600">12.5%</span>
+                </div>
+                <div class="flex justify-between border-t pt-2">
+                  <span class="text-sm font-medium text-gray-800">Tu Empresa</span>
+                  <span class="font-bold text-orange-600">15.3%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy Assurance -->
+        <div class="bg-green-50 p-6 rounded-lg mb-8">
+          <div class="flex items-start space-x-3">
+            <i class="fas fa-lock text-green-600 text-xl mt-1"></i>
+            <div>
+              <h3 class="text-lg font-semibold text-green-800 mb-2">Privacidad Garantizada</h3>
+              <p class="text-green-700 text-sm">
+                Utilizamos técnicas avanzadas de anonimización y agregación de datos para asegurar
+                que tu información financiera nunca pueda ser rastreada hasta tu empresa específica.
+                Todos los datos se procesan de forma estadística y colectiva.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Newsletter Signup -->
+        <div class="bg-blue-50 p-6 rounded-lg">
+          <h3 class="text-lg font-semibold text-blue-800 mb-3">¿Quieres ser parte del benchmarking?</h3>
+          <p class="text-blue-700 mb-4">
+            Sé de los primeros en acceder a comparaciones anónimas cuando lancemos esta funcionalidad.
+          </p>
+          <div class="flex justify-center">
+            <a href="/api/v1/registro" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+              Registrarme para Benchmarking
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to Dashboard -->
+      <div class="text-center mt-8">
+        <a href="/api/v1/dashboard" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 inline-flex items-center">
+          <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
