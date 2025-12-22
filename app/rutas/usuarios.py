@@ -395,6 +395,37 @@ def perfil():
 
     return render_template('perfil.html')
 
+@usuarios_bp.route('/perfil', methods=['GET'])
+def obtener_perfil():
+    """Obtener datos del perfil del usuario actual (API)"""
+    try:
+        if 'usuario_id' not in session:
+            return jsonify({
+                'success': False,
+                'error': 'Usuario no autenticado'
+            }), 401
+
+        usuario_id = session['usuario_id']
+        usuario = Usuario.obtener_usuario_por_id(usuario_id)
+
+        if not usuario:
+            return jsonify({
+                'success': False,
+                'error': 'Usuario no encontrado'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'usuario': usuario.to_dict()
+        })
+
+    except Exception as e:
+        print(f"Error obteniendo perfil: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
 @usuarios_bp.route('/logout')
 def logout():
     """Cerrar sesión del usuario"""

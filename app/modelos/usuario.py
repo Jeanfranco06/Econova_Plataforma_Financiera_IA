@@ -222,13 +222,25 @@ class Usuario:
         finally:
             db.disconnect()
 
-    def to_dict(self):
+    def to_dict(self, include_sensitive=False):
         """Convertir objeto a diccionario"""
-        return {
+        data = {
             'usuario_id': self.usuario_id,
             'nombre_usuario': self.nombre_usuario,
             'nombres': self.nombres,
             'apellidos': self.apellidos,
             'email': self.email,
-            'nivel': self.nivel
+            'telefono': self.telefono,
+            'empresa': self.empresa,
+            'sector': self.sector,
+            'tamano_empresa': self.tamano_empresa,
+            'newsletter': self.newsletter,
+            'nivel': self.nivel,
+            'fecha_creacion': self.fecha_creacion
         }
+
+        # Solo incluir campos sensibles si se solicita explícitamente
+        if include_sensitive:
+            data['password_hash'] = self.password_hash
+
+        return data
