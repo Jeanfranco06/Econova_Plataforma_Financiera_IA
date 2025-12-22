@@ -11,7 +11,7 @@ def adapt_query(query):
 class Usuario:
     def __init__(self, usuario_id=None, nombre_usuario=None, nombres=None, apellidos=None,
                  email=None, telefono=None, password_hash=None, empresa=None, sector=None,
-                 tamano_empresa=None, newsletter=None, nivel=None, fecha_creacion=None):
+                 tamano_empresa=None, newsletter=None, nivel=None, foto_perfil=None, fecha_creacion=None):
         self.usuario_id = usuario_id
         self.nombre_usuario = nombre_usuario
         self.nombres = nombres
@@ -24,6 +24,7 @@ class Usuario:
         self.tamano_empresa = tamano_empresa
         self.newsletter = newsletter
         self.nivel = nivel
+        self.foto_perfil = foto_perfil
         self.fecha_creacion = fecha_creacion
 
     @staticmethod
@@ -236,6 +237,7 @@ class Usuario:
             'tamano_empresa': self.tamano_empresa,
             'newsletter': self.newsletter,
             'nivel': self.nivel,
+            'foto_perfil': self.foto_perfil,
             'fecha_creacion': self.fecha_creacion
         }
 
