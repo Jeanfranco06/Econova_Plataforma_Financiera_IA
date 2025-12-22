@@ -195,6 +195,118 @@ def registro():
     """Mostrar formulario de registro"""
     return render_template('registro.html')
 
+@usuarios_bp.route('/registrar', methods=['POST'])
+def registrar_usuario():
+    """API para registrar un nuevo usuario"""
+    try:
+        # Get JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
+
+        nombres = data.get('nombres', '').strip()
+        apellidos = data.get('apellidos', '').strip()
+        email = data.get('email', '').strip().lower()
+        telefono = data.get('telefono', '').strip()
+        nombre_usuario = data.get('nombre_usuario', '').strip()
+        password = data.get('password', '')
+        empresa = data.get('empresa', '').strip()
+        sector = data.get('sector', '')
+        tamano_empresa = data.get('tamano_empresa', '')
+        terminos = data.get('terminos')
+        newsletter = data.get('newsletter', False)
+
+        # Validation
+        errors = []
+
+        # Required fields
+        if not nombres or not apellidos or not email or not nombre_usuario or not password:
+            errors.append('Todos los campos marcados con * son obligatorios')
+
+        # Email validation
+        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            errors.append('El correo electrónico no es válido')
+
+        # Username validation
+        if nombre_usuario and not re.match(r'^[a-zA-Z0-9_]{3,20}$', nombre_usuario):
+            errors.append('El nombre de usuario debe tener entre 3-20 caracteres y solo letras, números y guiones bajos')
+
+        # Password validation
+        if password:
+            if len(password) < 8:
+                errors.append('La contraseña debe tener al menos 8 caracteres')
+            if not re.search(r'\d', password):
+                errors.append('La contraseña debe contener al menos un número')
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                errors.append('La contraseña debe contener al menos un carácter especial')
+
+        # Terms acceptance
+        if not terminos:
+            errors.append('Debes aceptar los términos y condiciones')
+
+        # Check if user already exists
+        if email and Usuario.obtener_usuario_por_email(email):
+            errors.append('Ya existe una cuenta con este correo electrónico')
+
+        if nombre_usuario and Usuario.obtener_usuario_por_nombre_usuario(nombre_usuario):
+            errors.append('Este nombre de usuario ya está en uso')
+
+        if errors:
+            return jsonify({
+                'success': False,
+                'error': ' '.join(errors),
+                'data': {
+                    'nombres': nombres,
+                    'apellidos': apellidos,
+                    'email': email,
+                    'telefono': telefono,
+                    'nombre_usuario': nombre_usuario,
+                    'empresa': empresa,
+                    'sector': sector,
+                    'tamano_empresa': tamano_empresa,
+                    'newsletter': newsletter
+                }
+            }), 400
+
+        # Create user
+        usuario = Usuario.crear(
+            nombres=nombres,
+            apellidos=apellidos,
+            email=email,
+            telefono=telefono if telefono else None,
+            nombre_usuario=nombre_usuario,
+            password=password,
+            empresa=empresa if empresa else None,
+            sector=sector if sector else None,
+            tamano_empresa=tamano_empresa if tamano_empresa else None,
+            newsletter=newsletter
+        )
+
+        if usuario:
+            # Set default level to 'basico'
+            Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
+
+            return jsonify({
+                'success': True,
+                'message': 'Usuario registrado exitosamente',
+                'usuario': usuario.to_dict()
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Error al crear la cuenta'
+            }), 500
+
+    except Exception as e:
+        print(f"Error en registro API: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
 @usuarios_bp.route('/confirmar/<token>')
 def confirmar_cuenta(token):
     """Confirmar cuenta de usuario con token"""
@@ -319,7 +431,17 @@ def procesar_registro():
 
         if errors:
             flash(' '.join(errors), 'error')
-            return redirect(url_for('usuarios.registro'))
+            # Mantener los datos del formulario cuando hay errores
+            return render_template('registro.html',
+                                 nombres=nombres,
+                                 apellidos=apellidos,
+                                 email=email,
+                                 telefono=telefono,
+                                 nombre_usuario=nombre_usuario,
+                                 empresa=empresa,
+                                 sector=sector,
+                                 tamano_empresa=tamano_empresa,
+                                 newsletter_checked=newsletter)
 
         # Create user
         usuario = Usuario.crear(
