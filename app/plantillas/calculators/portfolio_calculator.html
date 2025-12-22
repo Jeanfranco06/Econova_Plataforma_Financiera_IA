@@ -1,0 +1,510 @@
+<!-- Portfolio Calculator -->
+<div id="portafolio-calculator" class="simulation-calculator" style="display: none;">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Engineering Economics Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Optimización de Portafolio</h3>
+          <div class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-chart-pie mr-1"></i>Teoría Moderna
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Optimización de inversiones usando teoría moderna de portafolios</p>
+
+        <!-- Educational Content -->
+        <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-orange-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-orange-800 mb-1">Concepto Económico</h5>
+              <p class="text-sm text-orange-700">
+                La teoría moderna de portafolios de Markowitz busca la combinación óptima de activos que maximice
+                el retorno esperado para un nivel dado de riesgo, o minimice el riesgo para un retorno esperado dado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="portafolio-form" class="space-y-6">
+      <!-- Portfolio Context -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-briefcase mr-2 text-gray-600"></i>
+          Contexto del Portafolio
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre del Portafolio
+            </label>
+            <input
+              type="text"
+              id="portafolio-nombre"
+              name="nombre_portafolio"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Ej: Portafolio Diversificado 2025"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Objetivo de Optimización
+            </label>
+            <select id="portafolio-objetivo" name="objetivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              <option value="max_sharpe">Máximo Ratio de Sharpe (Recomendado)</option>
+              <option value="max_retorno">Máximo Retorno Esperado</option>
+              <option value="min_riesgo">Mínimo Riesgo</option>
+              <option value="riesgo_especifico">Riesgo Específico</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk-Free Rate -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-piggy-bank mr-2 text-gray-500"></i>
+            Tasa Libre de Riesgo (%)
+          </label>
+          <input
+            type="number"
+            id="portafolio-tasa-libre"
+            name="tasa_libre_riesgo"
+            required
+            min="0"
+            max="20"
+            step="0.01"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200"
+            placeholder="3.0"
+            value="3.0"
+          >
+          <p class="text-xs text-gray-500 mt-1">Tasa de bonos del tesoro o similar</p>
+        </div>
+
+        <div id="riesgo-especifico-container" style="display: none;">
+          <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2 text-gray-500"></i>
+            Riesgo Máximo Aceptable (%)
+          </label>
+          <input
+            type="number"
+            id="portafolio-restriccion-riesgo"
+            name="restriccion_riesgo"
+            min="0"
+            max="50"
+            step="0.01"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200"
+            placeholder="15.0"
+          >
+          <p class="text-xs text-gray-500 mt-1">Volatilidad máxima deseada</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Assets -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+          <i class="fas fa-coins mr-2 text-gray-500"></i>
+          Activos del Portafolio
+        </label>
+        <p class="text-xs text-gray-600 mb-3">Configure los activos con sus pesos actuales y rendimientos esperados</p>
+
+        <div id="portafolio-activos" class="space-y-3">
+          <div class="grid md:grid-cols-3 gap-4 items-center">
+            <div>
+              <label class="block text-xs text-gray-600 mb-1">Nombre del Activo</label>
+              <input
+                type="text"
+                name="activo1"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ej: Apple Inc."
+                value="Apple Inc."
+              >
+            </div>
+            <div>
+              <label class="block text-xs text-gray-600 mb-1">Peso Actual (%)</label>
+              <input
+                type="number"
+                name="peso1"
+                min="0"
+                max="100"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="30"
+                value="30"
+              >
+            </div>
+            <div>
+              <label class="block text-xs text-gray-600 mb-1">Rendimiento Esperado (%)</label>
+              <input
+                type="number"
+                name="rendimiento1"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="12"
+                value="12"
+              >
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 items-center">
+            <div>
+              <input
+                type="text"
+                name="activo2"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ej: Microsoft Corp."
+                value="Microsoft Corp."
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="peso2"
+                min="0"
+                max="100"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="25"
+                value="25"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="rendimiento2"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="10"
+                value="10"
+              >
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 items-center">
+            <div>
+              <input
+                type="text"
+                name="activo3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ej: Tesla Inc."
+                value="Tesla Inc."
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="peso3"
+                min="0"
+                max="100"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="20"
+                value="20"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="rendimiento3"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="15"
+                value="15"
+              >
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 items-center">
+            <div>
+              <input
+                type="text"
+                name="activo4"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ej: Amazon.com"
+                value="Amazon.com"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="peso4"
+                min="0"
+                max="100"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="15"
+                value="15"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="rendimiento4"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="18"
+                value="18"
+              >
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 items-center">
+            <div>
+              <input
+                type="text"
+                name="activo5"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ej: Bono Gobierno"
+                value="Bono Gobierno"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="peso5"
+                min="0"
+                max="100"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="10"
+                value="10"
+              >
+            </div>
+            <div>
+              <input
+                type="number"
+                name="rendimiento5"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="5"
+                value="5"
+              >
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="add-activo-portafolio"
+          class="mt-3 text-orange-600 hover:text-orange-800 text-sm font-medium flex items-center"
+        >
+          <i class="fas fa-plus mr-1"></i>Agregar activo adicional
+        </button>
+      </div>
+
+      <!-- Analysis Options -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-cogs mr-2 text-gray-600"></i>
+          Opciones de Análisis
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="portafolio-sensibilidad" name="analisis_sensibilidad" class="mr-2">
+            <label for="portafolio-sensibilidad" class="text-sm text-gray-700">Análisis de sensibilidad</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="portafolio-frontera" name="mostrar_frontera" checked class="mr-2">
+            <label for="portafolio-frontera" class="text-sm text-gray-700">Mostrar frontera eficiente</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Button -->
+      <div class="flex justify-center pt-4">
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-10 py-4 rounded-lg hover:from-orange-700 hover:to-orange-800 focus:ring-4 focus:ring-orange-300 transition duration-300 text-lg font-semibold shadow-lg"
+        >
+          <i class="fas fa-chart-pie mr-2"></i>Optimizar Portafolio y Análisis
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div id="portafolio-results" class="mt-8 p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border border-orange-200" style="display: none;">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-bold text-gray-800">Resultados de Optimización de Portafolio</h4>
+        <div class="flex gap-2">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF" onclick="window.portfolioCalculator.exportarPDF()">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel" onclick="window.portfolioCalculator.exportarExcel()">
+            <i class="fas fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Portafolio Actual vs Óptimo -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Portafolio Actual -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-chart-pie mr-2 text-gray-600"></i>
+            Portafolio Actual
+          </h5>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Retorno Esperado:</span>
+              <span class="font-semibold text-green-600" id="portafolio-actual-retorno">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Riesgo (Volatilidad):</span>
+              <span class="font-semibold text-red-600" id="portafolio-actual-riesgo">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Ratio Sharpe:</span>
+              <span class="font-semibold text-blue-600" id="portafolio-actual-sharpe">0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Portafolio Óptimo -->
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg shadow-sm border border-green-200">
+          <h5 class="font-bold text-green-800 mb-4 flex items-center">
+            <i class="fas fa-trophy mr-2"></i>
+            Portafolio Óptimo
+          </h5>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Retorno Esperado:</span>
+              <span class="font-semibold text-green-600" id="portafolio-optimo-retorno">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Riesgo (Volatilidad):</span>
+              <span class="font-semibold text-red-600" id="portafolio-optimo-riesgo">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Ratio Sharpe:</span>
+              <span class="font-semibold text-blue-600" id="portafolio-optimo-sharpe">0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribución Óptima -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-balance-scale mr-2 text-gray-600"></i>
+          Distribución Óptima de Activos
+        </h5>
+
+        <div class="space-y-4" id="portafolio-distribucion">
+          <!-- Los resultados se mostrarán aquí -->
+        </div>
+      </div>
+
+      <!-- Métricas de Rendimiento -->
+      <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-blue-600 mb-1" id="portafolio-sharpe">0.00</div>
+          <div class="text-sm text-gray-600">Ratio de Sharpe</div>
+          <div class="text-xs text-gray-500 mt-1">Riesgo Ajustado</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-purple-600 mb-1" id="portafolio-sortino">0.00</div>
+          <div class="text-sm text-gray-600">Ratio de Sortino</div>
+          <div class="text-xs text-gray-500 mt-1">Riesgo Bajista</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-indigo-600 mb-1" id="portafolio-activos-count">0</div>
+          <div class="text-sm text-gray-600">Número de Activos</div>
+          <div class="text-xs text-gray-500 mt-1">Diversificación</div>
+        </div>
+      </div>
+
+      <!-- Decision Framework -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-gavel mr-2 text-gray-600"></i>
+          Recomendaciones de Inversión
+        </h5>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Estrategia Óptima:</span>
+              <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800" id="portafolio-estrategia">Máximo Sharpe</span>
+            </div>
+            <div class="text-sm text-gray-600" id="portafolio-estrategia-desc">
+              Equilibra retorno y riesgo para obtener la mejor relación riesgo-retorno.
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Diversificación:</span>
+              <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800" id="portafolio-diversificacion">Excelente</span>
+            </div>
+            <div class="text-sm text-gray-600" id="portafolio-diversificacion-desc">
+              Portafolio bien diversificado con múltiples activos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Efficient Frontier Chart -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-line mr-2 text-gray-600"></i>
+          Frontera Eficiente - Teoría Moderna de Portafolios
+        </h5>
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <canvas id="grafico-portafolio-frontera" width="400" height="200"></canvas>
+        </div>
+
+        <div class="mt-4 text-sm text-gray-600">
+          <p><strong>Frontera Eficiente:</strong> Conjunto de portafolios que ofrecen el máximo retorno esperado para un nivel dado de riesgo.</p>
+          <p><strong>Punto Óptimo:</strong> Portafolio que maximiza el ratio de Sharpe (retorno adicional por unidad de riesgo).</p>
+        </div>
+      </div>
+
+      <!-- Teoría Moderna de Portafolios -->
+      <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-lg border border-orange-200 mb-6">
+        <h5 class="font-bold text-orange-800 mb-4 flex items-center">
+          <i class="fas fa-lightbulb mr-2"></i>
+          Teoría Moderna de Portafolios
+        </h5>
+
+        <div class="bg-white p-4 rounded-lg mb-4">
+          <div class="text-center">
+            <div class="text-lg font-mono text-orange-800 mb-2">
+              E[rₚ] = Σ(wᵢ × E[rᵢ])<br>
+              σₚ² = ΣΣ(wᵢ × wⱼ × Cov(rᵢ,rⱼ))
+            </div>
+            <div class="text-sm text-gray-600">
+              Retorno esperado del portafolio | Varianza del portafolio
+            </div>
+          </div>
+        </div>
+
+        <div class="text-sm text-orange-700 space-y-2">
+          <p><strong>Principio de Markowitz:</strong> La diversificación reduce el riesgo sin sacrificar retorno esperado.</p>
+          <p><strong>Frontera Eficiente:</strong> Conjunto de portafolios que ofrecen el máximo retorno para un nivel dado de riesgo.</p>
+          <p><strong>Ratio Sharpe:</strong> Mide el retorno adicional por unidad de riesgo asumido.</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.guardarAnalisis()">
+          <i class="fas fa-save mr-2"></i>Guardar Portafolio
+        </button>
+        <button class="border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-lg hover:bg-orange-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.compartirAnalisis()">
+          <i class="fas fa-share mr-2"></i>Compartir Análisis
+        </button>
+        <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.imprimirAnalisis()">
+          <i class="fas fa-print mr-2"></i>Imprimir Reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

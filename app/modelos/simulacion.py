@@ -1,33 +1,56 @@
 from app.utils.base_datos import get_db_connection
+import json
 
 class Simulacion:
-    def __init__(self, simulacion_id=None, usuario_id=None, tipo_simulacion=None, fecha=None):
+    def __init__(self, simulacion_id=None, usuario_id=None, tipo_simulacion=None, nombre=None, parametros=None, resultados=None, fecha=None):
         self.simulacion_id = simulacion_id
         self.usuario_id = usuario_id
         self.tipo_simulacion = tipo_simulacion
+        self.nombre = nombre
+        self.parametros = parametros or {}
+        self.resultados = resultados or {}
         self.fecha = fecha
 
     @staticmethod
-    def crear_simulacion(usuario_id, tipo_simulacion):
-        """Crear una nueva simulación"""
+    def crear(usuario_id, nombre, tipo_simulacion, parametros=None, resultados=None):
+        """Crear una nueva simulación completa"""
         db = get_db_connection()
+
+        # Convertir parámetros y resultados a JSON si son diccionarios
+        parametros_json = json.dumps(parametros) if parametros else None
+        resultados_json = json.dumps(resultados) if resultados else None
+
         query = """
-        INSERT INTO Simulaciones (usuario_id, tipo_simulacion)
-        VALUES (%s, %s)
+        INSERT INTO Simulaciones (usuario_id, nombre, tipo_simulacion, parametros, resultados)
+        VALUES (%s, %s, %s, %s, %s)
         RETURNING simulacion_id
         """
         try:
             db.connect()
-            result = db.execute_query(query, (usuario_id, tipo_simulacion), fetch=True)
+            result = db.execute_query(query, (usuario_id, nombre, tipo_simulacion, parametros_json, resultados_json), fetch=True)
             db.commit()
             if result:
-                return result[0]['simulacion_id']
+                simulacion_id = result[0]['simulacion_id']
+                return Simulacion(
+                    simulacion_id=simulacion_id,
+                    usuario_id=usuario_id,
+                    nombre=nombre,
+                    tipo_simulacion=tipo_simulacion,
+                    parametros=parametros,
+                    resultados=resultados
+                )
             return None
         except Exception as e:
             print(f"Error creando simulación: {e}")
+            db.rollback()
             return None
         finally:
             db.disconnect()
+
+    @staticmethod
+    def crear_simulacion(usuario_id, tipo_simulacion):
+        """Crear una nueva simulación básica (compatibilidad)"""
+        return Simulacion.crear(usuario_id, f"Simulación {tipo_simulacion}", tipo_simulacion)
 
     @staticmethod
     def obtener_simulacion_por_id(simulacion_id):
@@ -39,7 +62,30 @@ class Simulacion:
             result = db.execute_query(query, (simulacion_id,), fetch=True)
             if result:
                 data = result[0]
-                return Simulacion(**data)
+                # Convert sqlite3.Row to dict for mutability
+                if hasattr(data, 'keys'):  # sqlite3.Row or dict-like
+                    data_dict = dict(data)
+                else:
+                    data_dict = data
+
+                # Parse JSON fields back to dictionaries
+                if data_dict.get('parametros'):
+                    try:
+                        data_dict['parametros'] = json.loads(data_dict['parametros']) if isinstance(data_dict['parametros'], str) else data_dict['parametros']
+                    except (json.JSONDecodeError, TypeError):
+                        data_dict['parametros'] = {}
+                else:
+                    data_dict['parametros'] = {}
+
+                if data_dict.get('resultados'):
+                    try:
+                        data_dict['resultados'] = json.loads(data_dict['resultados']) if isinstance(data_dict['resultados'], str) else data_dict['resultados']
+                    except (json.JSONDecodeError, TypeError):
+                        data_dict['resultados'] = {}
+                else:
+                    data_dict['resultados'] = {}
+
+                return Simulacion(**data_dict)
             return None
         except Exception as e:
             print(f"Error obteniendo simulación: {e}")
@@ -63,7 +109,30 @@ class Simulacion:
             simulaciones = []
             if result:
                 for data in result:
-                    simulaciones.append(Simulacion(**data))
+                    # Convert sqlite3.Row to dict for mutability
+                    if hasattr(data, 'keys'):  # sqlite3.Row or dict-like
+                        data_dict = dict(data)
+                    else:
+                        data_dict = data
+
+                    # Parse JSON fields back to dictionaries
+                    if data_dict.get('parametros'):
+                        try:
+                            data_dict['parametros'] = json.loads(data_dict['parametros']) if isinstance(data_dict['parametros'], str) else data_dict['parametros']
+                        except (json.JSONDecodeError, TypeError):
+                            data_dict['parametros'] = {}
+                    else:
+                        data_dict['parametros'] = {}
+
+                    if data_dict.get('resultados'):
+                        try:
+                            data_dict['resultados'] = json.loads(data_dict['resultados']) if isinstance(data_dict['resultados'], str) else data_dict['resultados']
+                        except (json.JSONDecodeError, TypeError):
+                            data_dict['resultados'] = {}
+                    else:
+                        data_dict['resultados'] = {}
+
+                    simulaciones.append(Simulacion(**data_dict))
             return simulaciones
         except Exception as e:
             print(f"Error obteniendo simulaciones del usuario: {e}")

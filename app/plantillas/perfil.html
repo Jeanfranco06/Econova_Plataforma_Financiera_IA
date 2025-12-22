@@ -26,10 +26,22 @@
           <div class="bg-white rounded-2xl shadow-xl p-6">
             <!-- Profile Picture -->
             <div class="text-center mb-6">
-              <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl font-bold text-white">
-                  {{ session.usuario_nombre[0] if session.usuario_nombre else 'U' }}
-                </span>
+              <div class="relative w-24 h-24 mx-auto mb-4">
+                <div id="profile-picture-container" class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden">
+                  {% if perfil_data and perfil_data.foto_perfil %}
+                  <img id="profile-picture" src="{{ url_for('static', filename='uploads/profile_pictures/' + perfil_data.foto_perfil) }}" alt="Foto de perfil" class="w-full h-full object-cover">
+                  {% else %}
+                  <span id="profile-initial" class="text-2xl font-bold text-white">
+                    {{ session.usuario_nombre[0] if session.usuario_nombre else 'U' }}
+                  </span>
+                  {% endif %}
+                </div>
+                <!-- Upload Button -->
+                <button id="upload-photo-btn" class="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700 transition duration-300" title="Cambiar foto de perfil">
+                  <i class="fas fa-camera text-xs"></i>
+                </button>
+                <!-- Hidden File Input -->
+                <input type="file" id="profile-picture-input" accept="image/*" class="hidden">
               </div>
               <h3 class="text-lg font-semibold text-gray-800">{{ session.usuario_nombre }}</h3>
               <p class="text-gray-600">{{ session.usuario_email }}</p>
@@ -101,7 +113,7 @@
                       type="text"
                       id="nombres"
                       name="nombres"
-                      value="Usuario"
+                      value="{{ perfil_data.nombres if perfil_data else '' }}"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                     >
                   </div>
@@ -114,7 +126,7 @@
                       type="text"
                       id="apellidos"
                       name="apellidos"
-                      value="Test"
+                      value="{{ perfil_data.apellidos if perfil_data else '' }}"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                     >
                   </div>
@@ -141,6 +153,7 @@
                     type="tel"
                     id="telefono"
                     name="telefono"
+                    value="{{ perfil_data.telefono if perfil_data and perfil_data.telefono else '' }}"
                     placeholder="+51 999 999 999"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                   >
@@ -154,6 +167,7 @@
                     type="text"
                     id="empresa"
                     name="empresa"
+                    value="{{ perfil_data.empresa if perfil_data and perfil_data.empresa else '' }}"
                     placeholder="Nombre de tu empresa"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                   >
@@ -170,17 +184,17 @@
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                     >
                       <option value="">Seleccionar sector</option>
-                      <option value="manufactura">Manufactura e Industria</option>
-                      <option value="comercio">Comercio y Retail</option>
-                      <option value="servicios">Servicios</option>
-                      <option value="tecnologia">Tecnología</option>
-                      <option value="construccion">Construcción</option>
-                      <option value="agricultura">Agricultura</option>
-                      <option value="turismo">Turismo y Hospitalidad</option>
-                      <option value="financiero">Servicios Financieros</option>
-                      <option value="salud">Salud</option>
-                      <option value="educacion">Educación</option>
-                      <option value="otro">Otro</option>
+                      <option value="manufactura" {{ 'selected' if perfil_data and perfil_data.sector == 'manufactura' else '' }}>Manufactura e Industria</option>
+                      <option value="comercio" {{ 'selected' if perfil_data and perfil_data.sector == 'comercio' else '' }}>Comercio y Retail</option>
+                      <option value="servicios" {{ 'selected' if perfil_data and perfil_data.sector == 'servicios' else '' }}>Servicios</option>
+                      <option value="tecnologia" {{ 'selected' if perfil_data and perfil_data.sector == 'tecnologia' else '' }}>Tecnología</option>
+                      <option value="construccion" {{ 'selected' if perfil_data and perfil_data.sector == 'construccion' else '' }}>Construcción</option>
+                      <option value="agricultura" {{ 'selected' if perfil_data and perfil_data.sector == 'agricultura' else '' }}>Agricultura</option>
+                      <option value="turismo" {{ 'selected' if perfil_data and perfil_data.sector == 'turismo' else '' }}>Turismo y Hospitalidad</option>
+                      <option value="financiero" {{ 'selected' if perfil_data and perfil_data.sector == 'financiero' else '' }}>Servicios Financieros</option>
+                      <option value="salud" {{ 'selected' if perfil_data and perfil_data.sector == 'salud' else '' }}>Salud</option>
+                      <option value="educacion" {{ 'selected' if perfil_data and perfil_data.sector == 'educacion' else '' }}>Educación</option>
+                      <option value="otro" {{ 'selected' if perfil_data and perfil_data.sector == 'otro' else '' }}>Otro</option>
                     </select>
                   </div>
 
@@ -194,11 +208,11 @@
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                     >
                       <option value="">Seleccionar tamaño</option>
-                      <option value="micro">Microempresa (1-10 empleados)</option>
-                      <option value="pequena">Pequeña (11-50 empleados)</option>
-                      <option value="mediana">Mediana (51-200 empleados)</option>
-                      <option value="grande">Grande (201+ empleados)</option>
-                      <option value="emprendedor">Emprendedor Individual</option>
+                      <option value="micro" {{ 'selected' if perfil_data and perfil_data.tamano_empresa == 'micro' else '' }}>Microempresa (1-10 empleados)</option>
+                      <option value="pequena" {{ 'selected' if perfil_data and perfil_data.tamano_empresa == 'pequena' else '' }}>Pequeña (11-50 empleados)</option>
+                      <option value="mediana" {{ 'selected' if perfil_data and perfil_data.tamano_empresa == 'mediana' else '' }}>Mediana (51-200 empleados)</option>
+                      <option value="grande" {{ 'selected' if perfil_data and perfil_data.tamano_empresa == 'grande' else '' }}>Grande (201+ empleados)</option>
+                      <option value="emprendedor" {{ 'selected' if perfil_data and perfil_data.tamano_empresa == 'emprendedor' else '' }}>Emprendedor Individual</option>
                     </select>
                   </div>
                 </div>
@@ -447,6 +461,159 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById(tabId).classList.remove('hidden');
     });
   });
+
+  // Profile picture upload functionality
+  initProfilePictureUpload();
 });
+
+function initProfilePictureUpload() {
+  const uploadBtn = document.getElementById('upload-photo-btn');
+  const fileInput = document.getElementById('profile-picture-input');
+  const container = document.getElementById('profile-picture-container');
+  const profileInitial = document.getElementById('profile-initial');
+
+  if (!uploadBtn || !fileInput || !container) {
+    console.log('Profile picture upload elements not found');
+    return;
+  }
+
+  // Handle upload button click
+  uploadBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    fileInput.click();
+  });
+
+  // Handle file selection
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen válido.');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no debe superar los 5MB.');
+        return;
+      }
+
+      // Preview image
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Hide initial if exists
+        if (profileInitial) {
+          profileInitial.style.display = 'none';
+        }
+
+        // Remove existing image if any
+        const existingImg = container.querySelector('img');
+        if (existingImg) {
+          existingImg.remove();
+        }
+
+        // Create and show preview
+        const img = document.createElement('img');
+        img.id = 'profile-picture';
+        img.src = e.target.result;
+        img.alt = 'Foto de perfil';
+        img.className = 'w-full h-full object-cover';
+        container.appendChild(img);
+
+        // Upload the image
+        uploadProfilePicture(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+function uploadProfilePicture(file) {
+  const formData = new FormData();
+  formData.append('profile_picture', file);
+
+  // Show loading state
+  const uploadBtn = document.getElementById('upload-photo-btn');
+  const originalIcon = uploadBtn.innerHTML;
+  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
+  uploadBtn.disabled = true;
+
+  fetch('/api/v1/perfil/upload-picture', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Update the image source to the uploaded file
+      const img = document.getElementById('profile-picture');
+      if (img) {
+        img.src = data.image_url + '?t=' + Date.now(); // Add timestamp to avoid cache
+      }
+
+      // Show success message
+      showNotification('Foto de perfil actualizada exitosamente', 'success');
+    } else {
+      throw new Error(data.error || 'Error al subir la imagen');
+    }
+  })
+  .catch(error => {
+    console.error('Upload error:', error);
+    showNotification('Error al subir la imagen: ' + error.message, 'error');
+
+    // Revert to initial state on error
+    const img = document.getElementById('profile-picture');
+    const profileInitial = document.getElementById('profile-initial');
+    if (img) img.remove();
+    if (profileInitial) profileInitial.style.display = 'block';
+  })
+  .finally(() => {
+    // Restore button state
+    uploadBtn.innerHTML = originalIcon;
+    uploadBtn.disabled = false;
+  });
+}
+
+function showNotification(message, type = 'info') {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+
+  if (type === 'success') {
+    notification.classList.add('bg-green-500', 'text-white');
+  } else if (type === 'error') {
+    notification.classList.add('bg-red-500', 'text-white');
+  } else {
+    notification.classList.add('bg-blue-500', 'text-white');
+  }
+
+  notification.innerHTML = `
+    <div class="flex items-center">
+      <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+      <span>${message}</span>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Animate in
+  setTimeout(() => {
+    notification.classList.remove('translate-x-full');
+  }, 100);
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
 </script>
 {% endblock %}

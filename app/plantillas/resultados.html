@@ -30,7 +30,7 @@
 
           <div class="flex flex-col sm:flex-row gap-3">
             <!-- Filter by Type -->
-            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select id="filter-type" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <option value="">Todos los tipos</option>
               <option value="van">VAN</option>
               <option value="tir">TIR</option>
@@ -40,18 +40,13 @@
             </select>
 
             <!-- Filter by Date -->
-            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select id="filter-date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <option value="">Todas las fechas</option>
               <option value="today">Hoy</option>
               <option value="week">Esta semana</option>
               <option value="month">Este mes</option>
               <option value="year">Este año</option>
             </select>
-
-            <!-- Export Button -->
-            <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
-              <i class="fas fa-download mr-2"></i>Exportar
-            </button>
           </div>
         </div>
       </div>
@@ -59,6 +54,111 @@
       <!-- Results Grid -->
       <div class="grid gap-6">
 
+        {% if simulaciones %}
+          {% for simulacion in simulaciones %}
+          <div class="bg-white rounded-2xl shadow-xl p-6">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800">{{ simulacion.nombre or simulacion.tipo_simulacion }}</h3>
+                <p class="text-gray-600 text-sm">
+                  {% if simulacion.fecha %}
+                    Realizado el {{ simulacion.fecha }}
+                  {% else %}
+                    Fecha no disponible
+                  {% endif %}
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                {% if simulacion.resultados and simulacion.resultados.get('decision') %}
+                  <span class="px-3 py-1 rounded-full text-sm font-semibold
+                    {% if simulacion.resultados.decision == 'viable' %}bg-green-100 text-green-800{% elif simulacion.resultados.decision == 'no_viable' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ simulacion.resultados.decision_texto or simulacion.resultados.decision }}
+                  </span>
+                {% else %}
+                  <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    {{ simulacion.tipo_simulacion }}
+                  </span>
+                {% endif %}
+                <button class="text-blue-600 hover:text-blue-700 ml-2 ver-detalles-btn"
+                        data-simulacion-id="{{ simulacion.simulacion_id }}"
+                        data-simulacion-data='{{ {
+                          "id": simulacion.simulacion_id,
+                          "nombre": simulacion.nombre or simulacion.tipo_simulacion,
+                          "tipo_simulacion": simulacion.tipo_simulacion,
+                          "fecha": simulacion.fecha,
+                          "parametros": simulacion.parametros,
+                          "resultados": simulacion.resultados
+                        } | tojson }}'>
+                  <i class="fas fa-eye mr-1"></i>Ver Detalles
+                </button>
+                <button class="text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+            </div>
+
+            {% if simulacion.resultados %}
+            <div class="grid md:grid-cols-3 gap-6 mb-6">
+              {% if simulacion.resultados.get('van') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">VAN Calculado</div>
+                <div class="text-2xl font-bold {{ 'text-green-600' if simulacion.resultados.van >= 0 else 'text-red-600' }}">
+                  S/ {{ "{:,.0f}".format(simulacion.resultados.van) }}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if simulacion.resultados.get('tir') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">TIR</div>
+                <div class="text-2xl font-bold text-blue-600">
+                  {{ "{:.1f}".format(simulacion.resultados.tir) }}%
+                </div>
+              </div>
+              {% endif %}
+
+              {% if simulacion.resultados.get('payback') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">Periodo Recuperación</div>
+                <div class="text-2xl font-bold text-purple-600">
+                  {{ "{:.1f}".format(simulacion.resultados.payback) }} años
+                </div>
+              </div>
+              {% endif %}
+
+              {% if simulacion.resultados.get('wacc') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">WACC</div>
+                <div class="text-2xl font-bold text-indigo-600">
+                  {{ "{:.1f}".format(simulacion.resultados.wacc) }}%
+                </div>
+              </div>
+              {% endif %}
+
+              {% if simulacion.resultados.get('rendimiento') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">Rendimiento Esperado</div>
+                <div class="text-2xl font-bold text-green-600">
+                  {{ "{:.1f}".format(simulacion.resultados.rendimiento) }}%
+                </div>
+              </div>
+              {% endif %}
+
+              {% if simulacion.resultados.get('riesgo') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">Riesgo (Volatilidad)</div>
+                <div class="text-2xl font-bold text-orange-600">
+                  {{ "{:.1f}".format(simulacion.resultados.riesgo) }}%
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+
+
+          </div>
+          {% endfor %}
+        {% else %}
         <!-- No Results State -->
         <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
           <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -72,53 +172,7 @@
             <i class="fas fa-plus-circle mr-2"></i>Crear Primera Simulación
           </a>
         </div>
-
-        <!-- Sample Results (when there are results) -->
-        <!--
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">Análisis VAN - Proyecto Expansión</h3>
-              <p class="text-gray-600 text-sm">Realizado el 15 de diciembre de 2025</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                VAN Positivo
-              </span>
-              <button class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-ellipsis-v"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <div class="text-sm text-gray-600 mb-1">VAN Calculado</div>
-              <div class="text-2xl font-bold text-green-600">S/ 1,250,000</div>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <div class="text-sm text-gray-600 mb-1">TIR</div>
-              <div class="text-2xl font-bold text-blue-600">18.5%</div>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <div class="text-sm text-gray-600 mb-1">Periodo Recuperación</div>
-              <div class="text-2xl font-bold text-purple-600">2.3 años</div>
-            </div>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
-              <i class="fas fa-eye mr-2"></i>Ver Detalles
-            </button>
-            <button class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition duration-300">
-              <i class="fas fa-share mr-2"></i>Compartir
-            </button>
-            <button class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition duration-300">
-              <i class="fas fa-download mr-2"></i>Exportar
-            </button>
-          </div>
-        </div>
-        -->
+        {% endif %}
 
       </div>
 
@@ -166,4 +220,7 @@
     </div>
   </div>
 </section>
+
+<!-- Include resultados JavaScript -->
+<script src="{{ url_for('static', filename='js/resultados.js') }}"></script>
 {% endblock %}

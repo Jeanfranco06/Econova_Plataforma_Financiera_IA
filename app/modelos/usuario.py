@@ -205,6 +205,22 @@ class Usuario:
             db.disconnect()
 
     @staticmethod
+    def actualizar_foto_perfil(usuario_id, foto_perfil):
+        """Actualizar foto de perfil del usuario"""
+        db = get_db_connection()
+        query = adapt_query("UPDATE Usuarios SET foto_perfil = %s WHERE usuario_id = %s")
+        try:
+            db.connect()
+            db.execute_query(query, (foto_perfil, usuario_id))
+            db.commit()
+            return True
+        except Exception as e:
+            print(f"Error actualizando foto de perfil: {e}")
+            return False
+        finally:
+            db.disconnect()
+
+    @staticmethod
     def listar_usuarios():
         """Listar todos los usuarios"""
         db = get_db_connection()

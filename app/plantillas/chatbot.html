@@ -18,10 +18,12 @@
 <!-- Chatbot Interface -->
 <section class="py-16 bg-gray-50">
   <div class="container mx-auto px-6">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-12 items-start">
 
-      <!-- Chatbot Interface -->
-      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <!-- Left Column: Chatbot Interface -->
+        <div class="order-2 lg:order-1">
+          <div class="bg-white rounded-2xl shadow-xl p-8">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-800">Chatbot Financiero IA</h2>
@@ -134,6 +136,112 @@
         <a href="/api/v1/dashboard" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 inline-flex items-center">
           <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
         </a>
+      </div>
+    </div>
+
+        <!-- Right Column: 3D Robot with Economic Context -->
+        <div class="order-1 lg:order-2">
+          <div class="sticky top-8">
+            <!-- Robot Container -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+              <div class="text-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Tu Asesor Financiero IA</h3>
+                <p class="text-gray-600 text-sm">Tecnología avanzada para decisiones inteligentes</p>
+              </div>
+
+              <!-- Robot 3D Display -->
+              <div class="flex justify-center mb-6">
+                <div id="chatbot-robot-container" class="relative">
+                  <div id="chatbot-robot" class="robot-3d-display"></div>
+
+                  <!-- Economic Context Elements -->
+                  <div class="absolute -top-2 -left-2 w-6 h-6 bg-green-400 rounded-full animate-pulse opacity-80">
+                    <i class="fas fa-chart-line text-white text-xs flex items-center justify-center h-full"></i>
+                  </div>
+                  <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-400 rounded-full animate-pulse opacity-80" style="animation-delay: 0.5s;">
+                    <i class="fas fa-calculator text-white text-xs flex items-center justify-center h-full"></i>
+                  </div>
+                  <div class="absolute top-1/2 -right-3 w-5 h-5 bg-purple-400 rounded-full animate-bounce opacity-80" style="animation-delay: 1s;">
+                    <i class="fas fa-brain text-white text-xs flex items-center justify-center h-full"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Economic Insights -->
+              <div class="space-y-4">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border-l-4 border-blue-500">
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-lightbulb text-blue-600 mr-2"></i>
+                    <span class="text-sm font-semibold text-blue-800">Análisis Predictivo</span>
+                  </div>
+                  <p class="text-xs text-blue-700">Machine Learning para pronósticos precisos basados en datos históricos del mercado peruano</p>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border-l-4 border-green-500">
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-balance-scale text-green-600 mr-2"></i>
+                    <span class="text-sm font-semibold text-green-800">VAN & TIR Optimizados</span>
+                  </div>
+                  <p class="text-xs text-green-700">Cálculos automáticos considerando inflación, riesgo país y tendencias económicas locales</p>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border-l-4 border-purple-500">
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-users text-purple-600 mr-2"></i>
+                    <span class="text-sm font-semibold text-purple-800">Benchmarking Anónimo</span>
+                  </div>
+                  <p class="text-xs text-purple-700">Compara tus resultados con estrategias exitosas de empresas similares en el mercado peruano</p>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border-l-4 border-orange-500">
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-shield-alt text-orange-600 mr-2"></i>
+                    <span class="text-sm font-semibold text-orange-800">Gestión de Riesgos</span>
+                  </div>
+                  <p class="text-xs text-orange-700">Análisis de sensibilidad y escenarios Monte Carlo para evaluar riesgos financieros</p>
+                </div>
+              </div>
+
+              <!-- Economic Stats -->
+              <div class="mt-6 grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 p-3 rounded-lg text-center">
+                  <div class="text-lg font-bold text-blue-600">98%</div>
+                  <div class="text-xs text-gray-600">Precisión</div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg text-center">
+                  <div class="text-lg font-bold text-green-600">24/7</div>
+                  <div class="text-xs text-gray-600">Disponible</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+              <h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                <i class="fas fa-star text-blue-600 mr-2"></i>
+                Consejos Rápidos
+              </h4>
+              <ul class="space-y-2 text-sm text-blue-700">
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  Pregunta sobre VAN, TIR o WACC
+                </li>
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  Interpreta resultados de simulaciones
+                </li>
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  Obtén recomendaciones personalizadas
+                </li>
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  Analiza riesgos de inversión
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

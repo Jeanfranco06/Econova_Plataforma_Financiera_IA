@@ -1,0 +1,309 @@
+<!-- VAN Calculator -->
+<div id="van-calculator" class="simulation-calculator">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Engineering Economics Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Valor Actual Neto (VAN)</h3>
+          <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-lightbulb mr-1"></i>Método Principal
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Métrica fundamental de evaluación económica de proyectos de inversión</p>
+
+        <!-- Educational Content -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-blue-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-blue-800 mb-1">Concepto Económico</h5>
+              <p class="text-sm text-blue-700">
+                El VAN mide la rentabilidad absoluta de una inversión comparando el valor presente de los flujos de caja futuros
+                con la inversión inicial. Un VAN positivo indica que el proyecto crea valor económico.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="van-form" class="space-y-6">
+      <!-- Project Context -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-project-diagram mr-2 text-gray-600"></i>
+          Contexto del Proyecto
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre del Proyecto
+            </label>
+            <input
+              type="text"
+              id="van-nombre-proyecto"
+              name="nombre_proyecto"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: Planta Solar 50MW"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Sector Industrial
+            </label>
+            <select id="van-sector" name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Seleccionar sector...</option>
+              <option value="energia">Energía y Recursos</option>
+              <option value="manufactura">Manufactura</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="construccion">Construcción</option>
+              <option value="transporte">Transporte</option>
+              <option value="salud">Salud</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investment Details -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-dollar-sign mr-2 text-gray-500"></i>
+            Inversión Inicial (S/)
+          </label>
+          <input
+            type="number"
+            id="van-inversion"
+            name="inversion"
+            required
+            min="0"
+            step="0.01"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+            placeholder="1000000"
+          >
+          <p class="text-xs text-gray-500 mt-1">Costo total de la inversión inicial</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-percentage mr-2 text-gray-500"></i>
+            Tasa de Descuento (%)
+          </label>
+          <input
+            type="number"
+            id="van-tasa"
+            name="tasa"
+            required
+            min="0"
+            max="50"
+            step="0.01"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+            placeholder="12.5"
+          >
+          <p class="text-xs text-gray-500 mt-1">Costo de oportunidad del capital (WACC)</p>
+        </div>
+      </div>
+
+      <!-- Cash Flows -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+          <i class="fas fa-chart-line mr-2 text-gray-500"></i>
+          Flujos de Caja Operativos (S/)
+        </label>
+        <p class="text-xs text-gray-600 mb-3">Ingresos menos costos operativos, depreciación e impuestos</p>
+
+        <div id="van-flujos" class="space-y-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-sm text-gray-600 w-16 font-medium">Año 1:</span>
+            <input
+              type="number"
+              name="flujo1"
+              step="0.01"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="250000"
+            >
+            <button type="button" class="remover-anio text-red-500 hover:text-red-700 px-2 opacity-0" style="display: none;">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-sm text-gray-600 w-16 font-medium">Año 2:</span>
+            <input
+              type="number"
+              name="flujo2"
+              step="0.01"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="280000"
+            >
+            <button type="button" class="remover-anio text-red-500 hover:text-red-700 px-2 opacity-0" style="display: none;">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-sm text-gray-600 w-16 font-medium">Año 3:</span>
+            <input
+              type="number"
+              name="flujo3"
+              step="0.01"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="320000"
+            >
+            <button type="button" class="remover-anio text-red-500 hover:text-red-700 px-2 opacity-0">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="add-flujo-van"
+          class="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+        >
+          <i class="fas fa-plus mr-1"></i>Agregar período adicional
+        </button>
+      </div>
+
+      <!-- Analysis Options -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-cogs mr-2 text-gray-600"></i>
+          Opciones de Análisis
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="van-sensibilidad" name="sensibilidad" class="mr-2">
+            <label for="van-sensibilidad" class="text-sm text-gray-700">Análisis de sensibilidad</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="van-riesgo" name="riesgo" class="mr-2">
+            <label for="van-riesgo" class="text-sm text-gray-700">Evaluación de riesgo</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Button -->
+      <div class="flex justify-center pt-4">
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-300 transition duration-300 text-lg font-semibold shadow-lg"
+        >
+          <i class="fas fa-calculator mr-2"></i>Calcular VAN y Métricas
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div id="van-results" class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200" style="display: none;">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-bold text-gray-800">Resultados del Análisis Económico</h4>
+        <div class="flex gap-2">
+          <button class="text-gray-500 hover:text-gray-700" title="Exportar PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="text-gray-500 hover:text-gray-700" title="Exportar Excel">
+            <i class="fas fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Metrics -->
+      <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-blue-600 mb-1" id="van-result">S/ 0</div>
+          <div class="text-sm text-gray-600 font-medium">Valor Actual Neto</div>
+          <div class="text-xs text-gray-500 mt-1">VAN</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-green-600 mb-1" id="van-tir">0.0%</div>
+          <div class="text-sm text-gray-600 font-medium">Tasa Interna de Retorno</div>
+          <div class="text-xs text-gray-500 mt-1">TIR</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-purple-600 mb-1" id="van-payback">0 años</div>
+          <div class="text-sm text-gray-600 font-medium">Periodo de Recuperación</div>
+          <div class="text-xs text-gray-500 mt-1">Payback</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-2xl font-bold text-orange-600 mb-1" id="van-vpn-inversion">0%</div>
+          <div class="text-sm text-gray-600 font-medium">VAN/Inversión</div>
+          <div class="text-xs text-gray-500 mt-1">Rentabilidad Relativa</div>
+        </div>
+      </div>
+
+      <!-- Decision Framework -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-gavel mr-2 text-gray-600"></i>
+          Marco de Decisión Económica
+        </h5>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Evaluación:</span>
+              <span id="van-evaluation" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
+            </div>
+            <div class="text-sm text-gray-600" id="van-evaluation-text">
+              Evaluando criterios de decisión...
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Confianza:</span>
+              <span id="van-confidence" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                Alta
+              </span>
+            </div>
+            <div class="text-sm text-gray-600">
+              Basado en datos completos y consistentes
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cash Flow Table -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-table mr-2 text-gray-600"></i>
+          Desglose de Flujos de Caja
+        </h5>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Período</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">Flujo de Caja</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">Factor Descuento</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">Valor Presente</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">VAN Acumulado</th>
+              </tr>
+            </thead>
+            <tbody id="van-cashflow-table" class="divide-y divide-gray-200">
+              <!-- Table rows will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i>Guardar Análisis
+        </button>
+        <button class="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-share mr-2"></i>Compartir Resultados
+        </button>
+        <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-print mr-2"></i>Imprimir Reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

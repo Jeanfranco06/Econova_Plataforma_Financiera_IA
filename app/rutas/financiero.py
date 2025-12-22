@@ -66,7 +66,8 @@ def calcular_van():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro si es la primera simulación de VAN
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -77,7 +78,6 @@ def calcular_van():
             {
                 "success": True,
                 "data": resultado,
-                "formatted": formatear_resultado_van(resultado),
             }
         ), 200
 
@@ -136,7 +136,8 @@ def calcular_tir():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -147,7 +148,6 @@ def calcular_tir():
             {
                 "success": True,
                 "data": resultado,
-                "formatted": formatear_resultado_tir(resultado),
             }
         ), 200
 
@@ -214,7 +214,8 @@ def calcular_wacc():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -225,7 +226,6 @@ def calcular_wacc():
             {
                 "success": True,
                 "data": resultado,
-                "formatted": formatear_resultado_wacc(resultado),
             }
         ), 200
 
@@ -287,7 +287,8 @@ def analizar_portafolio():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -298,7 +299,6 @@ def analizar_portafolio():
             {
                 "success": True,
                 "data": resultado,
-                "formatted": formatear_resultado_portafolio(resultado),
             }
         ), 200
 
@@ -359,7 +359,8 @@ def analizar_reemplazo():
                 parametros=datos,
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
         return jsonify({"success": True, "data": resultado}), 200
 
@@ -513,7 +514,8 @@ def calcular_prestamo():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro si es la primera simulación de préstamo
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -677,7 +679,8 @@ def calcular_ahorro():
                 },
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
             # Otorgar logro
             # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
@@ -791,7 +794,8 @@ def comparar_instrumentos():
                 parametros=datos,
                 resultados=resultado,
             )
-            resultado["simulacion_id"] = simulacion.simulacion_id
+            if simulacion:
+                resultado["simulacion_id"] = simulacion.simulacion_id
 
         return jsonify({"success": True, "data": resultado}), 200
 

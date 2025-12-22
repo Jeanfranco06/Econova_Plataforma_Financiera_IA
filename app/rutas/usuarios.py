@@ -189,12 +189,7 @@ def actualizar_nivel_usuario(usuario_id):
             'error': str(e)
         }), 500
 
-# Registration Routes
-@usuarios_bp.route('/registro', methods=['GET'])
-def registro():
-    """Mostrar formulario de registro"""
-    return render_template('registro.html')
-
+# API Routes for User Management
 @usuarios_bp.route('/registrar', methods=['POST'])
 def registrar_usuario():
     """API para registrar un nuevo usuario"""
@@ -307,35 +302,27 @@ def registrar_usuario():
             'error': 'Error interno del servidor'
         }), 500
 
-@usuarios_bp.route('/confirmar/<token>')
-def confirmar_cuenta(token):
-    """Confirmar cuenta de usuario con token"""
-    try:
-        # TODO: Implementar verificación real del token
-        # Por ahora, solo mostramos una página de confirmación exitosa
-        return render_template('confirmacion.html', token=token)
-    except Exception as e:
-        print(f"Error en confirmación: {e}")
-        return render_template('error.html', error="Error al confirmar la cuenta"), 500
-
-@usuarios_bp.route('/login', methods=['GET'])
-def login():
-    """Mostrar página de inicio de sesión"""
-    return render_template('login.html')
-
 @usuarios_bp.route('/login', methods=['POST'])
 def procesar_login():
-    """Procesar formulario de inicio de sesión"""
+    """API para procesar inicio de sesión"""
     try:
-        # Get form data
-        email_username = request.form.get('email', '').strip()
-        password = request.form.get('password', '')
-        remember = request.form.get('remember') is not None
+        # Get JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
+
+        email_username = data.get('email_username', '').strip()
+        password = data.get('password', '')
 
         # Validation
         if not email_username or not password:
-            flash('Por favor ingresa tu email/nombre de usuario y contraseña.', 'error')
-            return render_template('login.html', email_value=email_username)
+            return jsonify({
+                'success': False,
+                'error': 'Email/nombre de usuario y contraseña son requeridos'
+            }), 400
 
         # Buscar usuario por email o nombre de usuario
         usuario = None
@@ -356,166 +343,28 @@ def procesar_login():
                 session['usuario_nombre'] = f"{usuario.nombres} {usuario.apellidos}"
                 session['usuario_nivel'] = usuario.nivel
 
-                # TODO: Implementar "recordar sesión" si remember=True
-
-                print(f"✅ Login exitoso para usuario: {usuario.email}")
-                flash('Inicio de sesión exitoso. Bienvenido a Econova!', 'success')
-                return redirect(url_for('usuarios.dashboard'))  # Redirigir al dashboard
+                return jsonify({
+                    'success': True,
+                    'message': 'Inicio de sesión exitoso',
+                    'usuario': usuario.to_dict()
+                })
             else:
-                print(f"❌ Contraseña incorrecta para usuario: {email_username}")
-                flash('Contraseña incorrecta. Por favor, inténtalo de nuevo.', 'error')
-                return render_template('login.html', email_value=email_username, remember_checked=remember)
+                return jsonify({
+                    'success': False,
+                    'error': 'Contraseña incorrecta'
+                }), 401
         else:
-            print(f"❌ Usuario no encontrado: {email_username}")
-            flash('Usuario no encontrado. Verifica tu email o nombre de usuario.', 'error')
-            return render_template('login.html', email_value=email_username, remember_checked=remember)
+            return jsonify({
+                'success': False,
+                'error': 'Usuario no encontrado'
+            }), 404
 
     except Exception as e:
-        print(f"Error en login: {e}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
-        flash('Error interno del servidor. Por favor, inténtalo de nuevo.', 'error')
-        return render_template('login.html', email_value=email_username, remember_checked=remember)
-
-@usuarios_bp.route('/registro', methods=['POST'])
-def procesar_registro():
-    """Procesar formulario de registro"""
-    try:
-        # Get form data
-        nombres = request.form.get('nombres', '').strip()
-        apellidos = request.form.get('apellidos', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        telefono = request.form.get('telefono', '').strip()
-        nombre_usuario = request.form.get('nombre_usuario', '').strip()
-        password = request.form.get('password', '')
-        empresa = request.form.get('empresa', '').strip()
-        sector = request.form.get('sector', '')
-        tamano_empresa = request.form.get('tamano_empresa', '')
-        terminos = request.form.get('terminos')
-        newsletter = request.form.get('newsletter') is not None
-
-        # Validation
-        errors = []
-
-        # Required fields
-        if not nombres or not apellidos or not email or not nombre_usuario or not password:
-            errors.append('Todos los campos marcados con * son obligatorios')
-
-        # Email validation
-        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
-            errors.append('El correo electrónico no es válido')
-
-        # Username validation
-        if nombre_usuario and not re.match(r'^[a-zA-Z0-9_]{3,20}$', nombre_usuario):
-            errors.append('El nombre de usuario debe tener entre 3-20 caracteres y solo letras, números y guiones bajos')
-
-        # Password validation
-        if password:
-            if len(password) < 8:
-                errors.append('La contraseña debe tener al menos 8 caracteres')
-            if not re.search(r'\d', password):
-                errors.append('La contraseña debe contener al menos un número')
-            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-                errors.append('La contraseña debe contener al menos un carácter especial')
-
-        # Terms acceptance
-        if not terminos:
-            errors.append('Debes aceptar los términos y condiciones')
-
-        # Check if user already exists
-        if email and Usuario.obtener_usuario_por_email(email):
-            errors.append('Ya existe una cuenta con este correo electrónico')
-
-        if nombre_usuario and Usuario.obtener_usuario_por_nombre_usuario(nombre_usuario):
-            errors.append('Este nombre de usuario ya está en uso')
-
-        if errors:
-            flash(' '.join(errors), 'error')
-            # Mantener los datos del formulario cuando hay errores
-            return render_template('registro.html',
-                                 nombres=nombres,
-                                 apellidos=apellidos,
-                                 email=email,
-                                 telefono=telefono,
-                                 nombre_usuario=nombre_usuario,
-                                 empresa=empresa,
-                                 sector=sector,
-                                 tamano_empresa=tamano_empresa,
-                                 newsletter_checked=newsletter)
-
-        # Create user
-        usuario = Usuario.crear(
-            nombres=nombres,
-            apellidos=apellidos,
-            email=email,
-            telefono=telefono if telefono else None,
-            nombre_usuario=nombre_usuario,
-            password=password,
-            empresa=empresa if empresa else None,
-            sector=sector if sector else None,
-            tamano_empresa=tamano_empresa if tamano_empresa else None,
-            newsletter=newsletter
-        )
-
-        if usuario:
-            # Set default level to 'basico'
-            Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
-
-            # Generate confirmation token
-            token_confirmacion = secrets.token_urlsafe(32)
-
-            # Send confirmation email
-            print(f"📧 Intentando enviar email de confirmación a: {email}")
-            print(f"📧 Nombre de usuario: {nombres}")
-            print(f"📧 Token de confirmación: {token_confirmacion}")
-
-            try:
-                email_enviado = email_service.enviar_email_confirmacion(
-                    email=email,
-                    nombre_usuario=nombres,  # Usar el nombre real, no el username
-                    token_confirmacion=token_confirmacion
-                )
-
-                if email_enviado:
-                    print("✅ Email de confirmación enviado exitosamente")
-                    flash('¡Cuenta creada exitosamente! Revisa tu bandeja de entrada y carpeta de SPAM para el email de confirmación. El email puede tardar unos minutos en llegar.', 'success')
-                else:
-                    print("❌ Error: email_service.enviar_email_confirmacion retornó False")
-                    flash('Cuenta creada, pero hubo un problema enviando el email de confirmación. Contacta soporte si el problema persiste.', 'warning')
-            except Exception as e:
-                print(f"❌ Error enviando email: {e}")
-                print(f"❌ Tipo de error: {type(e)}")
-                import traceback
-                print(f"❌ Traceback: {traceback.format_exc()}")
-                flash('Cuenta creada, pero hubo un problema enviando el email de confirmación. Contacta soporte.', 'warning')
-
-            return redirect(url_for('usuarios.registro'))
-        else:
-            flash('Error al crear la cuenta. Por favor, inténtalo de nuevo.', 'error')
-            return redirect(url_for('usuarios.registro'))
-
-    except Exception as e:
-        print(f"Error en registro: {e}")
-        flash('Error interno del servidor. Por favor, inténtalo de nuevo.', 'error')
-        return redirect(url_for('usuarios.registro'))
-
-@usuarios_bp.route('/dashboard')
-def dashboard():
-    """Mostrar dashboard del usuario"""
-    if 'usuario_id' not in session:
-        flash('Debes iniciar sesión para acceder al dashboard.', 'error')
-        return redirect(url_for('usuarios.login'))
-
-    return render_template('dashboard.html')
-
-@usuarios_bp.route('/perfil')
-def perfil():
-    """Mostrar perfil del usuario"""
-    if 'usuario_id' not in session:
-        flash('Debes iniciar sesión para acceder a tu perfil.', 'error')
-        return redirect(url_for('usuarios.login'))
-
-    return render_template('perfil.html')
+        print(f"Error en login API: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @usuarios_bp.route('/perfil', methods=['GET'])
 def obtener_perfil():
@@ -548,12 +397,131 @@ def obtener_perfil():
             'error': 'Error interno del servidor'
         }), 500
 
-@usuarios_bp.route('/logout')
-def logout():
-    """Cerrar sesión del usuario"""
-    session.clear()
-    flash('Sesión cerrada exitosamente.', 'success')
-    return redirect('/')
+@usuarios_bp.route('/perfil/upload-picture', methods=['POST'])
+def upload_profile_picture():
+    """Subir foto de perfil del usuario"""
+    print("=== PROFILE PICTURE UPLOAD STARTED ===")
+    try:
+        if 'usuario_id' not in session:
+            print("ERROR: User not authenticated")
+            return jsonify({
+                'success': False,
+                'error': 'Usuario no autenticado'
+            }), 401
+
+        usuario_id = session['usuario_id']
+        print(f"User ID: {usuario_id}")
+
+        # Check if file is in request
+        if 'profile_picture' not in request.files:
+            print("ERROR: No file found in request.files")
+            return jsonify({
+                'success': False,
+                'error': 'No se encontró el archivo'
+            }), 400
+
+        file = request.files['profile_picture']
+        print(f"File received: {file.filename}")
+
+        # Check if file is selected
+        if file.filename == '':
+            print("ERROR: Empty filename")
+            return jsonify({
+                'success': False,
+                'error': 'No se seleccionó ningún archivo'
+            }), 400
+
+        # Validate file type
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+        if not file or '.' not in file.filename:
+            print("ERROR: Invalid file")
+            return jsonify({
+                'success': False,
+                'error': 'Archivo no válido'
+            }), 400
+
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        print(f"File extension: {extension}")
+        if extension not in allowed_extensions:
+            print(f"ERROR: Extension {extension} not allowed")
+            return jsonify({
+                'success': False,
+                'error': 'Tipo de archivo no permitido. Use PNG, JPG, JPEG o GIF'
+            }), 400
+
+        # Validate file size (max 5MB)
+        file.seek(0, 2)  # Seek to end
+        file_size = file.tell()
+        file.seek(0)  # Seek back to beginning
+        print(f"File size: {file_size} bytes")
+
+        if file_size > 5 * 1024 * 1024:  # 5MB
+            print("ERROR: File too large")
+            return jsonify({
+                'success': False,
+                'error': 'El archivo es demasiado grande. Máximo 5MB'
+            }), 400
+
+        # Create uploads directory if it doesn't exist
+        import os
+        uploads_dir = os.path.join(os.getcwd(), 'app', 'static', 'uploads', 'profile_pictures')
+        print(f"Uploads directory: {uploads_dir}")
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        # Generate unique filename
+        import uuid
+        filename = f"{usuario_id}_{uuid.uuid4().hex}.{extension}"
+        filepath = os.path.join(uploads_dir, filename)
+        print(f"File will be saved to: {filepath}")
+
+        # Save file
+        print("Saving file...")
+        file.save(filepath)
+        print("File saved successfully")
+
+        # Update user profile picture in database
+        print("Updating database...")
+        try:
+            # Use the existing Usuario model method to update
+            print(f"Updating user {usuario_id} with photo {filename}")
+            success = Usuario.actualizar_foto_perfil(usuario_id, filename)
+            if not success:
+                print("ERROR: Model update returned False")
+                return jsonify({
+                    'success': False,
+                    'error': 'Error actualizando la base de datos'
+                }), 500
+
+            print("Database updated successfully via model")
+
+            # Generate URL for the uploaded image
+            image_url = f"/static/uploads/profile_pictures/{filename}"
+
+            print("=== PROFILE PICTURE UPLOAD COMPLETED SUCCESSFULLY ===")
+            return jsonify({
+                'success': True,
+                'message': 'Foto de perfil actualizada exitosamente',
+                'image_url': image_url,
+                'filename': filename
+            })
+
+        except Exception as e:
+            print(f"ERROR updating database: {e}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            return jsonify({
+                'success': False,
+                'error': 'Error interno del servidor'
+            }), 500
+
+    except Exception as e:
+        print(f"ERROR in upload function: {e}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 def usuario_autenticado():
     """Verificar si el usuario está autenticado"""

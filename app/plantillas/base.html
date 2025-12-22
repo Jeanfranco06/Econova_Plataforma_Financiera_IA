@@ -11,6 +11,22 @@
 
     <!-- Custom styles -->
     <style>
+        :root {
+            --color-primary: #00ffff;
+            --color-secondary: #ff6b6b;
+            --color-accent: #4ecdc4;
+            --color-background: #ffffff;
+            --color-surface: #f8f9fa;
+            --color-text: #333333;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --color-warning: #ff9800;
+            --color-info: #2196f3;
+        }
+
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
@@ -25,7 +41,7 @@
 
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px var(--color-shadow);
         }
 
         /* Floating economic elements */
@@ -110,10 +126,36 @@
                 box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
             }
         }
+
+        /* Theme-aware classes */
+        .theme-bg-primary { background-color: var(--color-primary); }
+        .theme-bg-secondary { background-color: var(--color-secondary); }
+        .theme-bg-accent { background-color: var(--color-accent); }
+        .theme-bg-background { background-color: var(--color-background); }
+        .theme-bg-surface { background-color: var(--color-surface); }
+
+        .theme-text-primary { color: var(--color-text); }
+        .theme-text-secondary { color: var(--color-text-secondary); }
+        .theme-text-accent { color: var(--color-accent); }
+
+        .theme-border { border-color: var(--color-border); }
+        .theme-shadow { box-shadow: 0 4px 6px var(--color-shadow); }
+
+        /* Override hardcoded Tailwind classes with theme-aware versions */
+        .bg-slate-900 { background-color: #0f172a !important; } /* Keep dark for hero sections */
+        .text-white { color: #ffffff !important; } /* Keep white for hero sections */
+        .bg-gray-50 { background-color: var(--color-surface) !important; }
+        .text-gray-800 { color: var(--color-text) !important; }
+        .text-gray-600 { color: var(--color-text-secondary) !important; }
+        .bg-white { background-color: var(--color-surface) !important; }
+        .border-gray-200 { border-color: var(--color-border) !important; }
+        .text-gray-700 { color: var(--color-text) !important; }
+        .bg-gray-100 { background-color: var(--color-surface) !important; }
+        .text-gray-500 { color: var(--color-text-secondary) !important; }
     </style>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -122,7 +164,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 </head>
 
-<body class="font-['Inter'] antialiased">
+<body class="font-['Source Sans Pro'] antialiased" data-usuario-id="{{ session.get('usuario_id', '') }}">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg fixed w-full z-50">
         <div class="container mx-auto px-6 py-4">
@@ -131,7 +173,7 @@
                     <a href="/" class="text-2xl font-bold text-blue-600">Econova</a>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="hidden lg:flex items-center space-x-8">
                     {% set current_path = request.path %}
                     {% if current_path == '/' %}
                     <a href="#caracteristicas"
@@ -164,11 +206,17 @@
                     <div class="relative">
                         <button id="user-menu-button"
                             class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition duration-300">
+                            {% if current_user and current_user.foto_perfil %}
+                            <img src="{{ url_for('static', filename='uploads/profile_pictures/' + current_user.foto_perfil) }}"
+                                 alt="Foto de perfil"
+                                 class="w-8 h-8 rounded-full object-cover">
+                            {% else %}
                             <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                                 <span class="text-white text-sm font-semibold">
                                     {{ session.usuario_nombre[0] if session.usuario_nombre else 'U' }}
                                 </span>
                             </div>
+                            {% endif %}
                             <span class="font-medium">{{ session.usuario_nombre.split(' ')[0] if session.usuario_nombre
                                 else 'Usuario' }}</span>
                             <i class="fas fa-chevron-down text-xs"></i>
@@ -176,16 +224,17 @@
 
                         <!-- Dropdown Menu -->
                         <div id="user-dropdown"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden">
+                            class="dropdown-menu absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2"
+                            style="z-index: 99999 !important; position: absolute !important; display: none !important;">
                             <div class="px-4 py-2 border-b border-gray-200">
                                 <p class="text-sm font-medium text-gray-800">{{ session.usuario_nombre }}</p>
                                 <p class="text-xs text-gray-600">{{ session.usuario_email }}</p>
                             </div>
-                            <a href="/api/v1/dashboard"
+                            <a href="/dashboard"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
                                 <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                             </a>
-                            <a href="/api/v1/perfil"
+                            <a href="/perfil"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
                                 <i class="fas fa-user mr-2"></i>Mi Perfil
                             </a>
@@ -198,25 +247,30 @@
                                 <i class="fas fa-plus-circle mr-2"></i>Nueva Simulación
                             </a>
                             <div class="border-t border-gray-200 my-1"></div>
-                            <a href="/api/v1/logout"
+                            <a href="/logout"
                                 class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
                             </a>
                         </div>
                     </div>
+
+                    <!-- Theme Toggle Button (Sun/Moon) -->
+                    <button id="theme-toggle-btn" class="ml-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-300" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-sun text-yellow-500"></i>
+                    </button>
                     {% else %}
                     <!-- Guest Menu -->
-                    <a href="/api/v1/login"
+                    <a href="/login"
                         class="border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300">
                         <i class="fas fa-sign-in-alt mr-1"></i>Iniciar Sesión
                     </a>
-                    <a href="/api/v1/registro"
+                    <a href="/registro"
                         class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Registrarse</a>
                     {% endif %}
                 </div>
 
                 <!-- Mobile menu button -->
-                <div class="md:hidden">
+                <div class="lg:hidden">
                     <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
@@ -258,10 +312,10 @@
                             session.usuario_nombre else 'Usuario' }}</p>
                         <p class="text-xs text-gray-600">{{ session.usuario_email }}</p>
                     </div>
-                    <a href="/api/v1/dashboard" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/dashboard" class="block py-2 text-gray-700 hover:text-blue-600">
                         <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                     </a>
-                    <a href="/api/v1/perfil" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/perfil" class="block py-2 text-gray-700 hover:text-blue-600">
                         <i class="fas fa-user mr-2"></i>Mi Perfil
                     </a>
                     <a href="/resultados" class="block py-2 text-gray-700 hover:text-blue-600">
@@ -270,17 +324,17 @@
                     <a href="/simulacion" class="block py-2 text-gray-700 hover:text-blue-600">
                         <i class="fas fa-plus-circle mr-2"></i>Nueva Simulación
                     </a>
-                    <a href="/api/v1/logout" class="block py-2 text-red-600 hover:text-red-700 mt-2">
+                    <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 mt-2">
                         <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
                     </a>
                 </div>
                 {% else %}
                 <!-- Guest Mobile Menu -->
-                <a href="/api/v1/login"
+                <a href="/login"
                     class="block py-2 border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg mt-4 text-center">
                     <i class="fas fa-sign-in-alt mr-1"></i>Iniciar Sesión
                 </a>
-                <a href="/api/v1/registro"
+                <a href="/registro"
                     class="block py-2 bg-blue-600 text-white px-4 py-2 rounded-lg mt-2 text-center">Registrarse</a>
                 {% endif %}
             </div>
@@ -392,39 +446,86 @@
             }
         }
 
-        // User dropdown menu functionality
-        function initUserMenu() {
-            const userMenuButton = document.getElementById('user-menu-button');
-            const userDropdown = document.getElementById('user-dropdown');
+        // Simple dropdown functionality
+        function initDropdowns() {
+            console.log('🔽 Initializing dropdowns...');
 
-            if (userMenuButton && userDropdown) {
-                // Toggle dropdown on button click
-                userMenuButton.addEventListener('click', function (e) {
+            // User dropdown
+            const userBtn = document.getElementById('user-menu-button');
+            const userMenu = document.getElementById('user-dropdown');
+
+            console.log('👤 User button found:', !!userBtn);
+            console.log('👤 User menu found:', !!userMenu);
+
+            if (userBtn && userMenu) {
+                // Ensure dropdown starts hidden
+                userMenu.classList.add('hidden');
+                console.log('👤 User menu forced hidden on init');
+
+                // Add multiple event listeners to ensure it works
+                userBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     e.stopPropagation();
-                    userDropdown.classList.toggle('hidden');
+                    console.log('👤 User button clicked - event fired!');
+                    console.log('👤 Event target:', e.target);
+                    console.log('👤 Current userMenu display:', userMenu.style.display);
+
+                    // Force toggle using display style
+                    if (userMenu.style.display === 'none' || userMenu.style.display === '') {
+                        userMenu.style.display = 'block';
+                        console.log('👤 User menu shown');
+                    } else {
+                        userMenu.style.display = 'none';
+                        console.log('👤 User menu hidden');
+                    }
+
+                    console.log('👤 Final userMenu display:', userMenu.style.display);
                 });
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function (e) {
-                    if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.add('hidden');
+                // Also try mousedown for debugging
+                userBtn.addEventListener('mousedown', function(e) {
+                    console.log('👤 User button mousedown detected');
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
+                        const wasVisible = !userMenu.classList.contains('hidden');
+                        userMenu.classList.add('hidden');
+                        if (wasVisible) {
+                            console.log('👤 User menu closed by outside click');
+                        }
                     }
                 });
 
-                // Close dropdown on Escape key
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') {
-                        userDropdown.classList.add('hidden');
-                    }
-                });
+                console.log('👤 User dropdown initialized successfully');
+                console.log('👤 User button element:', userBtn);
+                console.log('👤 User menu element:', userMenu);
+            } else {
+                console.error('👤 User dropdown elements not found');
+                console.error('👤 userBtn:', userBtn);
+                console.error('👤 userMenu:', userMenu);
             }
+
+            // Theme dropdown removed - now using simple sun/moon toggle
+
+            // Close all dropdowns on Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.dropdown-menu, #theme-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                    });
+                }
+            });
+
+            console.log('🔽 Dropdowns initialization complete');
         }
+
+        // Initialize dropdowns after a short delay to ensure DOM is ready
+        setTimeout(initDropdowns, 10);
 
         // Modal event listeners
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize user menu
-            initUserMenu();
-
             // Show modal on page load (only once per session)
             if (!sessionStorage.getItem('welcomeModalShown')) {
                 showWelcomeModal();
@@ -476,12 +577,7 @@
     </style>
 
     <!-- Elementos visuales modernos -->
-    <!-- Selector de temas -->
-    <div id="theme-switcher">
-        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Cambiar tema">
-            <i class="fas fa-palette"></i>
-        </button>
-    </div>
+    <!-- Theme switcher removed - using simple sun/moon toggle only -->
 
     <!-- Avatar del chatbot -->
     <div id="chatbot-avatar" style="display: none;">
@@ -498,37 +594,100 @@
     <!-- Contenedor de mensajes contextuales -->
     <div id="contextual-messages-container" class="contextual-messages-container top-right"></div>
 
-    <!-- Scripts de elementos visuales -->
+    <!-- Scripts de elementos visuales - cargados condicionalmente -->
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    {% if request.path in ['/simulacion', '/chatbot', '/benchmarking'] %}
     <script src="{{ url_for('static', filename='js/contextual_message.js') }}"></script>
+    {% endif %}
+    {% if request.path == '/chatbot' %}
     <script src="{{ url_for('static', filename='js/chatbot_avatar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/econova_robot_3d.js') }}"></script>
+    {% endif %}
 
     <!-- Inicialización de elementos visuales -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar sistema de temas
+            const currentPath = window.location.pathname;
+
+            // Inicializar sistema de temas (siempre disponible)
             if (window.themeManager) {
                 window.themeManager.init();
             }
 
-            // Inicializar mensajes contextuales
-            if (window.contextualMessages) {
-                window.contextualMessages.init();
+            // Inicializar elementos específicos de página
+            if (currentPath === '/chatbot') {
+                // Chatbot page elements
+                if (window.contextualMessages) window.contextualMessages.init();
+                if (window.chatbotAvatar) window.chatbotAvatar.init();
+                if (window.econovaRobot && document.getElementById('chatbot-robot')) {
+                    window.econovaRobot.init('chatbot-robot');
+                }
+            } else if (['/simulacion', '/benchmarking'].includes(currentPath)) {
+                // Simulation/Benchmarking pages
+                if (window.contextualMessages) window.contextualMessages.init();
             }
 
-            // Inicializar avatar del chatbot
-            if (window.chatbotAvatar) {
-                window.chatbotAvatar.init();
-            }
-
-            // Inicializar robot 3D si estamos en la página principal
-            if (window.location.pathname === '/' && window.econovaRobot) {
-                window.econovaRobot.init();
-            }
-
-            console.log('🎨 Elementos visuales modernos inicializados');
+            console.log('🎨 Elementos visuales inicializados');
         });
+    </script>
+
+    <!-- Simple Sun/Moon Theme Toggle -->
+    <script>
+        // Simple light/dark theme toggle with sun/moon icons
+        function initThemeToggle() {
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (!themeBtn || !themeIcon) {
+                console.log('🌙 Theme toggle elements not found');
+                return;
+            }
+
+            // Function to update icon based on current theme
+            function updateIcon() {
+                const currentTheme = document.body.className.includes('theme-dark') ? 'dark' : 'light';
+                if (currentTheme === 'dark') {
+                    themeIcon.className = 'fas fa-moon text-blue-400';
+                    themeBtn.title = 'Cambiar a tema claro';
+                } else {
+                    themeIcon.className = 'fas fa-sun text-yellow-500';
+                    themeBtn.title = 'Cambiar a tema oscuro';
+                }
+                console.log('🌙 Theme icon updated for:', currentTheme);
+            }
+
+            // Handle button click - toggle between light and dark
+            themeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const currentTheme = document.body.className.includes('theme-dark') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                console.log('🌙 Toggling from', currentTheme, 'to', newTheme);
+
+                // Use theme manager if available
+                if (window.themeManager && window.themeManager.applyTheme) {
+                    window.themeManager.applyTheme(newTheme);
+                } else if (window.switchTheme) {
+                    window.switchTheme(newTheme);
+                }
+
+                // Update icon after a short delay to let theme change take effect
+                setTimeout(updateIcon, 50);
+            });
+
+            // Initial icon update
+            updateIcon();
+
+            // Listen for theme changes to update icon
+            document.addEventListener('themeChanged', updateIcon);
+
+            console.log('🌙 Simple theme toggle initialized successfully');
+        }
+
+        // Initialize immediately
+        initThemeToggle();
     </script>
 </body>
 

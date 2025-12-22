@@ -28,7 +28,10 @@ CREATE TABLE Usuarios(
 CREATE TABLE Simulaciones(
     simulacion_id SERIAL PRIMARY KEY,
     usuario_id int,
+    nombre VARCHAR(100),
     tipo_simulacion VARCHAR(70) NOT NULL,
+    parametros JSONB,
+    resultados JSONB,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     Foreign Key (usuario_id) REFERENCES Usuarios(usuario_id)
 );

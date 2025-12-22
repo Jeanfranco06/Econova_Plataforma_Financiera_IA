@@ -32,11 +32,102 @@ def crear_tablas_sqlite():
             )
         """)
 
+        # Crear tabla Simulaciones
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Simulaciones (
+                simulacion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                nombre TEXT,
+                tipo_simulacion TEXT NOT NULL,
+                parametros TEXT,
+                resultados TEXT,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
+        # Crear tabla Resultados
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Resultados (
+                resultado_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                simulacion_id INTEGER NOT NULL,
+                indicador TEXT NOT NULL,
+                valor REAL NOT NULL,
+                FOREIGN KEY (simulacion_id) REFERENCES Simulaciones(simulacion_id)
+            )
+        """)
+
+        # Crear tabla Insignias
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Insignias (
+                insignia_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre_insig TEXT NOT NULL UNIQUE,
+                descripcion_insig TEXT NOT NULL
+            )
+        """)
+
+        # Crear tabla Usuario_Insignia
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Usuario_Insignia (
+                insignia_id INTEGER NOT NULL,
+                usuario_id INTEGER NOT NULL,
+                fecha_obtenida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (usuario_id, insignia_id),
+                FOREIGN KEY (insignia_id) REFERENCES Insignias(insignia_id),
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
+        # Crear tabla Ranking
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Ranking (
+                ranking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                puntaje REAL,
+                sector TEXT,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
+        # Crear tabla Notificaciones
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Notificaciones (
+                notificacion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                tipo TEXT NOT NULL,
+                mensaje TEXT NOT NULL,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                estado TEXT DEFAULT 'Pendiente',
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
+        # Crear tabla Benchmarking_Grupo
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Benchmarking_Grupo (
+                benchmarking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre_grupo TEXT,
+                descripcion TEXT
+            )
+        """)
+
+        # Crear tabla Usuario_Benchmarking
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Usuario_Benchmarking (
+                usuario_id INTEGER NOT NULL,
+                benchmarking_id INTEGER NOT NULL,
+                PRIMARY KEY (usuario_id, benchmarking_id),
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id),
+                FOREIGN KEY (benchmarking_id) REFERENCES Benchmarking_Grupo(benchmarking_id)
+            )
+        """)
+
         # Crear índices
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_email ON Usuarios(email)")
-        db.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_nombre_usuario ON Usuarios(nombre_usuario)"
-        )
+        db.cur.execute("CREATE INDEX IF NOT EXISTS idx_nombre_usuario ON Usuarios(nombre_usuario)")
+        db.cur.execute("CREATE INDEX IF NOT EXISTS idx_simulaciones_usuario ON Simulaciones(usuario_id)")
+        db.cur.execute("CREATE INDEX IF NOT EXISTS idx_resultados_simulacion ON Resultados(simulacion_id)")
 
         db.conn.commit()
         print("✅ Tablas SQLite creadas exitosamente")
@@ -123,7 +214,19 @@ def crear_app(config_name="development"):
 
     @app.route("/resultados")
     def resultados():
-        return render_template("resultados.html")
+        from flask import session
+        from app.modelos.simulacion import Simulacion
+
+        # Check if user is logged in
+        if 'usuario_id' not in session:
+            return render_template("resultados.html", simulaciones=[], total_simulaciones=0)
+
+        # Get user's simulations
+        usuario_id = session['usuario_id']
+        simulaciones = Simulacion.obtener_simulaciones_usuario(usuario_id, limite=50)
+        total_simulaciones = len(simulaciones)
+
+        return render_template("resultados.html", simulaciones=simulaciones, total_simulaciones=total_simulaciones)
 
     @app.route("/chatbot")
     def chatbot():
@@ -144,6 +247,63 @@ def crear_app(config_name="development"):
     @app.route("/demo")
     def demo():
         return render_template("demo.html")
+
+    # User page routes (moved from usuarios blueprint to avoid /api/v1 prefix)
+    @app.route('/login', methods=['GET'])
+    def login():
+        """Mostrar página de inicio de sesión"""
+        return render_template('login.html')
+
+    @app.route('/registro', methods=['GET'])
+    def registro():
+        """Mostrar formulario de registro"""
+        return render_template('registro.html')
+
+    @app.route('/dashboard')
+    def dashboard():
+        """Mostrar dashboard del usuario"""
+        from flask import session, flash, redirect, url_for
+        if 'usuario_id' not in session:
+            flash('Debes iniciar sesión para acceder al dashboard.', 'error')
+            return redirect(url_for('login'))
+
+        return render_template('dashboard.html')
+
+    @app.route('/perfil')
+    def perfil():
+        """Mostrar perfil del usuario"""
+        from flask import session, flash, redirect, url_for
+        if 'usuario_id' not in session:
+            flash('Debes iniciar sesión para acceder a tu perfil.', 'error')
+            return redirect(url_for('login'))
+
+        # Obtener datos del perfil
+        from app.modelos.usuario import Usuario
+        usuario_id = session['usuario_id']
+        usuario = Usuario.obtener_usuario_por_id(usuario_id)
+
+        return render_template('perfil.html', perfil_data=usuario)
+
+    @app.route('/logout')
+    def logout():
+        """Cerrar sesión del usuario"""
+        from flask import session, flash, redirect
+        session.clear()
+        flash('Sesión cerrada exitosamente.', 'success')
+        return redirect('/')
+
+    # Context processor to make current user available in all templates
+    @app.context_processor
+    def inject_current_user():
+        from flask import session
+        from app.modelos.usuario import Usuario
+        if 'usuario_id' in session:
+            try:
+                current_user = Usuario.obtener_usuario_por_id(session['usuario_id'])
+                return {'current_user': current_user}
+            except:
+                return {'current_user': None}
+        return {'current_user': None}
 
     return app
 

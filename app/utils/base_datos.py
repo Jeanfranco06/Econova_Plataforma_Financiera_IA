@@ -72,6 +72,11 @@ class DatabaseConnection:
 
     def execute_query(self, query, params=None, fetch=False):
         try:
+            # Convert parameter placeholders for SQLite
+            if not self.use_postgresql and params:
+                # Replace %s with ? for SQLite
+                query = query.replace('%s', '?')
+
             if params is None:
                 self.cur.execute(query)
             else:

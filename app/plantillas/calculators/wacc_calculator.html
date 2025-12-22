@@ -1,0 +1,431 @@
+<!-- WACC Calculator -->
+<div id="wacc-calculator" class="simulation-calculator" style="display: none;">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Engineering Economics Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Costo Promedio Ponderado del Capital (WACC)</h3>
+          <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-balance-scale mr-1"></i>Métrica Fundamental
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Tasa de descuento apropiada para evaluar proyectos de inversión</p>
+
+        <!-- Educational Content -->
+        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-purple-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-purple-800 mb-1">Concepto Económico</h5>
+              <p class="text-sm text-purple-700">
+                El WACC representa el costo promedio del capital que la empresa utiliza para financiar sus operaciones.
+                Es la tasa de descuento correcta para evaluar proyectos de riesgo similar al de la empresa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="wacc-form" class="space-y-6">
+      <!-- Company Context -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-building mr-2 text-gray-600"></i>
+          Contexto Empresarial
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre de la Empresa
+            </label>
+            <input
+              type="text"
+              id="wacc-empresa"
+              name="empresa"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Ej: Industrias ABC S.A."
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Sector Industrial
+            </label>
+            <select id="wacc-sector" name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+              <option value="">Seleccionar sector...</option>
+              <option value="energia">Energía y Recursos</option>
+              <option value="manufactura">Manufactura</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="construccion">Construcción</option>
+              <option value="financiero">Servicios Financieros</option>
+              <option value="retail">Retail y Comercio</option>
+              <option value="salud">Salud</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capital Structure -->
+      <div>
+        <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-pie mr-2 text-gray-600"></i>
+          Estructura de Capital
+        </h4>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Debt Component -->
+          <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h5 class="font-medium text-red-800 mb-3 flex items-center">
+              <i class="fas fa-credit-card mr-2"></i>
+              Componente de Deuda
+            </h5>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Costo de Deuda (antes de impuestos) (%)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-deuda"
+                  name="costo_deuda"
+                  required
+                  min="0"
+                  max="50"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="8.5"
+                >
+                <p class="text-xs text-gray-500 mt-1">Tasa de interés efectiva de la deuda</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Proporción de Deuda (%)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-proporcion-deuda"
+                  name="proporcion_deuda"
+                  required
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="40"
+                >
+                <p class="text-xs text-gray-500 mt-1">Porcentaje de deuda en estructura de capital</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Equity Component -->
+          <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h5 class="font-medium text-green-800 mb-3 flex items-center">
+              <i class="fas fa-chart-line mr-2"></i>
+              Componente de Capital Propio
+            </h5>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Costo de Capital Propio (%)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-capital"
+                  name="costo_capital"
+                  required
+                  min="0"
+                  max="50"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="12.0"
+                >
+                <p class="text-xs text-gray-500 mt-1">Costo de equity (CAPM o similar)</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Proporción de Capital Propio (%)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-proporcion-capital"
+                  name="proporcion_capital"
+                  required
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="60"
+                >
+                <p class="text-xs text-gray-500 mt-1">Porcentaje de equity en estructura de capital</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tax Considerations -->
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h4 class="font-semibold text-blue-800 mb-3 flex items-center">
+          <i class="fas fa-calculator mr-2"></i>
+          Consideraciones Fiscales
+        </h4>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Tasa de Impuestos Corporativos (%)
+            </label>
+            <input
+              type="number"
+              id="wacc-impuestos"
+              name="tasa_impuestos"
+              required
+              min="0"
+              max="50"
+              step="0.01"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="29.5"
+            >
+            <p class="text-xs text-gray-500 mt-1">Tasa efectiva de impuestos de la empresa</p>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <input type="checkbox" id="wacc-escudo-fiscal" name="escudo_fiscal" checked class="w-4 h-4 text-blue-600">
+            <label for="wacc-escudo-fiscal" class="text-sm text-gray-700">
+              Aplicar escudo fiscal a la deuda
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Options -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-cogs mr-2 text-gray-600"></i>
+          Opciones de Análisis
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="wacc-sensibilidad" name="analisis_sensibilidad" class="mr-2">
+            <label for="wacc-sensibilidad" class="text-sm text-gray-700">Análisis de sensibilidad</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="wacc-comparacion" name="comparacion_sector" class="mr-2">
+            <label for="wacc-comparacion" class="text-sm text-gray-700">Comparación sectorial</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Button -->
+      <div class="flex justify-center pt-4">
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-10 py-4 rounded-lg hover:from-purple-700 hover:to-purple-800 focus:ring-4 focus:ring-purple-300 transition duration-300 text-lg font-semibold shadow-lg"
+        >
+          <i class="fas fa-calculator mr-2"></i>Calcular WACC y Análisis
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div id="wacc-results" class="mt-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200" style="display: none;">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-bold text-gray-800">Resultados del Análisis WACC</h4>
+        <div class="flex gap-2">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel">
+            <i class="fas fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main WACC Result -->
+      <div class="text-center mb-8">
+        <div class="inline-block bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+          <div class="text-4xl font-bold text-purple-600 mb-2" id="wacc-result">0.0%</div>
+          <div class="text-lg text-gray-600 font-medium">Costo Promedio Ponderado del Capital</div>
+          <div class="text-sm text-gray-500 mt-1">Tasa de descuento apropiada</div>
+        </div>
+      </div>
+
+      <!-- Component Breakdown -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Debt Component -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h5 class="font-bold text-red-800 mb-4 flex items-center">
+            <i class="fas fa-credit-card mr-2"></i>
+            Componente de Deuda
+          </h5>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Costo de deuda (antes de impuestos):</span>
+              <span class="font-semibold text-red-600" id="wacc-deuda-display">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Costo de deuda (después de impuestos):</span>
+              <span class="font-semibold text-red-600" id="wacc-deuda-after-tax">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Peso de la deuda:</span>
+              <span class="font-semibold text-gray-800" id="wacc-peso-deuda">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center border-t pt-2">
+              <span class="text-sm font-medium text-gray-700">Contribución al WACC:</span>
+              <span class="font-bold text-red-600" id="wacc-contribucion-deuda">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equity Component -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h5 class="font-bold text-green-800 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2"></i>
+            Componente de Capital Propio
+          </h5>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Costo de capital propio:</span>
+              <span class="font-semibold text-green-600" id="wacc-capital-display">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Peso del capital propio:</span>
+              <span class="font-semibold text-gray-800" id="wacc-peso-capital">0.0%</span>
+            </div>
+            <div class="flex justify-between items-center border-t pt-2">
+              <span class="text-sm font-medium text-gray-700">Contribución al WACC:</span>
+              <span class="font-bold text-green-600" id="wacc-contribucion-capital">0.0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decision Framework -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-gavel mr-2 text-gray-600"></i>
+          Marco de Decisión Económica
+        </h5>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Evaluación WACC:</span>
+              <span id="wacc-evaluation" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
+            </div>
+            <div class="text-sm text-gray-600" id="wacc-evaluation-text">
+              Evaluando costo de capital...
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-800">Comparación con TIR:</span>
+              <span id="wacc-vs-tir" class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                Calcular TIR primero
+              </span>
+            </div>
+            <div class="text-sm text-gray-600">
+              WACC vs TIR determina viabilidad
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WACC Formula Explanation -->
+      <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-lightbulb mr-2 text-purple-600"></i>
+          Fórmula del WACC
+        </h5>
+
+        <div class="bg-white p-4 rounded-lg mb-4">
+          <div class="text-center">
+            <div class="text-lg font-mono text-purple-800 mb-2">
+              WACC = (E/V × Re) + (D/V × Rd × (1-Tc))
+            </div>
+            <div class="text-sm text-gray-600">
+              Donde: E/V = Proporción de capital propio | D/V = Proporción de deuda |<br>
+              Re = Costo de capital propio | Rd = Costo de deuda | Tc = Tasa de impuestos
+            </div>
+          </div>
+        </div>
+
+        <div class="text-sm text-gray-700 space-y-2">
+          <p><strong>WACC calculado:</strong> <span id="wacc-formula-result" class="font-semibold text-purple-600">0.0%</span></p>
+          <p><strong>Interpretación:</strong> Este es el costo mínimo de rendimiento que debe generar un proyecto para crear valor para los accionistas.</p>
+          <p><strong>Aplicación:</strong> Use este WACC como tasa de descuento en análisis VAN y TIR de proyectos con riesgo similar al de la empresa.</p>
+        </div>
+      </div>
+
+      <!-- Industry Benchmarks -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-industry mr-2 text-gray-600"></i>
+          Referencias Sectoriales
+        </h5>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Sector</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">WACC Promedio</th>
+                <th class="px-4 py-2 text-right font-medium text-gray-700">Rango Típico</th>
+              </tr>
+            </thead>
+            <tbody id="wacc-sector-table" class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-2 text-left font-medium text-gray-700">Energía y Recursos</td>
+                <td class="px-4 py-2 text-right text-gray-700">8.5%</td>
+                <td class="px-4 py-2 text-right text-gray-700">7.0% - 10.0%</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="px-4 py-2 text-left font-medium text-gray-700">Manufactura</td>
+                <td class="px-4 py-2 text-right text-gray-700">9.2%</td>
+                <td class="px-4 py-2 text-right text-gray-700">8.0% - 11.0%</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 text-left font-medium text-gray-700">Tecnología</td>
+                <td class="px-4 py-2 text-right text-gray-700">10.8%</td>
+                <td class="px-4 py-2 text-right text-gray-700">9.0% - 13.0%</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="px-4 py-2 text-left font-medium text-gray-700">Construcción</td>
+                <td class="px-4 py-2 text-right text-gray-700">9.8%</td>
+                <td class="px-4 py-2 text-right text-gray-700">8.5% - 11.5%</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 text-left font-medium text-gray-700">Servicios Financieros</td>
+                <td class="px-4 py-2 text-right text-gray-700">8.9%</td>
+                <td class="px-4 py-2 text-right text-gray-700">7.5% - 10.5%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.guardarAnalisis('wacc')">
+          <i class="fas fa-save mr-2"></i>Guardar Análisis
+        </button>
+        <button class="border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.compartirAnalisis('wacc')">
+          <i class="fas fa-share mr-2"></i>Compartir Resultados
+        </button>
+        <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.imprimirAnalisis('wacc')">
+          <i class="fas fa-print mr-2"></i>Imprimir Reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

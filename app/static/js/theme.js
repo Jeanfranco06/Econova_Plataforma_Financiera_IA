@@ -115,15 +115,48 @@ class ThemeManager {
         document.body.className = document.body.className.replace(/theme-\w+/g, '');
         document.body.classList.add(`theme-${themeName}`);
 
+        // Forzar actualización de elementos que usan clases temáticas
+        this.updateThemeAwareElements();
+
         // Guardar en localStorage
         this.saveTheme(themeName);
 
         // Disparar evento
         this.dispatchEvent('themeChanged', { theme: themeName, colors: theme.colors });
+
+        console.log(`Tema cambiado a: ${themeName}`, theme.colors);
+    }
+
+    updateThemeAwareElements() {
+        // Actualizar elementos que necesitan refrescarse con el nuevo tema
+        const themeElements = document.querySelectorAll('.theme-bg-background, .theme-bg-surface, .theme-text-primary, .theme-text-secondary, .theme-border, .theme-shadow');
+
+        themeElements.forEach(element => {
+            // Forzar reflow para aplicar nuevos estilos
+            element.style.display = 'none';
+            element.offsetHeight; // Trigger reflow
+            element.style.display = '';
+        });
+
+        // Actualizar elementos con clases Tailwind que deben usar variables de tema
+        const tailwindOverrides = [
+            '.bg-gray-50', '.bg-white', '.text-gray-800', '.text-gray-700',
+            '.text-gray-600', '.text-gray-500', '.border-gray-200', '.bg-gray-100'
+        ];
+
+        tailwindOverrides.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                // Forzar actualización de estilos computados
+                const computedStyle = getComputedStyle(element);
+                element.style.cssText += '; display: ' + computedStyle.display + ';';
+            });
+        });
     }
 
     createThemeSwitcher() {
-        if (document.getElementById('theme-switcher')) return;
+        // Don't create theme switcher if we have the navbar theme toggle
+        if (document.getElementById('theme-toggle-btn') || document.getElementById('theme-menu')) return;
 
         const switcher = document.createElement('div');
         switcher.id = 'theme-switcher';
@@ -151,21 +184,21 @@ class ThemeManager {
         const styles = `
             #theme-switcher {
                 position: fixed;
-                top: 20px;
+                top: 80px;
                 right: 20px;
-                z-index: 1000;
+                z-index: 10000;
             }
 
             .theme-toggle-btn {
                 width: 50px;
                 height: 50px;
                 border-radius: 50%;
-                border: none;
+                border: 3px solid #fff;
                 background: var(--color-primary);
                 color: #000;
                 font-size: 18px;
                 cursor: pointer;
-                box-shadow: 0 4px 20px var(--color-shadow);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
                 transition: all 0.3s ease;
                 display: flex;
                 align-items: center;
@@ -174,7 +207,7 @@ class ThemeManager {
 
             .theme-toggle-btn:hover {
                 transform: scale(1.1);
-                box-shadow: 0 6px 30px var(--color-shadow);
+                box-shadow: 0 6px 30px rgba(0,0,0,0.4);
             }
 
             .theme-menu {
@@ -182,12 +215,13 @@ class ThemeManager {
                 top: 60px;
                 right: 0;
                 background: var(--color-surface);
-                border: 1px solid var(--color-border);
+                border: 2px solid var(--color-border);
                 border-radius: 12px;
                 padding: 12px;
-                box-shadow: 0 8px 32px var(--color-shadow);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
                 min-width: 200px;
                 backdrop-filter: blur(10px);
+                z-index: 10001;
             }
 
             .theme-menu.hidden {
@@ -206,6 +240,7 @@ class ThemeManager {
                 cursor: pointer;
                 transition: background-color 0.2s;
                 color: var(--color-text);
+                font-size: 14px;
             }
 
             .theme-option:hover {
@@ -216,6 +251,7 @@ class ThemeManager {
             .theme-option.active {
                 background: var(--color-primary);
                 color: #000;
+                font-weight: bold;
             }
 
             .theme-preview {
@@ -238,7 +274,7 @@ class ThemeManager {
 
             @media (max-width: 768px) {
                 #theme-switcher {
-                    top: 10px;
+                    top: 70px;
                     right: 10px;
                 }
 
@@ -261,36 +297,44 @@ class ThemeManager {
 
         document.body.appendChild(switcher);
 
+        console.log('🎨 Theme switcher created and appended to body');
+
         // Event listeners
         const toggleBtn = document.getElementById('theme-toggle');
         const menu = document.getElementById('theme-menu');
 
-        toggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menu.classList.toggle('hidden');
-        });
-
-        // Cerrar menú al hacer click fuera
-        document.addEventListener('click', (e) => {
-            if (!switcher.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-
-        // Cambiar tema
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const theme = option.dataset.theme;
-                this.applyTheme(theme);
-                menu.classList.add('hidden');
-
-                // Actualizar clase active
-                document.querySelectorAll('.theme-option').forEach(opt => {
-                    opt.classList.remove('active');
-                });
-                option.classList.add('active');
+        if (toggleBtn && menu) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+                console.log('🎨 Theme menu toggled');
             });
-        });
+
+            // Cerrar menú al hacer click fuera
+            document.addEventListener('click', (e) => {
+                if (!switcher.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // Cambiar tema
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const theme = option.dataset.theme;
+                    console.log('🎨 Switching to theme:', theme);
+                    this.applyTheme(theme);
+                    menu.classList.add('hidden');
+
+                    // Actualizar clase active
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    option.classList.add('active');
+                });
+            });
+        } else {
+            console.error('🎨 Theme switcher elements not found');
+        }
     }
 
     setupSystemThemeDetection() {
