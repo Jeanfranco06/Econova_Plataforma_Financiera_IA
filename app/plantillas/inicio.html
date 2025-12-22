@@ -162,44 +162,73 @@
   </div>
 
   <div class="container mx-auto px-6 text-center relative z-10">
-    <div class="inline-block mb-6">
-      <h1 class="text-5xl md:text-6xl font-bold mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-        Econova
-      </h1>
-      <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-green-400 mx-auto rounded-full"></div>
-    </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left Column: Text Content -->
+      <div class="order-2 lg:order-1">
+        <div class="inline-block mb-6">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+            Econova
+          </h1>
+          <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-green-400 mx-auto rounded-full"></div>
+        </div>
 
-    <p class="text-xl md:text-2xl mb-8 text-blue-100 font-light">
-      Plataforma Inteligente de Simulación Financiera Empresarial
-    </p>
-    <p class="text-lg mb-12 max-w-3xl mx-auto text-blue-200 leading-relaxed">
-      Optimiza tus decisiones financieras con IA avanzada. Simula VAN, TIR, portafolios y más,
-      guiado por nuestro chatbot asesor inteligente.
-    </p>
+        <p class="text-xl md:text-2xl mb-8 text-blue-100 font-light">
+          Plataforma Inteligente de Simulación Financiera Empresarial
+        </p>
+        <p class="text-lg mb-12 max-w-2xl text-blue-200 leading-relaxed">
+          Optimiza tus decisiones financieras con IA avanzada. Simula VAN, TIR, portafolios y más,
+          guiado por nuestro chatbot asesor inteligente.
+        </p>
 
-    <!-- Interactive CTA Buttons -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a href="#simulacion" class="bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl pulse-glow">
-        <i class="fas fa-play-circle mr-2"></i>Comenzar Simulación
-      </a>
-      <a href="#caracteristicas" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-900 transition duration-300 transform hover:scale-105">
-        <i class="fas fa-info-circle mr-2"></i>Conocer Más
-      </a>
-    </div>
+        <!-- Interactive CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-start mb-8">
+          <a href="#simulacion" class="bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl pulse-glow">
+            <i class="fas fa-play-circle mr-2"></i>Comenzar Simulación
+          </a>
+          <a href="#caracteristicas" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-900 transition duration-300 transform hover:scale-105">
+            <i class="fas fa-info-circle mr-2"></i>Conocer Más
+          </a>
+        </div>
 
-    <!-- Economic Stats -->
-    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-        <div class="text-3xl font-bold text-green-300 mb-2">98%</div>
-        <div class="text-sm text-blue-200">Precisión en simulaciones</div>
+        <!-- Economic Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-md">
+          <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <div class="text-2xl font-bold text-green-300 mb-1">98%</div>
+            <div class="text-xs text-blue-200">Precisión</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <div class="text-2xl font-bold text-blue-300 mb-1">24/7</div>
+            <div class="text-xs text-blue-200">IA Activa</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <div class="text-2xl font-bold text-purple-300 mb-1">500+</div>
+            <div class="text-xs text-blue-200">Empresas</div>
+          </div>
+        </div>
       </div>
-      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-        <div class="text-3xl font-bold text-blue-300 mb-2">24/7</div>
-        <div class="text-sm text-blue-200">Asistencia del chatbot</div>
-      </div>
-      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-        <div class="text-3xl font-bold text-purple-300 mb-2">500+</div>
-        <div class="text-sm text-blue-200">Empresas usuarias</div>
+
+      <!-- Right Column: 3D Robot Hero -->
+      <div class="order-1 lg:order-2 flex justify-center">
+        <div id="robot-hero-container" class="relative">
+          <!-- Robot 3D Container -->
+          <div id="robot-container" class="robot-3d-display"></div>
+
+          <!-- Floating Tech Elements around Robot -->
+          <div class="absolute -top-4 -left-4 w-8 h-8 bg-blue-400 rounded-full animate-bounce opacity-70">
+            <i class="fas fa-chart-line text-white text-xs flex items-center justify-center h-full"></i>
+          </div>
+          <div class="absolute -bottom-4 -right-4 w-8 h-8 bg-green-400 rounded-full animate-bounce opacity-70" style="animation-delay: 0.5s;">
+            <i class="fas fa-robot text-white text-xs flex items-center justify-center h-full"></i>
+          </div>
+          <div class="absolute top-1/2 -right-6 w-6 h-6 bg-purple-400 rounded-full animate-pulse opacity-70" style="animation-delay: 1s;">
+            <i class="fas fa-brain text-white text-xs flex items-center justify-center h-full"></i>
+          </div>
+
+          <!-- Robot Info Tooltip -->
+          <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 bg-black/80 text-white px-4 py-2 rounded-lg text-sm opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            🤖 Robot IA - Tu asistente financiero inteligente
+          </div>
+        </div>
       </div>
     </div>
   </div>
