@@ -137,6 +137,8 @@ python run.py
 
 La aplicación estará disponible en `http://localhost:5000`
 
+**Nota:** El script `run.py` configura automáticamente SQLite para desarrollo local si no hay una base de datos PostgreSQL configurada.
+
 ## 📁 Estructura del Proyecto
 
 ```
