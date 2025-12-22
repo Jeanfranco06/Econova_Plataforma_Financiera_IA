@@ -191,3 +191,10 @@ def registrar_manejadores_errores(app):
     @app.errorhandler(400)
     def peticion_invalida(error):
         return jsonify({"error": "Petición inválida", "status": 400}), 400
+
+
+# Crear instancia global de la aplicación para Gunicorn
+# En producción, usa la configuración de producción
+# En desarrollo, usa la configuración de desarrollo
+config_name = "production" if os.getenv("RENDER") or os.getenv("PRODUCTION") else "development"
+app = crear_app(config_name)
