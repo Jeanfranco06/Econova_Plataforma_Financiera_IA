@@ -185,7 +185,7 @@ pytest pruebas/
 
 ### Autenticación:
 - `POST /api/v1/login` - Iniciar sesión
-- `POST /api/v1/registro` - Registrar usuario
+- `POST /api/v1/registrar` - Registrar usuario (API)
 - `POST /logout` - Cerrar sesión
 
 ### Financiero:

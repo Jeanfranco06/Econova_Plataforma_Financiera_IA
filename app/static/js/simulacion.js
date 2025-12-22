@@ -1,482 +1,720 @@
-// JavaScript para la página de simulación financiera
-// Archivo separado para evitar conflictos con Jinja2
+/**
+ * Módulo de Simulación Financiera - Econova
+ * Funcionalidades para simulaciones financieras interactivas
+ */
 
-// Cambio de tipo de simulación
+class SimulacionFinanciera {
+    constructor() {
+        this.simulaciones = {};
+        this.graficos = {};
+        this.init();
+    }
+
+    init() {
+        console.log('📊 Módulo de Simulación Financiera inicializado');
+        this.setupEventListeners();
+        this.inicializarGraficos();
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de formularios de simulación
+        document.addEventListener('submit', (e) => {
+            if (e.target.id === 'form-simulacion-van') {
+                e.preventDefault();
+                this.simularVAN(e.target);
+            }
+            if (e.target.id === 'form-simulacion-tir') {
+                e.preventDefault();
+                this.simularTIR(e.target);
+            }
+            if (e.target.id === 'form-simulacion-portafolio') {
+                e.preventDefault();
+                this.simularPortafolio(e.target);
+            }
+            if (e.target.id === 'form-simulacion-sensibilidad') {
+                e.preventDefault();
+                this.simularSensibilidad(e.target);
+            }
+        });
+
+        // Escuchar eventos de cambio en inputs
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('simulacion-input')) {
+                this.actualizarSimulacionTiempoReal(e.target);
+            }
+        });
+
+        // Escuchar eventos de actualización de gráficos
+        document.addEventListener('actualizarGrafico', (event) => {
+            this.actualizarGrafico(event.detail);
+        });
+    }
+
+    /**
+     * Simular VAN con análisis de sensibilidad
+     */
+    simularVAN(form) {
+        const formData = new FormData(form);
+        const datos = {
+            flujos: this.parsearFlujos(formData.get('flujos')),
+            tasaDescuento: parseFloat(formData.get('tasa_descuento')) || 0,
+            incluirSensibilidad: formData.get('sensibilidad') === 'on',
+            rangoSensibilidad: parseFloat(formData.get('rango_sensibilidad')) || 5
+        };
+
+        // Validar datos
+        if (!this.validarDatosVAN(datos)) {
+            this.mostrarError('Por favor, complete todos los campos correctamente.');
+            return;
+        }
+
+        // Calcular VAN
+        const resultado = this.calcularVAN(datos);
+
+        // Mostrar resultados
+        this.mostrarResultadosVAN(resultado, datos);
+
+        // Crear gráfico si está disponible
+        if (datos.incluirSensibilidad) {
+            this.crearGraficoSensibilidadVAN(datos, resultado);
+        }
+
+        // Guardar simulación
+        this.guardarSimulacion('van', { datos, resultado });
+
+        // Disparar evento
+        this.dispararEvento('vanSimulado', resultado);
+    }
+
+    calcularVAN(datos) {
+        const { flujos, tasaDescuento } = datos;
+        const tasaDecimal = tasaDescuento / 100;
+
+        let van = 0;
+        const detalleFlujos = [];
+
+        for (let i = 0; i < flujos.length; i++) {
+            const flujo = flujos[i];
+            const factorDescuento = Math.pow(1 + tasaDecimal, i);
+            const valorPresente = flujo / factorDescuento;
+
+            van += valorPresente;
+
+            detalleFlujos.push({
+                periodo: i,
+                flujo: flujo,
+                factorDescuento: factorDescuento,
+                valorPresente: valorPresente
+            });
+        }
+
+        // Análisis de sensibilidad si está habilitado
+        let sensibilidad = null;
+        if (datos.incluirSensibilidad) {
+            sensibilidad = this.analizarSensibilidadVAN(flujos, tasaDescuento, datos.rangoSensibilidad);
+        }
+
+        return {
+            van: van,
+            detalleFlujos: detalleFlujos,
+            sensibilidad: sensibilidad,
+            decision: van > 0 ? 'Viable' : van < 0 ? 'No Viable' : 'Indiferente',
+            tasaDescuento: tasaDescuento
+        };
+    }
+
+    analizarSensibilidadVAN(flujos, tasaBase, rango) {
+        const sensibilidades = [];
+        const pasos = 20;
+
+        for (let i = -rango; i <= rango; i += (rango * 2) / pasos) {
+            const tasaActual = tasaBase + i;
+            if (tasaActual >= 0) {
+                let vanSensibilidad = 0;
+                const tasaDecimal = tasaActual / 100;
+
+                for (let j = 0; j < flujos.length; j++) {
+                    vanSensibilidad += flujos[j] / Math.pow(1 + tasaDecimal, j);
+                }
+
+                sensibilidades.push({
+                    tasa: tasaActual,
+                    van: vanSensibilidad
+                });
+            }
+        }
+
+        return sensibilidades;
+    }
+
+    /**
+     * Simular TIR con análisis detallado
+     */
+    simularTIR(form) {
+        const formData = new FormData(form);
+        const datos = {
+            flujos: this.parsearFlujos(formData.get('flujos_tir')),
+            metodo: formData.get('metodo_tir') || 'newton',
+            maxIteraciones: parseInt(formData.get('max_iteraciones')) || 100,
+            tolerancia: parseFloat(formData.get('tolerancia')) || 0.0001
+        };
+
+        // Validar datos
+        if (!this.validarDatosTIR(datos)) {
+            this.mostrarError('Por favor, complete todos los campos correctamente.');
+            return;
+        }
+
+        // Calcular TIR
+        const resultado = this.calcularTIR(datos);
+
+        // Mostrar resultados
+        this.mostrarResultadosTIR(resultado, datos);
+
+        // Crear gráfico de convergencia
+        this.crearGraficoConvergenciaTIR(resultado);
+
+        // Guardar simulación
+        this.guardarSimulacion('tir', { datos, resultado });
+
+        // Disparar evento
+        this.dispararEvento('tirSimulado', resultado);
+    }
+
+    calcularTIR(datos) {
+        const { flujos, metodo, maxIteraciones, tolerancia } = datos;
+
+        // Verificar que hay al menos un flujo negativo y uno positivo
+        const tieneNegativo = flujos.some(f => f < 0);
+        const tienePositivo = flujos.some(f => f > 0);
+
+        if (!tieneNegativo || !tienePositivo) {
+            return {
+                tir: null,
+                error: 'Se requiere al menos un flujo negativo (inversión) y uno positivo (ingreso)',
+                iteraciones: 0,
+                convergencia: []
+            };
+        }
+
+        let tir = 0;
+        const convergencia = [];
+
+        if (metodo === 'newton') {
+            // Método de Newton-Raphson
+            tir = 0.1; // Estimación inicial
+            let iteracion = 0;
+
+            while (iteracion < maxIteraciones) {
+                let van = 0;
+                let derivada = 0;
+
+                for (let i = 0; i < flujos.length; i++) {
+                    van += flujos[i] / Math.pow(1 + tir, i);
+                    if (i > 0) {
+                        derivada -= i * flujos[i] / Math.pow(1 + tir, i + 1);
+                    }
+                }
+
+                convergencia.push({
+                    iteracion: iteracion + 1,
+                    tir: tir * 100,
+                    van: van,
+                    derivada: derivada
+                });
+
+                if (Math.abs(van) < tolerancia) {
+                    break;
+                }
+
+                if (Math.abs(derivada) < 1e-10) {
+                    tir += 0.01; // Pequeño ajuste si derivada es muy pequeña
+                } else {
+                    tir = tir - van / derivada;
+                }
+
+                // Limitar TIR a rango razonable
+                if (tir < -0.5 || tir > 1) {
+                    return {
+                        tir: null,
+                        error: 'No se pudo encontrar TIR en el rango válido',
+                        iteraciones: iteracion + 1,
+                        convergencia: convergencia
+                    };
+                }
+
+                iteracion++;
+            }
+
+            if (iteracion >= maxIteraciones) {
+                return {
+                    tir: null,
+                    error: 'No convergió en el número máximo de iteraciones',
+                    iteraciones: iteracion,
+                    convergencia: convergencia
+                };
+            }
+
+        } else {
+            // Método de aproximaciones sucesivas
+            let tirInferior = 0;
+            let tirSuperior = 1;
+            let iteracion = 0;
+
+            while (iteracion < maxIteraciones) {
+                const tirMedio = (tirInferior + tirSuperior) / 2;
+
+                let vanInferior = 0;
+                let vanSuperior = 0;
+                let vanMedio = 0;
+
+                for (let i = 0; i < flujos.length; i++) {
+                    vanInferior += flujos[i] / Math.pow(1 + tirInferior, i);
+                    vanSuperior += flujos[i] / Math.pow(1 + tirSuperior, i);
+                    vanMedio += flujos[i] / Math.pow(1 + tirMedio, i);
+                }
+
+                convergencia.push({
+                    iteracion: iteracion + 1,
+                    tir: tirMedio * 100,
+                    van: vanMedio
+                });
+
+                if (Math.abs(vanMedio) < tolerancia) {
+                    tir = tirMedio;
+                    break;
+                }
+
+                if (vanMedio > 0) {
+                    tirInferior = tirMedio;
+                } else {
+                    tirSuperior = tirMedio;
+                }
+
+                iteracion++;
+            }
+
+            if (iteracion >= maxIteraciones) {
+                return {
+                    tir: null,
+                    error: 'No convergió en el número máximo de iteraciones',
+                    iteraciones: iteracion,
+                    convergencia: convergencia
+                };
+            }
+        }
+
+        return {
+            tir: tir * 100, // Convertir a porcentaje
+            iteraciones: convergencia.length,
+            convergencia: convergencia,
+            metodo: metodo
+        };
+    }
+
+    /**
+     * Simular portafolio de inversión
+     */
+    simularPortafolio(form) {
+        const formData = new FormData(form);
+        const datos = {
+            activos: [
+                {
+                    nombre: formData.get('activo1_nombre') || 'Activo 1',
+                    peso: parseFloat(formData.get('activo1_peso')) || 0,
+                    retorno: parseFloat(formData.get('activo1_retorno')) || 0,
+                    riesgo: parseFloat(formData.get('activo1_riesgo')) || 0
+                },
+                {
+                    nombre: formData.get('activo2_nombre') || 'Activo 2',
+                    peso: parseFloat(formData.get('activo2_peso')) || 0,
+                    retorno: parseFloat(formData.get('activo2_retorno')) || 0,
+                    riesgo: parseFloat(formData.get('activo2_riesgo')) || 0
+                },
+                {
+                    nombre: formData.get('activo3_nombre') || 'Activo 3',
+                    peso: parseFloat(formData.get('activo3_peso')) || 0,
+                    retorno: parseFloat(formData.get('activo3_retorno')) || 0,
+                    riesgo: parseFloat(formData.get('activo3_riesgo')) || 0
+                }
+            ].filter(activo => activo.peso > 0)
+        };
+
+        // Validar datos
+        if (!this.validarDatosPortafolio(datos)) {
+            this.mostrarError('Por favor, complete correctamente los datos del portafolio.');
+            return;
+        }
+
+        // Calcular portafolio
+        const resultado = this.calcularPortafolio(datos);
+
+        // Mostrar resultados
+        this.mostrarResultadosPortafolio(resultado, datos);
+
+        // Crear gráfico de eficiencia
+        this.crearGraficoPortafolio(resultado);
+
+        // Guardar simulación
+        this.guardarSimulacion('portafolio', { datos, resultado });
+
+        // Disparar evento
+        this.dispararEvento('portafolioSimulado', resultado);
+    }
+
+    calcularPortafolio(datos) {
+        const { activos } = datos;
+
+        // Calcular retorno esperado del portafolio
+        const retornoPortafolio = activos.reduce((sum, activo) =>
+            sum + (activo.peso * activo.retorno), 0) / 100; // Convertir a decimal
+
+        // Calcular riesgo del portafolio (varianza)
+        let varianzaPortafolio = 0;
+
+        // Para simplificar, asumimos correlación = 0.5 entre activos
+        const correlacion = 0.5;
+
+        for (let i = 0; i < activos.length; i++) {
+            for (let j = 0; j < activos.length; j++) {
+                const peso_i = activos[i].peso;
+                const peso_j = activos[j].peso;
+                const riesgo_i = activos[i].riesgo / 100; // Convertir a decimal
+                const riesgo_j = activos[j].riesgo / 100;
+
+                if (i === j) {
+                    varianzaPortafolio += peso_i * peso_j * riesgo_i * riesgo_j;
+                } else {
+                    varianzaPortafolio += peso_i * peso_j * riesgo_i * riesgo_j * correlacion;
+                }
+            }
+        }
+
+        const riesgoPortafolio = Math.sqrt(varianzaPortafolio) * 100; // Convertir a porcentaje
+
+        // Calcular ratio de Sharpe (aproximado)
+        const tasaLibreRiesgo = 0.03; // 3% aproximado
+        const sharpeRatio = (retornoPortafolio - tasaLibreRiesgo) / (riesgoPortafolio / 100);
+
+        // Diversificación
+        const diversificacion = activos.length > 1 ? 'Bien diversificado' : 'Poco diversificado';
+
+        return {
+            retornoPortafolio: retornoPortafolio * 100, // Convertir a porcentaje
+            riesgoPortafolio: riesgoPortafolio,
+            sharpeRatio: sharpeRatio,
+            diversificacion: diversificacion,
+            activos: activos,
+            fronteraEficiente: this.calcularFronteraEficiente(activos)
+        };
+    }
+
+    calcularFronteraEficiente(activos) {
+        // Simplificación: calcular algunos puntos de la frontera eficiente
+        const puntos = [];
+        for (let peso1 = 0; peso1 <= 1; peso1 += 0.1) {
+            if (activos.length >= 2) {
+                const peso2 = 1 - peso1;
+                const retorno = peso1 * activos[0].retorno + peso2 * activos[1].retorno;
+                const riesgo = Math.sqrt(
+                    peso1 * peso1 * activos[0].riesgo * activos[0].riesgo +
+                    peso2 * peso2 * activos[1].riesgo * activos[1].riesgo +
+                    2 * peso1 * peso2 * activos[0].riesgo * activos[1].riesgo * 0.5
+                );
+
+                puntos.push({ retorno: retorno, riesgo: riesgo });
+            }
+        }
+
+        return puntos;
+    }
+
+    /**
+     * Funciones de gráficos
+     */
+    inicializarGraficos() {
+        // Verificar si Chart.js está disponible
+        if (typeof Chart !== 'undefined') {
+            console.log('📊 Chart.js disponible para gráficos');
+        } else {
+            console.warn('⚠️ Chart.js no está cargado - gráficos no disponibles');
+        }
+    }
+
+    crearGraficoSensibilidadVAN(datos, resultado) {
+        if (!resultado.sensibilidad || typeof Chart === 'undefined') return;
+
+        const ctx = document.getElementById('grafico-van-sensibilidad');
+        if (!ctx) return;
+
+        const labels = resultado.sensibilidad.map(s => s.tasa.toFixed(1) + '%');
+        const data = resultado.sensibilidad.map(s => s.van);
+
+        if (this.graficos.vanSensibilidad) {
+            this.graficos.vanSensibilidad.destroy();
+        }
+
+        this.graficos.vanSensibilidad = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'VAN',
+                    data: data,
+                    borderColor: '#00ffff',
+                    backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Análisis de Sensibilidad - VAN vs Tasa de Descuento'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'VAN (S/)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tasa de Descuento (%)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    crearGraficoConvergenciaTIR(resultado) {
+        if (!resultado.convergencia || typeof Chart === 'undefined') return;
+
+        const ctx = document.getElementById('grafico-tir-convergencia');
+        if (!ctx) return;
+
+        const labels = resultado.convergencia.map(c => 'Iter ' + c.iteracion);
+        const data = resultado.convergencia.map(c => c.tir);
+
+        if (this.graficos.tirConvergencia) {
+            this.graficos.tirConvergencia.destroy();
+        }
+
+        this.graficos.tirConvergencia = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'TIR (%)',
+                    data: data,
+                    borderColor: '#ff6b6b',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Convergencia del Método Numérico - TIR'
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'TIR (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Iteración'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    crearGraficoPortafolio(resultado) {
+        if (!resultado.activos || typeof Chart === 'undefined') return;
+
+        const ctx = document.getElementById('grafico-portafolio');
+        if (!ctx) return;
+
+        const labels = resultado.activos.map(a => a.nombre);
+        const pesos = resultado.activos.map(a => a.peso * 100);
+
+        if (this.graficos.portafolio) {
+            this.graficos.portafolio.destroy();
+        }
+
+        this.graficos.portafolio = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: pesos,
+                    backgroundColor: [
+                        '#00ffff',
+                        '#ff6b6b',
+                        '#4ecdc4',
+                        '#45b7d1',
+                        '#96ceb4'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribución del Portafolio'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Funciones de validación
+     */
+    validarDatosVAN(datos) {
+        return datos.flujos && datos.flujos.length > 0 &&
+               datos.tasaDescuento >= 0 && datos.tasaDescuento <= 50;
+    }
+
+    validarDatosTIR(datos) {
+        return datos.flujos && datos.flujos.length > 1;
+    }
+
+    validarDatosPortafolio(datos) {
+        const sumaPesos = datos.activos.reduce((sum, activo) => sum + activo.peso, 0);
+        return datos.activos.length > 0 &&
+               Math.abs(sumaPesos - 1) < 0.01 && // Suma de pesos ≈ 1
+               datos.activos.every(activo => activo.peso > 0 && activo.retorno >= 0 && activo.riesgo >= 0);
+    }
+
+    /**
+     * Funciones auxiliares
+     */
+    parsearFlujos(flujosString) {
+        if (!flujosString) return [];
+
+        return flujosString.split(',')
+            .map(f => parseFloat(f.trim()))
+            .filter(f => !isNaN(f));
+    }
+
+    formatearMoneda(valor) {
+        return new Intl.NumberFormat('es-PE', {
+            style: 'currency',
+            currency: 'PEN'
+        }).format(valor);
+    }
+
+    formatearPorcentaje(valor) {
+        return (valor).toFixed(2) + '%';
+    }
+
+    actualizarSimulacionTiempoReal(input) {
+        // Implementar actualizaciones en tiempo real si es necesario
+        const form = input.closest('form');
+        if (form) {
+            clearTimeout(this.simulacionTimeout);
+            this.simulacionTimeout = setTimeout(() => {
+                // Trigger simulation update
+                const event = new CustomEvent('actualizarGrafico', {
+                    detail: { formId: form.id, inputId: input.id }
+                });
+                document.dispatchEvent(event);
+            }, 300);
+        }
+    }
+
+    actualizarGrafico(detalles) {
+        // Implementar actualizaciones de gráficos en tiempo real
+        console.log('Actualizando gráfico:', detalles);
+    }
+
+    mostrarError(mensaje) {
+        // Usar sistema de mensajes contextuales si está disponible
+        if (window.contextualMessages) {
+            window.contextualMessages.error({
+                title: 'Error en simulación',
+                body: mensaje
+            });
+        } else {
+            alert(`Error: ${mensaje}`);
+        }
+    }
+
+    guardarSimulacion(tipo, datos) {
+        this.simulaciones[tipo] = {
+            ...datos,
+            timestamp: new Date(),
+            id: Date.now()
+        };
+
+        // Guardar en localStorage
+        try {
+            const simulacionesGuardadas = JSON.parse(localStorage.getItem('econova_simulaciones') || '{}');
+            simulacionesGuardadas[tipo] = this.simulaciones[tipo];
+            localStorage.setItem('econova_simulaciones', JSON.stringify(simulacionesGuardadas));
+        } catch (error) {
+            console.warn('No se pudo guardar la simulación:', error);
+        }
+    }
+
+    dispararEvento(evento, datos) {
+        const customEvent = new CustomEvent(`simulacion${evento.charAt(0).toUpperCase() + evento.slice(1)}`, {
+            detail: datos
+        });
+        document.dispatchEvent(customEvent);
+    }
+
+    // API pública
+    obtenerSimulacion(tipo) {
+        return this.simulaciones[tipo] || null;
+    }
+
+    listarSimulaciones() {
+        return Object.keys(this.simulaciones);
+    }
+
+    exportarResultados(tipo) {
+        const simulacion = this.simulaciones[tipo];
+        if (!simulacion) return null;
+
+        return {
+            tipo: tipo,
+            datos: simulacion.datos,
+            resultados: simulacion.resultado,
+            timestamp: simulacion.timestamp,
+            exportado: new Date()
+        };
+    }
+}
+
+// Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-  const typeButtons = document.querySelectorAll('.simulation-type-btn');
-  const calculators = document.querySelectorAll('.simulation-calculator');
-
-  typeButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remover clase activa de todos los botones
-      typeButtons.forEach(btn => {
-        btn.classList.remove('active', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600', 'text-white');
-        btn.classList.add('bg-gray-100', 'text-gray-700');
-      });
-
-      // Ocultar todas las calculadoras
-      calculators.forEach(calc => {
-        calc.style.display = 'none';
-      });
-
-      // Agregar clase activa al botón clickeado
-      this.classList.add('active');
-      if (this.id === 'van-btn') {
-        this.classList.add('bg-blue-600', 'text-white');
-      } else if (this.id === 'tir-btn') {
-        this.classList.add('bg-green-600', 'text-white');
-      } else if (this.id === 'wacc-btn') {
-        this.classList.add('bg-purple-600', 'text-white');
-      } else if (this.id === 'portafolio-btn') {
-        this.classList.add('bg-orange-600', 'text-white');
-      }
-
-      // Mostrar calculadora correspondiente
-      const calcId = this.id.replace('-btn', '-calculator');
-      document.getElementById(calcId).style.display = 'block';
-    });
-  });
-
-  // Calculadora VAN
-  document.getElementById('van-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    calculateVAN();
-  });
-
-  // Calculadora TIR
-  document.getElementById('tir-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    calculateTIR();
-  });
-
-  // Calculadora WACC
-  document.getElementById('wacc-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    calculateWACC();
-  });
-
-  // Calculadora Portafolio
-  const portafolioForm = document.getElementById('portafolio-form');
-  if (portafolioForm) {
-    portafolioForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      calculatePortfolio();
-    });
-  }
-
-  // Funcionalidad para agregar más años
-  document.getElementById('add-flujo-van').addEventListener('click', function() {
-    addYearToVAN();
-  });
-
-  document.getElementById('add-flujo-tir').addEventListener('click', function() {
-    addYearToTIR();
-  });
-
-  // Funcionalidad para agregar más activos al portafolio
-  const addActivoBtn = document.getElementById('add-activo-portafolio');
-  if (addActivoBtn) {
-    addActivoBtn.addEventListener('click', function() {
-      addAssetToPortfolio();
-    });
-  }
-
-  // El botón de portafolio siempre existe ahora
-  document.getElementById('portafolio-btn').addEventListener('click', function() {
-    // Ocultar todas las calculadoras
-    calculators.forEach(calc => {
-      calc.style.display = 'none';
-    });
-
-    // Mostrar calculadora de portafolio
-    document.getElementById('portafolio-calculator').style.display = 'block';
-
-    // Actualizar botones activos
-    typeButtons.forEach(btn => {
-      btn.classList.remove('active', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600', 'text-white');
-      btn.classList.add('bg-gray-100', 'text-gray-700');
-    });
-
-    this.classList.add('active', 'bg-orange-600', 'text-white');
-  });
+    window.simulacionFinanciera = new SimulacionFinanciera();
+    console.log('📊 Simulación Financiera inicializada');
 });
 
-function calculateVAN() {
-  // Obtener valores de inversión y tasa
-  const inversion = parseFloat(document.getElementById('van-inversion').value);
-  const tasa = parseFloat(document.getElementById('van-tasa').value) / 100;
-
-  if (!inversion || !tasa) {
-    alert('Por favor ingresa todos los valores requeridos');
-    return;
-  }
-
-  // Obtener flujos de caja
-  const flujos = [];
-  const flujoInputs = document.querySelectorAll('#van-flujos input[type="number"]');
-  flujoInputs.forEach(input => {
-    const value = parseFloat(input.value);
-    if (!isNaN(value)) {
-      flujos.push(value);
-    }
-  });
-
-  if (flujos.length === 0) {
-    alert('Por favor ingresa al menos un flujo de caja');
-    return;
-  }
-
-  // Calcular VAN
-  let van = -inversion;
-  for (let i = 0; i < flujos.length; i++) {
-    van += flujos[i] / Math.pow(1 + tasa, i + 1);
-  }
-
-  // Calcular TIR (aproximada)
-  const tir = calculateTIRFromFlows(inversion, flujos);
-
-  // Calcular período de recuperación
-  const payback = calculatePaybackPeriod(inversion, flujos);
-
-  // Mostrar resultados
-  document.getElementById('van-result').textContent = 'S/ ' + van.toLocaleString('es-PE', {maximumFractionDigits: 0});
-  document.getElementById('van-tir').textContent = tir.toFixed(1) + '%';
-  document.getElementById('van-payback').textContent = payback.toFixed(1) + ' años';
-
-  // Evaluación del proyecto
-  const evaluation = document.getElementById('van-evaluation');
-  if (van > 0) {
-    evaluation.textContent = 'Proyecto Viable';
-    evaluation.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800';
-  } else {
-    evaluation.textContent = 'Proyecto No Viable';
-    evaluation.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800';
-  }
-
-  document.getElementById('van-results').style.display = 'block';
-}
-
-function calculateTIR() {
-  // Obtener inversión inicial
-  const inversion = parseFloat(document.getElementById('tir-inversion').value);
-
-  if (!inversion) {
-    alert('Por favor ingresa la inversión inicial');
-    return;
-  }
-
-  // Obtener flujos de caja
-  const flujos = [];
-  const flujoInputs = document.querySelectorAll('#tir-flujos input[type="number"]');
-  flujoInputs.forEach(input => {
-    const value = parseFloat(input.value);
-    if (!isNaN(value)) {
-      flujos.push(value);
-    }
-  });
-
-  if (flujos.length === 0) {
-    alert('Por favor ingresa al menos un flujo de caja');
-    return;
-  }
-
-  const tir = calculateTIRFromFlows(inversion, flujos);
-
-  document.getElementById('tir-result').textContent = tir.toFixed(1) + '%';
-
-  const evaluation = document.getElementById('tir-evaluation');
-  if (tir > 10) {
-    evaluation.textContent = 'Excelente Rentabilidad';
-    evaluation.className = 'bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm font-semibold';
-  } else if (tir > 5) {
-    evaluation.textContent = 'Buena Rentabilidad';
-    evaluation.className = 'bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg text-sm font-semibold';
-  } else {
-    evaluation.textContent = 'Rentabilidad Baja';
-    evaluation.className = 'bg-red-100 text-red-800 px-4 py-2 rounded-lg text-sm font-semibold';
-  }
-
-  document.getElementById('tir-results').style.display = 'block';
-}
-
-function calculateWACC() {
-  // Obtener valores para cálculo WACC
-  const costoDeuda = parseFloat(document.getElementById('wacc-deuda').value) / 100;
-  const tasaImpuestos = parseFloat(document.getElementById('wacc-impuestos').value) / 100;
-  const costoCapital = parseFloat(document.getElementById('wacc-capital').value) / 100;
-  const proporcionDeuda = parseFloat(document.getElementById('wacc-proporcion').value) / 100;
-
-  if (!costoDeuda || !tasaImpuestos || !costoCapital || proporcionDeuda === undefined) {
-    alert('Por favor ingresa todos los valores requeridos');
-    return;
-  }
-
-  // WACC = (E/V * Re) + (D/V * Rd * (1-Tc))
-  const proporcionCapital = 1 - proporcionDeuda;
-  const costoDeudaDespuesImpuestos = costoDeuda * (1 - tasaImpuestos);
-
-  const wacc = (proporcionCapital * costoCapital) + (proporcionDeuda * costoDeudaDespuesImpuestos);
-
-  document.getElementById('wacc-result').textContent = (wacc * 100).toFixed(1) + '%';
-  document.getElementById('wacc-results').style.display = 'block';
-}
-
-function calculateTIRFromFlows(inversion, flujos) {
-  // Cálculo simplificado de TIR usando aproximación
-  // En una implementación real, usarías el método de Newton-Raphson
-  let tir = 0.1; // Comenzar con 10%
-  const maxIterations = 100;
-  const tolerance = 0.0001;
-
-  for (let i = 0; i < maxIterations; i++) {
-    let npv = -inversion;
-    let dnpv = 0;
-
-    for (let j = 0; j < flujos.length; j++) {
-      npv += flujos[j] / Math.pow(1 + tir, j + 1);
-      dnpv -= (j + 1) * flujos[j] / Math.pow(1 + tir, j + 2);
-    }
-
-    const newTir = tir - npv / dnpv;
-
-    if (Math.abs(newTir - tir) < tolerance) {
-      return newTir * 100;
-    }
-
-    tir = newTir;
-  }
-
-  return tir * 100;
-}
-
-function calculatePaybackPeriod(inversion, flujos) {
-  // Calcular período de recuperación (payback period)
-  let cumulative = 0;
-  let years = 0;
-
-  for (let i = 0; i < flujos.length; i++) {
-    cumulative += flujos[i];
-    years++;
-
-    if (cumulative >= inversion) {
-      // Interpolar para año parcial
-      const excess = cumulative - inversion;
-      const partialYear = excess / flujos[i];
-      return years - 1 + (1 - partialYear);
-    }
-  }
-
-  return years; // Si no se alcanza el payback
-}
-
-function addYearToVAN() {
-  // Agregar un nuevo año para flujos de caja VAN
-  const container = document.getElementById('van-flujos');
-  const yearCount = container.children.length + 1;
-
-  const div = document.createElement('div');
-  div.className = 'flex items-center space-x-3';
-
-  // Crear HTML para el nuevo campo de flujo de caja
-  const span = document.createElement('span');
-  span.className = 'text-sm text-gray-600 w-16';
-  span.textContent = 'Año ' + yearCount + ':';
-
-  const input = document.createElement('input');
-  input.type = 'number';
-  input.name = 'flujo' + yearCount;
-  input.step = '0.01';
-  input.className = 'flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
-  input.placeholder = '0';
-
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'remove-flujo text-red-500 hover:text-red-700 px-2';
-  button.innerHTML = '<i class="fas fa-trash"></i>';
-
-  div.appendChild(span);
-  div.appendChild(input);
-  div.appendChild(button);
-  container.appendChild(div);
-
-  // Mostrar botones de eliminar para todos menos el primero
-  const removeButtons = container.querySelectorAll('.remove-flujo');
-  removeButtons.forEach((btn, index) => {
-    if (index > 0) { // No mostrar para el primer año
-      btn.style.display = 'block';
-    }
-  });
-
-  // Agregar funcionalidad de eliminación
-  button.addEventListener('click', function() {
-    container.removeChild(div);
-    updateVANYears();
-  });
-}
-
-function addYearToTIR() {
-  // Agregar un nuevo año para flujos de caja TIR
-  const container = document.getElementById('tir-flujos');
-  const yearCount = container.children.length + 1;
-
-  const div = document.createElement('div');
-  div.className = 'flex items-center space-x-3';
-
-  // Crear HTML para el nuevo campo de flujo de caja
-  const span = document.createElement('span');
-  span.className = 'text-sm text-gray-600 w-16';
-  span.textContent = 'Año ' + yearCount + ':';
-
-  const input = document.createElement('input');
-  input.type = 'number';
-  input.name = 'flujo' + yearCount;
-  input.step = '0.01';
-  input.className = 'flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent';
-  input.placeholder = '0';
-
-  div.appendChild(span);
-  div.appendChild(input);
-  container.appendChild(div);
-}
-
-function updateVANYears() {
-  // Actualizar numeración de años en VAN
-  const container = document.getElementById('van-flujos');
-  const years = container.children;
-
-  for (let index = 0; index < years.length; index++) {
-    const year = years[index];
-    const span = year.querySelector('span');
-    const input = year.querySelector('input');
-    const removeBtn = year.querySelector('.remove-flujo');
-
-    span.textContent = 'Año ' + (index + 1) + ':';
-    input.name = 'flujo' + (index + 1);
-
-    if (index === 0) {
-      removeBtn.style.display = 'none';
-    } else {
-      removeBtn.style.display = 'block';
-    }
-  }
-}
-
-function calculatePortfolio() {
-  // Obtener todos los activos del portafolio
-  const activos = [];
-  const pesos = [];
-  const rendimientos = [];
-
-  // Recopilar datos de todos los activos
-  const activoInputs = document.querySelectorAll('#portafolio-activos input[name^="activo"]');
-  const pesoInputs = document.querySelectorAll('#portafolio-activos input[name^="peso"]');
-  const rendimientoInputs = document.querySelectorAll('#portafolio-activos input[name^="rendimiento"]');
-
-  for (let i = 0; i < activoInputs.length; i++) {
-    const activo = activoInputs[i].value.trim();
-    const peso = parseFloat(pesoInputs[i].value);
-    const rendimiento = parseFloat(rendimientoInputs[i].value);
-
-    if (activo && !isNaN(peso) && !isNaN(rendimiento) && peso > 0) {
-      activos.push(activo);
-      pesos.push(peso / 100); // Convertir a decimal
-      rendimientos.push(rendimiento / 100); // Convertir a decimal
-    }
-  }
-
-  if (activos.length < 2) {
-    alert('Por favor ingresa al menos 2 activos válidos para el portafolio');
-    return;
-  }
-
-  // Verificar que los pesos sumen 100%
-  const sumaPesos = pesos.reduce((sum, peso) => sum + peso, 0);
-  if (Math.abs(sumaPesos - 1) > 0.01) {
-    alert('Los pesos deben sumar exactamente 100%');
-    return;
-  }
-
-  // Calcular rendimiento esperado del portafolio
-  let rendimientoEsperado = 0;
-  for (let i = 0; i < pesos.length; i++) {
-    rendimientoEsperado += pesos[i] * rendimientos[i];
-  }
-
-  // Calcular riesgo (varianza) del portafolio
-  // Para simplificar, usaremos una aproximación básica sin covarianzas
-  // En un portafolio real, necesitaríamos la matriz de covarianzas
-  let varianza = 0;
-  for (let i = 0; i < pesos.length; i++) {
-    // Asumiendo volatilidad aproximada basada en el rendimiento esperado
-    // En la realidad, esto vendría de datos históricos
-    const volatilidadEstimada = Math.abs(rendimientos[i]) * 0.3; // 30% de volatilidad aproximada
-    varianza += pesos[i] * pesos[i] * volatilidadEstimada * volatilidadEstimada;
-  }
-
-  const riesgo = Math.sqrt(varianza);
-
-  // Mostrar resultados
-  document.getElementById('portafolio-rendimiento').textContent = (rendimientoEsperado * 100).toFixed(1) + '%';
-  document.getElementById('portafolio-riesgo').textContent = (riesgo * 100).toFixed(1) + '%';
-
-  // Mostrar distribución del portafolio
-  const distribucionDiv = document.getElementById('portafolio-distribucion');
-  distribucionDiv.innerHTML = '';
-
-  for (let i = 0; i < activos.length; i++) {
-    const div = document.createElement('div');
-    div.className = 'flex justify-between items-center py-1';
-    div.innerHTML = `
-      <span class="text-sm text-gray-700">${activos[i]}</span>
-      <span class="text-sm font-medium text-orange-600">${(pesos[i] * 100).toFixed(1)}%</span>
-    `;
-    distribucionDiv.appendChild(div);
-  }
-
-  document.getElementById('portafolio-results').style.display = 'block';
-}
-
-function addAssetToPortfolio() {
-  // Agregar un nuevo activo al portafolio
-  const container = document.getElementById('portafolio-activos');
-  const assetCount = Math.floor(container.children.length / 3) + 1; // Cada activo tiene 3 inputs
-
-  const div = document.createElement('div');
-  div.className = 'grid md:grid-cols-3 gap-4 items-center';
-
-  // Nombre del activo
-  const activoDiv = document.createElement('div');
-  const activoInput = document.createElement('input');
-  activoInput.type = 'text';
-  activoInput.name = 'activo' + assetCount;
-  activoInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent';
-  activoInput.placeholder = 'Ej: Nuevo Activo';
-  activoDiv.appendChild(activoInput);
-
-  // Peso
-  const pesoDiv = document.createElement('div');
-  const pesoInput = document.createElement('input');
-  pesoInput.type = 'number';
-  pesoInput.name = 'peso' + assetCount;
-  pesoInput.min = '0';
-  pesoInput.max = '100';
-  pesoInput.step = '0.01';
-  pesoInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent';
-  pesoInput.placeholder = '10';
-  pesoDiv.appendChild(pesoInput);
-
-  // Rendimiento
-  const rendimientoDiv = document.createElement('div');
-  const rendimientoInput = document.createElement('input');
-  rendimientoInput.type = 'number';
-  rendimientoInput.name = 'rendimiento' + assetCount;
-  rendimientoInput.step = '0.01';
-  rendimientoInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent';
-  rendimientoInput.placeholder = '8';
-  rendimientoDiv.appendChild(rendimientoInput);
-
-  div.appendChild(activoDiv);
-  div.appendChild(pesoDiv);
-  div.appendChild(rendimientoDiv);
-  container.appendChild(div);
+// Exportar para módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SimulacionFinanciera;
 }

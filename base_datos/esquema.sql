@@ -9,12 +9,20 @@ DROP TABLE IF EXISTS Benchmarking_Grupo ;
 DROP TABLE IF EXISTS Ranking ;
 DROP TABLE IF EXISTS Usuarios ;
 CREATE TABLE Usuarios(
-    usuario_id  serial PRIMARY key,
-    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+    usuario_id SERIAL PRIMARY KEY,
+    nombre_usuario VARCHAR(50) UNIQUE,
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
     email VARCHAR(70) NOT NULL UNIQUE,
-    nivel VARCHAR(80)
+    telefono VARCHAR(20),
+    password_hash TEXT,
+    empresa VARCHAR(100),
+    sector VARCHAR(100),
+    tamano_empresa VARCHAR(50),
+    newsletter BOOLEAN DEFAULT 0,
+    nivel VARCHAR(80) DEFAULT 'basico',
+    foto_perfil VARCHAR(255),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Simulaciones(

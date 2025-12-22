@@ -11,7 +11,7 @@ def adapt_query(query):
 class Usuario:
     def __init__(self, usuario_id=None, nombre_usuario=None, nombres=None, apellidos=None,
                  email=None, telefono=None, password_hash=None, empresa=None, sector=None,
-                 tamano_empresa=None, newsletter=None, nivel=None, fecha_creacion=None):
+                 tamano_empresa=None, newsletter=None, nivel=None, foto_perfil=None, fecha_creacion=None):
         self.usuario_id = usuario_id
         self.nombre_usuario = nombre_usuario
         self.nombres = nombres
@@ -24,6 +24,7 @@ class Usuario:
         self.tamano_empresa = tamano_empresa
         self.newsletter = newsletter
         self.nivel = nivel
+        self.foto_perfil = foto_perfil
         self.fecha_creacion = fecha_creacion
 
     @staticmethod
@@ -222,13 +223,26 @@ class Usuario:
         finally:
             db.disconnect()
 
-    def to_dict(self):
+    def to_dict(self, include_sensitive=False):
         """Convertir objeto a diccionario"""
-        return {
+        data = {
             'usuario_id': self.usuario_id,
             'nombre_usuario': self.nombre_usuario,
             'nombres': self.nombres,
             'apellidos': self.apellidos,
             'email': self.email,
-            'nivel': self.nivel
+            'telefono': self.telefono,
+            'empresa': self.empresa,
+            'sector': self.sector,
+            'tamano_empresa': self.tamano_empresa,
+            'newsletter': self.newsletter,
+            'nivel': self.nivel,
+            'foto_perfil': self.foto_perfil,
+            'fecha_creacion': self.fecha_creacion
         }
+
+        # Solo incluir campos sensibles si se solicita explícitamente
+        if include_sensitive:
+            data['password_hash'] = self.password_hash
+
+        return data

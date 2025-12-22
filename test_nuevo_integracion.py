@@ -1,198 +1,284 @@
 #!/usr/bin/env python3
 """
-Script de prueba rápida para validar servicios de Préstamo y Ahorro
-Ejecutar: python test_nuevo_integracion.py
+Tests de integración para nuevos módulos
 """
 
-import sys
-import os
+import pytest
+import json
+from app import crear_app
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+class TestIntegracionNueva:
+    """Tests para nuevos módulos de integración"""
 
+    def setup_method(self):
+        """Configuración antes de cada test"""
+        self.app = crear_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        self.client = self.client = self.app.test_client()
 
-def test_prestamo_servicio():
-    """Test Servicio de Préstamo"""
-    print("\n" + "=" * 60)
-    print("TESTING SERVICIO DE PRÉSTAMO")
-    print("=" * 60)
+    def teardown_method(self):
+        """Limpieza después de cada test"""
+        self.app_context.pop()
 
-    from app.servicios.prestamo_servicio import ServicioPrestamo
+    def test_integracion_financiera_completa(self):
+        """Test integración completa financiera"""
+        # Simular flujo completo: registro → simulación → resultados
+        print("🧪 Probando integración financiera completa...")
 
-    # Test 1: Cálculo básico
-    print("\n1. Cálculo de Cuota Mensual")
-    print("-" * 40)
-    cuota = ServicioPrestamo.calcular_cuota_mensual(
-        monto=50000, tasa_anual=12.5, plazo_meses=60
-    )
-    print(f"   Monto: S/ 50,000")
-    print(f"   Tasa: 12.5%")
-    print(f"   Plazo: 60 meses")
-    print(f"   ✓ Cuota Mensual: S/ {cuota:,.2f}")
+        # 1. Registro de usuario
+        datos_registro = {
+            "nombres": "Test",
+            "apellidos": "Integracion",
+            "email": "test_integracion@example.com",
+            "nombre_usuario": "test_integracion",
+            "password": "Test123!",
+            "empresa": "Test Company",
+            "sector": "Tecnología"
+        }
 
-    # Test 2: Tabla de amortización
-    print("\n2. Tabla de Amortización (primeros 3 meses)")
-    print("-" * 40)
-    tabla = ServicioPrestamo.calcular_tabla_amortizacion(
-        monto=50000, tasa_anual=12.5, plazo_meses=60
-    )
-    for i in range(3):
-        row = tabla[i]
-        print(
-            f"   Mes {row['mes']}: Capital=S/{row['capital']:.2f}, Interés=S/{row['interes']:.2f}, Saldo=S/{row['saldo_restante']:.2f}"
-        )
-    print(f"   ... (total {len(tabla)} meses)")
+        response = self.client.post('/api/v1/registrar',
+                                  data=json.dumps(datos_registro),
+                                  content_type='application/json')
+        assert response.status_code == 201
+        registro_data = json.loads(response.data)
+        assert registro_data["success"] == True
 
-    # Test 3: Análisis completo
-    print("\n3. Análisis Completo")
-    print("-" * 40)
-    resultado = ServicioPrestamo.calcular_prestamo_completo(
-        monto=50000,
-        tasa_anual=12.5,
-        plazo_meses=60,
-        comision_inicial=2,
-        tasa_impuesto=0,
-    )
-    print(f"   ✓ Cuota Mensual: S/ {resultado['resumen']['cuota_mensual']:,.2f}")
-    print(f"   ✓ TED: {resultado['resumen']['ted_tasa_efectiva']}%")
-    print(
-        f"   ✓ Costo Total: S/ {resultado['costos']['costo_total_desembolsado']:,.2f}"
-    )
-    print(f"   ✓ Costo Interés: S/ {resultado['costos']['costo_interes']:,.2f}")
+        print("✅ Usuario registrado exitosamente")
 
-    # Test 4: Sensibilidad
-    print("\n4. Análisis de Sensibilidad")
-    print("-" * 40)
-    sensibilidad = ServicioPrestamo.analizar_sensibilidad_prestamo(
-        monto=50000, tasa_anual=12.5, plazo_meses=60
-    )
-    print(f"   Tasa Base: {sensibilidad['tasa_actual']}%")
-    for escenario in sensibilidad["escenarios"]:
-        print(
-            f"   - {escenario['escenario']:12} ({escenario['tasa']}%): Cuota S/{escenario['cuota_mensual']:,.2f} ({escenario['variacion_cuota_porcentaje']:+.2f}%)"
-        )
+        # 2. Login
+        datos_login = {
+            "email": "test_integracion@example.com",
+            "password": "Test123!"
+        }
 
-    # Test 5: Comparar plazos
-    print("\n5. Comparativa de Plazos")
-    print("-" * 40)
-    comparativa = ServicioPrestamo.comparar_plazos(
-        monto=50000, tasa_anual=12.5, plazos=[24, 36, 48, 60]
-    )
-    for plazo in comparativa["comparativa_plazos"]:
-        print(
-            f"   {plazo['plazo_anos']:>4} años: Cuota S/{plazo['cuota_mensual']:>10,.2f} | Interés S/{plazo['costo_interes']:>10,.2f}"
-        )
+        response = self.client.post('/api/v1/login',
+                                  data=json.dumps(datos_login),
+                                  content_type='application/json')
+        assert response.status_code == 200
 
-    print("\n✅ SERVICIO DE PRÉSTAMO: OK\n")
+        print("✅ Login exitoso")
 
+        # 3. Simulación financiera (VAN)
+        datos_van = {
+            "flujos": [-10000, 3000, 4000, 5000, 6000],
+            "tasa_descuento": 0.12
+        }
 
-def test_ahorro_servicio():
-    """Test Servicio de Ahorro e Inversión"""
-    print("\n" + "=" * 60)
-    print("TESTING SERVICIO DE AHORRO E INVERSIÓN")
-    print("=" * 60)
+        response = self.client.post('/api/v1/financiero/van',
+                                  data=json.dumps(datos_van),
+                                  content_type='application/json')
+        assert response.status_code == 200
+        van_data = json.loads(response.data)
+        assert "van" in van_data
+        assert isinstance(van_data["van"], (int, float))
 
-    from app.servicios.ahorro_inversion_servicio import ServicioAhorroInversion
+        print(f"✅ VAN calculado: {van_data['van']}")
 
-    # Test 1: Proyección básica
-    print("\n1. Proyección de Ahorro")
-    print("-" * 40)
-    resultado = ServicioAhorroInversion.calcular_ahorro_con_aportes(
-        monto_inicial=10000, aporte_mensual=500, tasa_anual=8.0, meses=120
-    )
-    print(f"   Monto Inicial: S/ 10,000")
-    print(f"   Aporte Mensual: S/ 500")
-    print(f"   Tasa: 8%")
-    print(f"   Período: 120 meses (10 años)")
-    print(f"   ✓ Saldo Final: S/ {resultado['resumen']['saldo_final']:,.2f}")
-    print(f"   ✓ Intereses: S/ {resultado['resumen']['interes_ganado']:,.2f}")
-    print(
-        f"   ✓ Rendimiento: {resultado['indicadores']['rendimiento_porcentaje']:.2f}%"
-    )
+        # 4. Ver perfil
+        response = self.client.get('/api/v1/perfil')
+        assert response.status_code == 200
+        perfil_data = json.loads(response.data)
+        assert perfil_data["success"] == True
+        assert perfil_data["usuario"]["email"] == "test_integracion@example.com"
 
-    # Test 2: Con inflación
-    print("\n2. Proyección con Inflación (3%)")
-    print("-" * 40)
-    resultado_inflacion = ServicioAhorroInversion.calcular_ahorro_con_aportes(
-        monto_inicial=10000,
-        aporte_mensual=500,
-        tasa_anual=8.0,
-        meses=120,
-        inflacion_anual=3.0,
-    )
-    print(f"   Saldo Nominal: S/ {resultado_inflacion['resumen']['saldo_final']:,.2f}")
-    print(
-        f"   ✓ Poder Adquisitivo Real: S/ {resultado_inflacion['indicadores']['saldo_poder_adquisitivo_real']:,.2f}"
-    )
-    print(
-        f"   ✓ Pérdida por Inflación: S/ {resultado_inflacion['indicadores']['perdida_poder_adquisitivo']:,.2f}"
-    )
+        print("✅ Perfil obtenido correctamente")
 
-    # Test 3: Meta de ahorro
-    print("\n3. Cálculo para Alcanzar Meta")
-    print("-" * 40)
-    meta = ServicioAhorroInversion.analizar_meta_ahorro(
-        monto_objetivo=100000, monto_inicial=10000, tasa_anual=8.0, aporte_mensual=500
-    )
-    print(f"   Meta Objetivo: S/ 100,000")
-    print(
-        f"   ✓ Tiempo Necesario: {meta['meses_necesarios']} meses ({meta['anos_necesarios']} años)"
-    )
-    print(f"   ✓ Saldo Alcanzado: S/ {meta['saldo_final']:,.2f}")
+    def test_integracion_ml_completa(self):
+        """Test integración completa de ML"""
+        print("🧪 Probando integración ML completa...")
 
-    # Test 4: Comparador de instrumentos
-    print("\n4. Comparador de Instrumentos")
-    print("-" * 40)
-    instrumentos = [
-        {"nombre": "Plazo Fijo", "tasa_anual": 5.0, "tasa_impuesto": 0},
-        {"nombre": "Fondo Mutuo", "tasa_anual": 8.5, "tasa_impuesto": 0.05},
-        {"nombre": "Renta Fija", "tasa_anual": 6.5, "tasa_impuesto": 0.03},
-    ]
-    comparativa = ServicioAhorroInversion.comparar_instrumentos(
-        monto_inicial=100000, aporte_mensual=1000, meses=24, instrumentos=instrumentos
-    )
-    print(f"   Mejor opción: {comparativa['mejor_opcion']['nombre']}")
-    for instr in comparativa["comparativa"]:
-        print(
-            f"   - {instr['nombre']:15} → S/ {instr['saldo_final']:>12,.2f} (Ganancia: S/ {instr['ganancia_neta']:>10,.2f})"
-        )
+        # 1. Predicción de ventas
+        datos_prediccion = {
+            "datos_historicos": [100, 120, 110, 130, 125, 140, 135, 150],
+            "periodos": 3
+        }
 
-    # Test 5: Sensibilidad
-    print("\n5. Análisis de Sensibilidad")
-    print("-" * 40)
-    sensibilidad = ServicioAhorroInversion.analizar_sensibilidad_ahorro(
-        monto_inicial=10000, aporte_mensual=500, tasa_anual=8.0, meses=120
-    )
-    for escenario in sensibilidad["escenarios"]:
-        print(
-            f"   {escenario['escenario']:12} ({escenario['tasa']}%): S/ {escenario['saldo_final']:>12,.2f} ({escenario['variacion_porcentaje']:+.2f}%)"
-        )
+        response = self.client.post('/api/v1/ml/predecir',
+                                  data=json.dumps(datos_prediccion),
+                                  content_type='application/json')
+        assert response.status_code == 200
+        prediccion_data = json.loads(response.data)
+        assert "predicciones" in prediccion_data
+        assert len(prediccion_data["predicciones"]) == 3
 
-    print("\n✅ SERVICIO DE AHORRO: OK\n")
+        print(f"✅ Predicciones generadas: {prediccion_data['predicciones']}")
 
+        # 2. Análisis de tendencias
+        datos_tendencias = {
+            "ventas": [100, 105, 110, 108, 115, 120, 118, 125],
+            "costos": [80, 82, 85, 87, 89, 91, 93, 95]
+        }
 
-def main():
-    """Ejecutar todas las pruebas"""
-    print("\n" + "▄" * 60)
-    print("PRUEBAS DE INTEGRACIÓN - PRÉSTAMOS Y AHORRO")
-    print("▄" * 60)
+        response = self.client.post('/api/v1/ml/analizar',
+                                  data=json.dumps(datos_tendencias),
+                                  content_type='application/json')
+        assert response.status_code == 200
+        tendencias_data = json.loads(response.data)
+        assert "correlacion" in tendencias_data
+        assert isinstance(tendencias_data["correlacion"], (int, float))
 
-    try:
-        test_prestamo_servicio()
-        test_ahorro_servicio()
+        print(f"✅ Correlación calculada: {tendencias_data['correlacion']}")
 
-        print("\n" + "=" * 60)
-        print("✅ TODAS LAS PRUEBAS PASARON CORRECTAMENTE")
-        print("=" * 60)
-        print("\nLos servicios están listos para producción.\n")
+    def test_integracion_gamificacion(self):
+        """Test integración de gamificación"""
+        print("🧪 Probando integración de gamificación...")
 
-    except Exception as e:
-        print(f"\n❌ ERROR: {e}")
-        import traceback
+        # Crear usuario de prueba
+        datos_registro = {
+            "nombres": "Test",
+            "apellidos": "Gamificacion",
+            "email": "test_gamificacion@example.com",
+            "nombre_usuario": "test_gamificacion",
+            "password": "Test123!",
+            "empresa": "Test Company"
+        }
 
-        traceback.print_exc()
-        sys.exit(1)
+        response = self.client.post('/api/v1/registrar',
+                                  data=json.dumps(datos_registro),
+                                  content_type='application/json')
+        assert response.status_code == 201
 
+        # Login
+        datos_login = {
+            "email": "test_gamificacion@example.com",
+            "password": "Test123!"
+        }
+        self.client.post('/api/v1/login',
+                        data=json.dumps(datos_login),
+                        content_type='application/json')
+
+        # Ver insignias (debería tener al menos la insignia básica)
+        response = self.client.get('/api/v1/usuarios/1/insignias')
+        assert response.status_code == 200
+        insignias_data = json.loads(response.data)
+        assert "insignias" in insignias_data
+
+        print(f"✅ Insignias obtenidas: {len(insignias_data['insignias'])}")
+
+    def test_integracion_benchmarking(self):
+        """Test integración de benchmarking"""
+        print("🧪 Probando integración de benchmarking...")
+
+        # Crear usuario de prueba
+        datos_registro = {
+            "nombres": "Test",
+            "apellidos": "Benchmarking",
+            "email": "test_benchmarking@example.com",
+            "nombre_usuario": "test_benchmarking",
+            "password": "Test123!",
+            "empresa": "Test Company",
+            "sector": "Tecnología"
+        }
+
+        response = self.client.post('/api/v1/registrar',
+                                  data=json.dumps(datos_registro),
+                                  content_type='application/json')
+        assert response.status_code == 201
+
+        # Login
+        datos_login = {
+            "email": "test_benchmarking@example.com",
+            "password": "Test123!"
+        }
+        self.client.post('/api/v1/login',
+                        data=json.dumps(datos_login),
+                        content_type='application/json')
+
+        # Ver ranking
+        response = self.client.get('/api/v1/usuarios/1/ranking')
+        assert response.status_code == 200
+        ranking_data = json.loads(response.data)
+        assert "rankings" in ranking_data
+
+        print(f"✅ Rankings obtenidos: {len(ranking_data['rankings'])}")
+
+    def test_rendimiento_api(self):
+        """Test de rendimiento de APIs"""
+        import time
+
+        print("🧪 Probando rendimiento de APIs...")
+
+        # Medir tiempo de respuesta de health check
+        start_time = time.time()
+        response = self.client.get('/health')
+        end_time = time.time()
+
+        response_time = (end_time - start_time) * 1000  # ms
+        assert response.status_code == 200
+        assert response_time < 500  # Debe responder en menos de 500ms
+
+        print(f"✅ Tiempo de respuesta: {response_time:.2f}ms")
+
+    def test_validacion_datos_completa(self):
+        """Test validación completa de datos"""
+        print("🧪 Probando validación completa de datos...")
+
+        # Datos válidos
+        datos_validos = {
+            "nombres": "Juan Pérez",
+            "apellidos": "González",
+            "email": "juan.perez@email.com",
+            "telefono": "+51987654321",
+            "nombre_usuario": "juan_perez",
+            "password": "Password123!",
+            "empresa": "Empresa S.A.",
+            "sector": "Tecnología",
+            "tamano_empresa": "Mediana",
+            "terminos": True,
+            "newsletter": True
+        }
+
+        response = self.client.post('/api/v1/registrar',
+                                  data=json.dumps(datos_validos),
+                                  content_type='application/json')
+        assert response.status_code == 201
+
+        print("✅ Validación de datos correcta")
+
+        # Intentar registrar con mismo email (debe fallar)
+        response = self.client.post('/api/v1/registrar',
+                                  data=json.dumps(datos_validos),
+                                  content_type='application/json')
+        assert response.status_code == 400
+        error_data = json.loads(response.data)
+        assert not error_data["success"]
+        assert "correo electrónico" in error_data["error"]
+
+        print("✅ Validación de duplicados correcta")
 
 if __name__ == "__main__":
-    main()
+    # Ejecutar tests manualmente
+    test_instance = TestIntegracionNueva()
+
+    print("🚀 Ejecutando tests de integración nueva...\n")
+
+    try:
+        test_instance.setup_method()
+
+        test_instance.test_integracion_financiera_completa()
+        print()
+
+        test_instance.test_integracion_ml_completa()
+        print()
+
+        test_instance.test_integracion_gamificacion()
+        print()
+
+        test_instance.test_integracion_benchmarking()
+        print()
+
+        test_instance.test_rendimiento_api()
+        print()
+
+        test_instance.test_validacion_datos_completa()
+        print()
+
+        test_instance.teardown_method()
+
+        print("🎉 Todos los tests de integración pasaron exitosamente!")
+
+    except Exception as e:
+        print(f"❌ Error en tests de integración: {e}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")

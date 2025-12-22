@@ -1,136 +1,114 @@
+#!/usr/bin/env python3
 """
-Script de prueba rápida del módulo ML de Diego
-Ejecutar: python test_rapido_ml.py
+Tests rápidos para machine learning
 """
 
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Evitar importaciones problemáticas del módulo app
-# Importamos directamente el código del servicio ML
-ruta_servicio = os.path.join(os.path.dirname(__file__), 'app', 'servicios', 'ml_servicio.py')
-with open(ruta_servicio, 'r', encoding='utf-8') as f:
-    codigo = f.read()
+from app import crear_app
+from app.servicios.ml_servicio import MLServicio
 
-# Ejecutar el código en el contexto global para tener las clases disponibles
-exec(codigo)
+def test_rapido_prediccion():
+    """Test rápido de predicción"""
+    print("🔬 Test rápido - Predicción de ventas")
+
+    app = crear_app('testing')
+    with app.app_context():
+        datos = [100, 120, 110, 130, 125, 140, 135, 150]
+        resultado = MLServicio.predecir_ventas(datos, periodos=2)
+
+        assert len(resultado) == 2
+        print(f"✅ Predicción: {resultado}")
+        return True
+
+def test_rapido_riesgo():
+    """Test rápido de clasificación de riesgo"""
+    print("🔬 Test rápido - Clasificación de riesgo")
+
+    app = crear_app('testing')
+    with app.app_context():
+        datos = {
+            "ingresos": 500000,
+            "deuda": 150000,
+            "antiguedad": 5,
+            "sector": "Tecnología"
+        }
+        riesgo = MLServicio.clasificar_riesgo(datos)
+
+        assert riesgo in ["Bajo", "Medio", "Alto", "Muy Alto"]
+        print(f"✅ Riesgo clasificado: {riesgo}")
+        return True
+
+def test_rapido_correlacion():
+    """Test rápido de análisis de correlación"""
+    print("🔬 Test rápido - Análisis de correlación")
+
+    app = crear_app('testing')
+    with app.app_context():
+        ventas = [100, 105, 110, 108, 115]
+        costos = [80, 82, 85, 87, 89]
+
+        resultado = MLServicio.analizar_tendencias(ventas, costos)
+
+        assert "correlacion" in resultado
+        assert -1 <= resultado["correlacion"] <= 1
+        print(f"✅ Correlación: {resultado['correlacion']:.3f}")
+        return True
+
+def test_rapido_recomendaciones():
+    """Test rápido de recomendaciones"""
+    print("🔬 Test rápido - Recomendaciones de inversión")
+
+    app = crear_app('testing')
+    with app.app_context():
+        perfil = {
+            "capital": 10000,
+            "tolerancia_riesgo": "Media",
+            "plazo": 3
+        }
+
+        recomendaciones = MLServicio.recomendar_inversiones(perfil)
+
+        assert isinstance(recomendaciones, list)
+        assert len(recomendaciones) > 0
+        print(f"✅ Recomendaciones: {len(recomendaciones)} opciones")
+        return True
 
 def main():
-    print("=" * 60)
-    print("🧪 PRUEBA DEL MÓDULO ML - DIEGO")
-    print("=" * 60)
-    
-    # Datos de empresa de ejemplo
-    datos_empresa = {
-        'ingresos_anuales': 500000,
-        'gastos_operativos': 350000,
-        'activos_totales': 800000,
-        'pasivos_totales': 300000,
-        'antiguedad_anios': 8,
-        'num_empleados': 45,
-        'num_clientes': 1200,
-        'tasa_retencion_clientes': 0.85
-    }
-    
-    # Crear servicio
-    servicio = ServicioML()
-    
-    # =========================================
-    # 1. PREDICCIÓN DE INGRESOS
-    # =========================================
-    print("\n📊 1. PREDICCIÓN DE INGRESOS")
-    print("-" * 40)
-    resultado = servicio.predecir_ingresos(datos_empresa)
-    print(f"   Ingresos predichos: ${resultado['ingresos_predichos']:,.2f}")
-    print(f"   Crecimiento esperado: {resultado['crecimiento_esperado_pct']:.1f}%")
-    print(f"   Intervalo 90%: ${resultado['intervalo_confianza_90']['inferior']:,.0f} - ${resultado['intervalo_confianza_90']['superior']:,.0f}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # 2. PREDICCIÓN DE CRECIMIENTO
-    # =========================================
-    print("\n📈 2. PREDICCIÓN DE CRECIMIENTO")
-    print("-" * 40)
-    resultado = servicio.predecir_crecimiento(datos_empresa)
-    print(f"   Crecimiento anual: ${resultado['crecimiento_anual']:,.2f}")
-    print(f"   Porcentaje: {resultado['crecimiento_porcentaje']:.1f}%")
-    print(f"   Categoría: {resultado['categoria']}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # 3. CLASIFICACIÓN DE RIESGO
-    # =========================================
-    print("\n⚠️  3. CLASIFICACIÓN DE RIESGO")
-    print("-" * 40)
-    resultado = servicio.clasificar_riesgo(datos_empresa)
-    print(f"   Nivel de riesgo: {resultado['nivel_riesgo']}")
-    print(f"   Probabilidades: {resultado['probabilidades']}")
-    print(f"   Recomendación: {resultado['recomendaciones'][0]}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # 4. SIMULACIÓN MONTE CARLO
-    # =========================================
-    print("\n🎲 4. SIMULACIÓN MONTE CARLO (VAN)")
-    print("-" * 40)
-    mc = SimulacionMonteCarlo(n_simulaciones=5000)
-    resultado = mc.simular_van(
-        inversion_inicial=100000,
-        flujos_base=[25000, 30000, 35000, 40000, 45000],
-        tasa_descuento_base=0.12
-    )
-    print(f"   Simulaciones: {resultado['n_simulaciones']}")
-    print(f"   VAN Medio: ${resultado['van_medio']:,.2f}")
-    print(f"   VAN Mediana: ${resultado['van_mediana']:,.2f}")
-    print(f"   Desv. Estándar: ${resultado['desviacion_estandar']:,.2f}")
-    print(f"   Prob. VAN > 0: {resultado['probabilidad_van_positivo']*100:.1f}%")
-    print(f"   Rango: ${resultado['van_minimo']:,.0f} a ${resultado['van_maximo']:,.0f}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # 5. ANÁLISIS TORNADO
-    # =========================================
-    print("\n🌪️  5. ANÁLISIS TORNADO")
-    print("-" * 40)
-    analisis = AnalisisSensibilidad()
-    resultado = analisis.analisis_tornado(
-        inversion_inicial=100000,
-        flujos_base=[25000, 30000, 35000, 40000, 45000],
-        tasa_base=0.12
-    )
-    print(f"   VAN Base: ${resultado['van_base']:,.2f}")
-    print(f"   Variable más sensible: {resultado['variable_mas_sensible']}")
-    for r in resultado['resultados']:
-        print(f"   - {r['variable']}: rango ${r['rango']:,.0f}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # 6. ANÁLISIS DE ESCENARIOS
-    # =========================================
-    print("\n🎯 6. ANÁLISIS DE ESCENARIOS")
-    print("-" * 40)
-    resultado = analisis.analisis_escenarios(
-        inversion_inicial=100000,
-        flujos_base=[25000, 30000, 35000, 40000, 45000],
-        tasa_base=0.12
-    )
-    for nombre, escenario in resultado['escenarios'].items():
-        print(f"   {nombre.capitalize()}: VAN ${escenario['van']:,.2f}")
-    print(f"   Recomendación: {resultado['recomendacion']}")
-    print("   ✅ OK")
-    
-    # =========================================
-    # RESUMEN
-    # =========================================
-    print("\n" + "=" * 60)
-    print("✅ TODAS LAS PRUEBAS PASARON CORRECTAMENTE")
-    print("=" * 60)
-    print("\nMódulos probados:")
-    print("  ✅ ServicioML (predicciones)")
-    print("  ✅ SimulacionMonteCarlo")
-    print("  ✅ AnalisisSensibilidad (Tornado + Escenarios)")
-    print("\n🎉 ¡El módulo ML de Diego funciona perfectamente!")
+    """Ejecutar todos los tests rápidos"""
+    print("🚀 Ejecutando tests rápidos de ML\n")
 
+    tests = [
+        test_rapido_prediccion,
+        test_rapido_riesgo,
+        test_rapido_correlacion,
+        test_rapido_recomendaciones
+    ]
 
-if __name__ == '__main__':
-    main()
+    resultados = []
+    for test in tests:
+        try:
+            resultado = test()
+            resultados.append(resultado)
+            print()
+        except Exception as e:
+            print(f"❌ Error en {test.__name__}: {e}")
+            resultados.append(False)
+            print()
+
+    exitos = sum(resultados)
+    total = len(resultados)
+
+    print(f"📊 Resultados: {exitos}/{total} tests pasaron")
+
+    if exitos == total:
+        print("🎉 Todos los tests rápidos pasaron!")
+        return 0
+    else:
+        print("❌ Algunos tests fallaron")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
