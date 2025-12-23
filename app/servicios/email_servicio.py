@@ -21,8 +21,8 @@ class EmailService:
 
     def init_app(self, app):
         """Inicializar servicio de email"""
-        self.smtp_server = app.config.get('SMTP_SERVER', 'smtp.gmail.com')
-        self.smtp_port = app.config.get('SMTP_PORT', 587)
+        self.smtp_server = app.config.get('MAIL_SERVER', 'smtp.gmail.com')
+        self.smtp_port = app.config.get('MAIL_PORT', 587)
         self.username = app.config.get('MAIL_USERNAME', '')
         self.password = app.config.get('MAIL_PASSWORD', '')
         self.sender = app.config.get('MAIL_USERNAME', 'jean20francisco06@gmail.com')
