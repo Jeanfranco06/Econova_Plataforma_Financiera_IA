@@ -23,7 +23,7 @@ if Config.DATABASE_URL and POSTGRESQL_AVAILABLE:
     # Producción: PostgreSQL con DATABASE_URL
     USE_POSTGRESQL = True
     print("🐘 Usando PostgreSQL (producción con DATABASE_URL)")
-elif IS_PRODUCTION and Config.DB_USER and Config.DB_USER != '' and POSTGRESQL_AVAILABLE:
+elif IS_PRODUCTION and hasattr(Config, 'DB_USER') and getattr(Config, 'DB_USER', '') and POSTGRESQL_AVAILABLE:
     # Producción: PostgreSQL con configuración individual
     USE_POSTGRESQL = True
     print("🐘 Usando PostgreSQL (producción)")
@@ -51,11 +51,11 @@ class DatabaseConnection:
                 else:
                     # Usar configuración individual (desarrollo/producción alternativa)
                     self.conn = psycopg2.connect(
-                        dbname=Config.DB_NAME,
-                        user=Config.DB_USER,
-                        password=Config.DB_PASSWORD,
-                        host=Config.DB_HOST,
-                        port=Config.DB_PORT,
+                        dbname=getattr(Config, 'DB_NAME', 'econova_db'),
+                        user=getattr(Config, 'DB_USER', 'postgres'),
+                        password=getattr(Config, 'DB_PASSWORD', 'postgres'),
+                        host=getattr(Config, 'DB_HOST', 'localhost'),
+                        port=getattr(Config, 'DB_PORT', '5432'),
                         options="-c client_encoding=UTF8"
                     )
                 self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -63,7 +63,8 @@ class DatabaseConnection:
                 return True
             else:
                 # Conexión SQLite
-                db_path = Config.DB_NAME if hasattr(Config, 'DB_NAME') and Config.DB_NAME and Config.DB_NAME.endswith('.db') else 'econova.db'
+                db_name = getattr(Config, 'DB_NAME', 'econova.db')
+                db_path = db_name if db_name and db_name.endswith('.db') else 'econova.db'
                 self.conn = sqlite3.connect(db_path)
                 self.conn.row_factory = sqlite3.Row
                 self.cur = self.conn.cursor()
