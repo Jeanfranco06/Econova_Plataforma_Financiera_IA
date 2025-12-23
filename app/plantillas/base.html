@@ -1203,32 +1203,25 @@
         function initDropdowns() {
             console.log('🔽 Initializing dropdowns...');
 
-            // Herramientas dropdown
+        // Herramientas dropdown
             const herramientasBtn = document.getElementById('herramientas-menu-button');
             const herramientasMenu = document.getElementById('herramientas-dropdown');
-
-            console.log('🔧 Herramientas button found:', !!herramientasBtn);
-            console.log('🔧 Herramientas menu found:', !!herramientasMenu);
 
             if (herramientasBtn && herramientasMenu) {
                 // Ensure dropdown starts hidden
                 herramientasMenu.classList.add('hidden');
-                console.log('🔧 Herramientas menu forced hidden on init');
 
                 herramientasBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🔧 Herramientas button clicked!');
 
                     // Toggle menu
                     if (herramientasMenu.classList.contains('hidden')) {
                         herramientasMenu.classList.remove('hidden');
                         herramientasMenu.style.display = 'block';
-                        console.log('🔧 Herramientas menu shown');
                     } else {
                         herramientasMenu.classList.add('hidden');
                         herramientasMenu.style.display = 'none';
-                        console.log('🔧 Herramientas menu hidden');
                     }
                 });
 
@@ -1237,11 +1230,8 @@
                     if (!herramientasBtn.contains(e.target) && !herramientasMenu.contains(e.target)) {
                         herramientasMenu.classList.add('hidden');
                         herramientasMenu.style.display = 'none';
-                        console.log('🔧 Herramientas menu closed by outside click');
                     }
                 });
-
-                console.log('🔧 Herramientas dropdown initialized successfully');
             } else {
                 console.log('🔧 Herramientas dropdown elements not found');
             }
