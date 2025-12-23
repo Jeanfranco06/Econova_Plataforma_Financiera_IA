@@ -355,7 +355,7 @@ def registrar_usuario():
             else:
                 # For regular form submissions, redirect to login page with success message
                 from flask import flash, redirect, url_for
-                flash('¡Registro exitoso! Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.', 'info')
+                flash('¡Registro exitoso! Te hemos enviado un email de confirmación a tu bandeja de entrada. Si no lo recibes en unos minutos, puedes hacer clic en "Reenviar confirmación" en la página de login.', 'info')
                 return redirect(url_for('login'))
         else:
             if not request.is_json:
@@ -657,6 +657,42 @@ def check_username_availability():
     except Exception as e:
         print(f"Error checking username availability: {e}")
         return jsonify({'available': False, 'error': 'Error interno del servidor'}), 500
+
+@usuarios_bp.route('/reenviar-confirmacion', methods=['POST'])
+def reenviar_confirmacion():
+    """Reenviar email de confirmación"""
+    try:
+        data = request.get_json() or request.form
+        email = data.get('email', '').strip().lower()
+
+        if not email:
+            return jsonify({'success': False, 'error': 'Email requerido'}), 400
+
+        # Buscar usuario por email
+        usuario = Usuario.obtener_usuario_por_email(email)
+        if not usuario:
+            return jsonify({'success': False, 'error': 'Usuario no encontrado'}), 404
+
+        if usuario.email_confirmado:
+            return jsonify({'success': False, 'error': 'La cuenta ya está confirmada'}), 400
+
+        # Enviar email de confirmación de forma síncrona (para feedback inmediato)
+        email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
+
+        if email_result:
+            return jsonify({
+                'success': True,
+                'message': 'Email de confirmación reenviado exitosamente'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Error enviando el email. Por favor, intenta más tarde.'
+            }), 500
+
+    except Exception as e:
+        print(f"Error reenviando confirmación: {e}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 @usuarios_bp.route('/confirmar/<token>', methods=['GET'])
 def confirmar_cuenta(token):

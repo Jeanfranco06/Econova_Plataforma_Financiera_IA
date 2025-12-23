@@ -30,12 +30,19 @@ class EmailService:
         # Check if we should use mock mode (for testing)
         self.use_mock = app.config.get('EMAIL_MOCK', False)
 
+        # Force mock mode in production if SMTP credentials are not properly set
+        if not self.username or not self.password or self.username == '' or self.password == '':
+            print("⚠️ SMTP credentials not properly configured, forcing mock mode")
+            self.use_mock = True
+
         print(f"📧 Email service initialized:")
         print(f"   Server: {self.smtp_server}")
         print(f"   Port: {self.smtp_port}")
-        print(f"   Username: {self.username}")
+        print(f"   Username: {'***' if self.username else 'NOT SET'}")
+        print(f"   Password: {'***' if self.password else 'NOT SET'}")
         print(f"   Sender: {self.sender}")
         print(f"   Mock mode: {self.use_mock}")
+        print(f"   Base URL: {os.getenv('BASE_URL', os.getenv('RENDER_EXTERNAL_URL', 'http://localhost:5000'))}")
 
     def _send_email(self, to_email, subject, html_content):
         """Enviar email usando SMTP directo"""
