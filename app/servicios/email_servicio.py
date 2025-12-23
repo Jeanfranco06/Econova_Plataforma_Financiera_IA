@@ -85,8 +85,9 @@ class EmailService:
             print(f"🔄 ENVIANDO EMAIL DE CONFIRMACIÓN a {email}")
             subject = "¡Bienvenido a Econova! Confirma tu cuenta"
 
-            # URL de confirmación
-            url_confirmacion = f"http://localhost:5000/api/v1/confirmar/{token_confirmacion or 'placeholder'}"
+            # URL de confirmación - usar variable de entorno o detectar automáticamente
+            base_url = os.getenv('BASE_URL', os.getenv('RENDER_EXTERNAL_URL', 'http://localhost:5000'))
+            url_confirmacion = f"{base_url}/api/v1/confirmar/{token_confirmacion or 'placeholder'}"
             print(f"🔗 URL de confirmación: {url_confirmacion}")
 
             # Template HTML del email
@@ -201,7 +202,7 @@ class EmailService:
                         <p>Tu cuenta en <span class="highlight">Econova</span> ha sido confirmada exitosamente. Ahora tienes acceso completo a todas nuestras herramientas de simulación financiera.</p>
 
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="http://localhost:5000" class="button">Comenzar a Simular</a>
+                            <a href="{{ base_url }}" class="button">Comenzar a Simular</a>
                         </div>
 
                         <p><strong>¿Qué puedes hacer ahora?</strong></p>
@@ -233,7 +234,10 @@ class EmailService:
             </html>
             """
 
-            html_body = render_template_string(html_template, nombre_usuario=nombre_usuario)
+            # URL de bienvenida - usar variable de entorno o detectar automáticamente
+            base_url = os.getenv('BASE_URL', os.getenv('RENDER_EXTERNAL_URL', 'http://localhost:5000'))
+
+            html_body = render_template_string(html_template, nombre_usuario=nombre_usuario, base_url=base_url)
             return self._send_email(email, subject, html_body)
 
         except Exception as e:
@@ -299,7 +303,8 @@ class EmailService:
             </html>
             """
 
-            url_recuperacion = f"http://localhost:5000/reset-password/{token_recuperacion}"
+            base_url = os.getenv('BASE_URL', os.getenv('RENDER_EXTERNAL_URL', 'http://localhost:5000'))
+            url_recuperacion = f"{base_url}/reset-password/{token_recuperacion}"
             html_body = render_template_string(html_template,
                                              nombre_usuario=nombre_usuario,
                                              url_recuperacion=url_recuperacion)

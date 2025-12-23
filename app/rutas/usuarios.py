@@ -8,6 +8,7 @@ from app.servicios.email_servicio import email_service
 from werkzeug.security import check_password_hash
 import re
 import secrets
+import threading
 
 def adapt_query(query):
     """Adaptar consulta SQL para el tipo de base de datos"""
@@ -326,19 +327,22 @@ def registrar_usuario():
             # Set default level to 'basico'
             Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
 
-            # Send confirmation email
-            try:
-                email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
-                if email_result:
-                    print(f"✅ Email de confirmación enviado exitosamente a {email}")
-                else:
-                    print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
-                    # Don't fail registration, but log the issue
-            except Exception as e:
-                print(f"⚠️ Excepción enviando email de confirmación: {e}")
-                import traceback
-                print(f"📋 Traceback: {traceback.format_exc()}")
-                # Don't fail registration, but log the issue
+            # Send confirmation email asynchronously to avoid blocking the response
+            def send_confirmation_email_async():
+                try:
+                    email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
+                    if email_result:
+                        print(f"✅ Email de confirmación enviado exitosamente a {email}")
+                    else:
+                        print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
+                except Exception as e:
+                    print(f"⚠️ Excepción enviando email de confirmación: {e}")
+                    import traceback
+                    print(f"📋 Traceback: {traceback.format_exc()}")
+
+            # Start email sending in a separate thread
+            email_thread = threading.Thread(target=send_confirmation_email_async, daemon=True)
+            email_thread.start()
 
             # Check if this is an AJAX request (has X-Requested-With header)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
