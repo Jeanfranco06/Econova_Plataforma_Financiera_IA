@@ -17,7 +17,7 @@ from app.utils.validadores import (
 )
 from app.servicios.gamification_servicio import GamificationService
 
-class ServicioFinanciero:
+class FinancieroServicio:
     """Servicio para cálculos financieros avanzados"""
     
     @staticmethod
@@ -314,7 +314,7 @@ class ServicioFinanciero:
         flujos = [ahorro_anual] * vida
         
         # VAN del reemplazo
-        van_reemplazo = ServicioFinanciero.calcular_van(inversion_neta, flujos, tasa)
+        van_reemplazo = FinancieroServicio.calcular_van(inversion_neta, flujos, tasa)
         
         decision = "REEMPLAZAR" if van_reemplazo['van'] > 0 else "MANTENER ACTUAL"
         

@@ -6,7 +6,7 @@ Endpoints REST para:
 """
 
 from flask import Blueprint, request, jsonify
-from app.servicios.financiero_servicio import ServicioFinanciero
+from app.servicios.financiero_servicio import FinancieroServicio
 from app.servicios.prestamo_servicio import ServicioPrestamo
 from app.servicios.ahorro_inversion_servicio import ServicioAhorroInversion
 from app.modelos.simulacion import Simulacion
@@ -51,7 +51,7 @@ def calcular_van():
             ), 400
 
         # Calcular VAN
-        resultado = ServicioFinanciero.calcular_van(inversion, flujos, tasa)
+        resultado = FinancieroServicio.calcular_van(inversion, flujos, tasa)
 
         # Guardar simulación si hay usuario_id
         if usuario_id:
@@ -121,7 +121,7 @@ def calcular_tir():
             ), 400
 
         # Calcular TIR
-        resultado = ServicioFinanciero.calcular_tir(inversion, flujos, tasa_ref)
+        resultado = FinancieroServicio.calcular_tir(inversion, flujos, tasa_ref)
 
         # Guardar simulación
         if usuario_id:
@@ -195,7 +195,7 @@ def calcular_wacc():
             ), 400
 
         # Calcular WACC
-        resultado = ServicioFinanciero.calcular_wacc(
+        resultado = FinancieroServicio.calcular_wacc(
             capital, deuda, costo_cap, costo_deu, tasa_imp
         )
 
@@ -269,7 +269,7 @@ def analizar_portafolio():
             ), 400
 
         # Analizar portafolio
-        resultado = ServicioFinanciero.analizar_portafolio(
+        resultado = FinancieroServicio.analizar_portafolio(
             retornos, ponderaciones, volatilidades, matriz_corr
         )
 
@@ -346,7 +346,7 @@ def analizar_reemplazo():
             return jsonify({"error": "Faltan parámetros requeridos"}), 400
 
         # Analizar reemplazo
-        resultado = ServicioFinanciero.analizar_reemplazo_activo(
+        resultado = FinancieroServicio.analizar_reemplazo_activo(
             costo_act, costo_nue, costo_comp, salvamento, vida_util, tasa
         )
 
@@ -398,7 +398,7 @@ def calcular_periodo_recuperacion():
                 }
             ), 400
 
-        resultado = ServicioFinanciero.calcular_periodo_recuperacion(inversion, flujos)
+        resultado = FinancieroServicio.calcular_periodo_recuperacion(inversion, flujos)
 
         return jsonify({"success": True, "data": resultado}), 200
 

@@ -14,26 +14,40 @@
     <style>
         /* Sistema de tipografía profesional */
         :root {
-            --font-primary: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-accent: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;/* Sistema de colores - serán definidos dinámicamente por JavaScript */
-            --color-primary: #3b82f6;--color-secondary: #6b7280;--color-success: #10b981;--color-danger: #ef4444;--color-warning: #f59e0b;--color-background: #ffffff;--color-surface: #f9fafb;--color-text-primary: #111827;--color-text-secondary: #6b7280;--color-border: #d1d5db;--color-shadow: rgba(0, 0, 0, 0.1);--color-card-bg: #ffffff;--color-input-bg: #ffffff;}
+            --font-primary: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-accent: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;--font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;/* Paleta de colores corporativos Econova */
+            --color-primary: #1e3a5f; /* Azul Marino */
+            --color-primary-variant: #2c5282; /* Azul Corporativo */
+            --color-accent: #d4af37; /* Dorado */
+            --color-text-primary: #2d3748; /* Gris oscuro */
+            --color-text-secondary: #4a5568; /* Gris medio */
+            --color-background: #f7fafc; /* Blanco Humo */
+            --color-surface: #ffffff; /* Blanco puro */
+            --color-border: #e2e8f0; /* Gris claro */
+            --color-shadow: rgba(30, 58, 95, 0.1); /* Sombra azulada */
+            --color-card-bg: #ffffff;
+            --color-input-bg: #ffffff;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+            --color-secondary: #6b7280;}
 
         /* Tipografía jerárquica */
         .text-h1 {
-            font-family: var(--font-heading);font-size: 2.5rem;font-weight: 700;line-height: 1.2;letter-spacing: -0.025em;}
+            font-family: var(--font-heading);font-size: 2.5rem;font-weight: 700;line-height: 1.2;letter-spacing: -0.025em;color: var(--color-text-primary);}
         .text-h2 {
-            font-family: var(--font-heading);font-size: 2rem;font-weight: 600;line-height: 1.3;letter-spacing: -0.025em;}
+            font-family: var(--font-heading);font-size: 2rem;font-weight: 600;line-height: 1.3;letter-spacing: -0.025em;color: var(--color-text-primary);}
         .text-h3 {
-            font-family: var(--font-heading);font-size: 1.5rem;font-weight: 600;line-height: 1.4;letter-spacing: -0.025em;}
+            font-family: var(--font-heading);font-size: 1.5rem;font-weight: 600;line-height: 1.4;letter-spacing: -0.025em;color: var(--color-text-primary);}
         .text-h4 {
-            font-family: var(--font-heading);font-size: 1.25rem;font-weight: 600;line-height: 1.4;letter-spacing: -0.025em;}
+            font-family: var(--font-heading);font-size: 1.25rem;font-weight: 600;line-height: 1.4;letter-spacing: -0.025em;color: var(--color-text-primary);}
         .text-body-lg {
-            font-family: var(--font-primary);font-size: 1.125rem;line-height: 1.6;font-weight: 400;}
+            font-family: var(--font-primary);font-size: 1.125rem;line-height: 1.6;font-weight: 400;color: var(--color-text-primary);}
         .text-body {
-            font-family: var(--font-primary);font-size: 1rem;line-height: 1.6;font-weight: 400;}
+            font-family: var(--font-primary);font-size: 1rem;line-height: 1.6;font-weight: 400;color: var(--color-text-primary);}
         .text-sm {
-            font-family: var(--font-primary);font-size: 0.875rem;line-height: 1.5;font-weight: 500;}
+            font-family: var(--font-primary);font-size: 0.875rem;line-height: 1.5;font-weight: 500;color: var(--color-text-secondary);}
         .text-xs {
-            font-family: var(--font-primary);font-size: 0.75rem;line-height: 1.4;font-weight: 500;}
+            font-family: var(--font-primary);font-size: 0.75rem;line-height: 1.4;font-weight: 500;color: var(--color-text-secondary);}
         
         /* Énfasis en datos financieros */
         .text-data { font-family: var(--font-mono); font-weight: 600; font-size: 1.125rem; }
@@ -321,6 +335,32 @@
         .animate-delay-600 { animation-delay: 0.6s; }
         .animate-delay-700 { animation-delay: 0.7s; }
 
+        /* Colores específicos para elementos de la página de inicio - resistentes al cambio de tema */
+        .inicio-h2 {
+            color: #0f172a !important; /* Gris oscuro fijo */
+        }
+
+        .inicio-h4 {
+            color: #0f172a !important; /* Gris oscuro fijo */
+        }
+
+        .inicio-body-secondary {
+            color: #475569 !important; /* Gris medio fijo */
+        }
+
+        /* Aplicar colores oscuros en modo oscuro */
+        .theme-dark .inicio-h2 {
+            color: #f1f5f9 !important; /* Blanco casi puro en modo oscuro */
+        }
+
+        .theme-dark .inicio-h4 {
+            color: #f1f5f9 !important; /* Blanco casi puro en modo oscuro */
+        }
+
+        .theme-dark .inicio-body-secondary {
+            color: #cbd5e1 !important; /* Gris claro en modo oscuro */
+        }
+
         /* Mobile menu styles */
         .nav-mobile-menu {
             display: none;background-color: var(--color-card-bg);border: 1px solid var(--color-border);border-radius: 8px;margin-top: 16px;padding: 16px;box-shadow: 0 4px 6px var(--color-shadow);}
@@ -508,6 +548,11 @@
                         </a>
                     </div>
 
+                    <!-- Theme Toggle Button (Sun/Moon) - Available for all users -->
+                    <button id="theme-toggle-btn" class="nav-theme-btn" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-sun"></i>
+                    </button>
+
                     {% if session.usuario_id %}
                     <!-- User Menu -->
                     <div class="relative">
@@ -547,17 +592,16 @@
                             </a>
                         </div>
                     </div>
-
-                    <!-- Theme Toggle Button (Sun/Moon) -->
-                    <button id="theme-toggle-btn" class="nav-theme-btn" title="Cambiar tema">
-                        <i id="theme-icon" class="fas fa-sun"></i>
-                    </button>
                     {% else %}
-                    <!-- Guest Menu -->
-                    <a href="/login" class="nav-login-btn">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Iniciar Sesión
-                    </a>
-                    <a href="/registro" class="nav-register-btn">Registrarse</a>
+                    <!-- Guest Menu - Redesigned for better navbar integration -->
+                    <div class="flex items-center space-x-6">
+                        <a href="/login" class="nav-link font-medium hover:text-blue-600 transition-colors duration-200">
+                            Iniciar Sesión
+                        </a>
+                        <a href="/registro" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                            Registrarse
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
 
