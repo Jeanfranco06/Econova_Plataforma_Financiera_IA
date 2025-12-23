@@ -30,8 +30,11 @@ except ImportError:
     OPENAI_AVAILABLE = False
     openai = None
 
-from ..utils.base_datos import get_db_connection
-from .chatbot_prompts import ChatbotPrompts
+# Imports relativos - solo cuando se ejecuta como parte de un paquete
+if __name__ != "__main__":
+    from ..utils.base_datos import get_db_connection
+    from .chatbot_prompts import ChatbotPrompts
+    from .niveles import SistemaNiveles
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -181,43 +184,9 @@ class ChatbotServicio:
                                historial_conversaciones: List[Dict] = None) -> str:
         """
         Determina el nivel de expertise del usuario basado en su historial
+        Utiliza el sistema de niveles centralizado
         """
-        if not usuario_id:
-            return "basico"
-
-        try:
-            conn = get_db_connection().conn
-            cursor = conn.cursor()
-
-            # Analizar historial de conversaciones
-            cursor.execute("""
-                SELECT COUNT(*) as total_conversaciones,
-                       AVG(LENGTH(mensaje_usuario)) as longitud_promedio,
-                       COUNT(CASE WHEN tipo_interaccion = 'simulacion_financiera' THEN 1 END) as simulaciones,
-                       COUNT(CASE WHEN tipo_interaccion = 'consulta_tecnica' THEN 1 END) as consultas_tecnicas
-                FROM Conversaciones_Chatbot
-                WHERE usuario_id = ? AND fecha > datetime('now', '-30 days')
-            """, (usuario_id,))
-
-            stats = cursor.fetchone()
-
-            if stats:
-                total_conv, long_promedio, simulaciones, consultas_tecnicas = stats
-
-                # Lógica de clasificación
-                if total_conv >= 20 and (simulaciones >= 5 or consultas_tecnicas >= 10):
-                    return "experto"
-                elif total_conv >= 10 and (simulaciones >= 2 or consultas_tecnicas >= 3):
-                    return "intermedio"
-                else:
-                    return "basico"
-
-            conn.close()
-
-        except Exception as e:
-            logger.error(f"Error determinando nivel usuario: {e}")
-
-        return "basico"
+        return SistemaNiveles.determinar_nivel_usuario(usuario_id, historial_conversaciones)
 
     def obtener_prompt_por_nivel(self, nivel: str, contexto: Dict = None, analysis_context: Dict = None) -> str:
         """

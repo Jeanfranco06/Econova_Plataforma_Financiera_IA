@@ -12,7 +12,7 @@ from app.modelos.benchmarking import BenchmarkingService
 class GoogleSheetsExporter:
     def __init__(self):
         self.creds = None
-        self.service = None
+        self.service = None  # type: googleapiclient.discovery.Resource
         self._authenticate()
 
     def _authenticate(self):
@@ -86,7 +86,7 @@ class GoogleSheetsExporter:
 
             # Limpiar la hoja existente
             range_name = f"{sheet_name}!A:Z"
-            self.service.spreadsheets().values().clear(
+            self.service.spreadsheets().values().clear(  # type: ignore
                 spreadsheetId=spreadsheet_id,
                 range=range_name
             ).execute()
@@ -96,7 +96,7 @@ class GoogleSheetsExporter:
                 'values': values
             }
 
-            result = self.service.spreadsheets().values().update(
+            result = self.service.spreadsheets().values().update(  # type: ignore
                 spreadsheetId=spreadsheet_id,
                 range=f"{sheet_name}!A1",
                 valueInputOption='RAW',
@@ -156,7 +156,7 @@ class GoogleSheetsExporter:
             values = [df.columns.tolist()] + df.values.tolist()
 
             range_name = f"{sheet_name}!A:Z"
-            self.service.spreadsheets().values().clear(
+            self.service.spreadsheets().values().clear(  # type: ignore
                 spreadsheetId=spreadsheet_id,
                 range=range_name
             ).execute()
@@ -165,7 +165,7 @@ class GoogleSheetsExporter:
                 'values': values
             }
 
-            result = self.service.spreadsheets().values().update(
+            result = self.service.spreadsheets().values().update(  # type: ignore
                 spreadsheetId=spreadsheet_id,
                 range=f"{sheet_name}!A1",
                 valueInputOption='RAW',
@@ -245,7 +245,7 @@ class GoogleSheetsExporter:
         """Crear una hoja si no existe"""
         try:
             # Obtener información del spreadsheet
-            spreadsheet = self.service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+            spreadsheet = self.service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()  # type: ignore
             sheets = spreadsheet.get('sheets', [])
 
             # Verificar si la hoja ya existe
@@ -265,7 +265,7 @@ class GoogleSheetsExporter:
                     'requests': requests
                 }
 
-                self.service.spreadsheets().batchUpdate(
+                self.service.spreadsheets().batchUpdate(  # type: ignore
                     spreadsheetId=spreadsheet_id,
                     body=body
                 ).execute()
