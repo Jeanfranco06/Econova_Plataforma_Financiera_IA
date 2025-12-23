@@ -19,10 +19,10 @@ CREATE TABLE Usuarios(
     empresa VARCHAR(100),
     sector VARCHAR(100),
     tamano_empresa VARCHAR(50),
-    newsletter BOOLEAN DEFAULT 0,
+    newsletter BOOLEAN DEFAULT FALSE,
     nivel VARCHAR(80) DEFAULT 'basico',
     foto_perfil VARCHAR(255),
-    email_confirmado BOOLEAN DEFAULT 0,
+    email_confirmado BOOLEAN DEFAULT FALSE,
     confirmation_token VARCHAR(255),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
