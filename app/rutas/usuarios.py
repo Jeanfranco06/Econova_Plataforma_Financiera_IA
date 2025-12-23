@@ -337,10 +337,18 @@ def registrar_usuario():
                     'usuario': usuario.to_dict()
                 }), 201
             else:
-                # For regular form submissions, redirect to login page
-                from flask import flash, redirect, url_for
-                flash('¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.', 'success')
-                return redirect(url_for('login'))
+                # For regular form submissions, log in automatically and redirect to dashboard
+                from flask import session, flash, redirect, url_for
+
+                # Create session for the new user (automatic login)
+                session['usuario_id'] = usuario.usuario_id
+                session['usuario_email'] = usuario.email
+                session['usuario_nombre'] = f"{usuario.nombres} {usuario.apellidos}"
+                session['usuario_nivel'] = usuario.nivel
+                session['usuario_foto_perfil'] = usuario.foto_perfil
+
+                flash('¡Bienvenido! Tu cuenta ha sido creada exitosamente.', 'success')
+                return redirect(url_for('dashboard'))
         else:
             if not request.is_json:
                 # For form submissions, redirect back with error
