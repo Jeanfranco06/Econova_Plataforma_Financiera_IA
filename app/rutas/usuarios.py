@@ -328,20 +328,26 @@ def registrar_usuario():
             Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
 
             # Send confirmation email asynchronously to avoid blocking the response
-            def send_confirmation_email_async():
+            from app import crear_app
+
+            def send_confirmation_email_async(app):
                 try:
-                    email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
-                    if email_result:
-                        print(f"✅ Email de confirmación enviado exitosamente a {email}")
-                    else:
-                        print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
+                    with app.app_context():
+                        email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
+                        if email_result:
+                            print(f"✅ Email de confirmación enviado exitosamente a {email}")
+                        else:
+                            print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
                 except Exception as e:
                     print(f"⚠️ Excepción enviando email de confirmación: {e}")
                     import traceback
                     print(f"📋 Traceback: {traceback.format_exc()}")
 
-            # Start email sending in a separate thread
-            email_thread = threading.Thread(target=send_confirmation_email_async, daemon=True)
+            # Create app instance for the thread
+            app_instance = crear_app('production')
+
+            # Start email sending in a separate thread with app context
+            email_thread = threading.Thread(target=send_confirmation_email_async, args=(app_instance,), daemon=True)
             email_thread.start()
 
             # Check if this is an AJAX request (has X-Requested-With header)
@@ -676,8 +682,11 @@ def reenviar_confirmacion():
         if usuario.email_confirmado:
             return jsonify({'success': False, 'error': 'La cuenta ya está confirmada'}), 400
 
-        # Enviar email de confirmación de forma síncrona (para feedback inmediato)
-        email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
+        # Enviar email de confirmación de forma síncrona con app context (para feedback inmediato)
+        from app import crear_app
+        app_instance = crear_app('production')
+        with app_instance.app_context():
+            email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
 
         if email_result:
             return jsonify({
