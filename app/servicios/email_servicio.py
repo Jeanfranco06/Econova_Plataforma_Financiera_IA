@@ -25,7 +25,8 @@ class EmailService:
         self.smtp_port = app.config.get('MAIL_PORT', 587)
         self.username = app.config.get('MAIL_USERNAME', '')
         self.password = app.config.get('MAIL_PASSWORD', '')
-        self.sender = app.config.get('MAIL_USERNAME', 'jean20francisco06@gmail.com')
+        # Usar el email verificado en SendGrid como remitente por defecto
+        self.sender = app.config.get('MAIL_DEFAULT_SENDER', 'jjgonzaleses@unitru.edu.pe')
 
         # Check if we should use mock mode (for testing)
         self.use_mock = app.config.get('EMAIL_MOCK', False)
