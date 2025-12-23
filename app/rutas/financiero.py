@@ -413,7 +413,7 @@ def calcular_periodo_recuperacion():
 def obtener_simulacion(simulacion_id):
     """Obtiene una simulación por ID"""
     try:
-        simulacion = Simulacion.obtener_por_id(simulacion_id)
+        simulacion = Simulacion.obtener_simulacion_por_id(simulacion_id)
 
         if not simulacion:
             return jsonify({"error": "Simulación no encontrada"}), 404
@@ -431,7 +431,7 @@ def listar_simulaciones_usuario(usuario_id):
         tipo = request.args.get("tipo")  # Filtro opcional por tipo
         limit = int(request.args.get("limit", 50))
 
-        simulaciones = Simulacion.listar_por_usuario(usuario_id, tipo, limit)
+        simulaciones = Simulacion.obtener_simulaciones_usuario(usuario_id, limit, tipo)
 
         return jsonify(
             {

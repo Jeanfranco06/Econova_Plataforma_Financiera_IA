@@ -94,18 +94,26 @@ class Simulacion:
             db.disconnect()
 
     @staticmethod
-    def obtener_simulaciones_usuario(usuario_id, limite=50):
-        """Obtener simulaciones de un usuario"""
+    def obtener_simulaciones_usuario(usuario_id, limite=50, tipo=None):
+        """Obtener simulaciones de un usuario con filtro opcional por tipo"""
         db = get_db_connection()
+
         query = """
         SELECT * FROM Simulaciones
         WHERE usuario_id = %s
-        ORDER BY fecha DESC
-        LIMIT %s
         """
+        params = [usuario_id]
+
+        if tipo:
+            query += " AND tipo_simulacion = %s"
+            params.append(tipo)
+
+        query += " ORDER BY fecha DESC LIMIT %s"
+        params.append(limite)
+
         try:
             db.connect()
-            result = db.execute_query(query, (usuario_id, limite), fetch=True)
+            result = db.execute_query(query, tuple(params), fetch=True)
             simulaciones = []
             if result:
                 for data in result:
