@@ -333,11 +333,13 @@ def registrar_usuario():
             def send_confirmation_email_async(app):
                 try:
                     with app.app_context():
-                        email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
-                        if email_result:
-                            print(f"✅ Email de confirmación enviado exitosamente a {email}")
-                        else:
-                            print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
+                        # Crear un request context mínimo para render_template_string
+                        with app.test_request_context():
+                            email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
+                            if email_result:
+                                print(f"✅ Email de confirmación enviado exitosamente a {email}")
+                            else:
+                                print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
                 except Exception as e:
                     print(f"⚠️ Excepción enviando email de confirmación: {e}")
                     import traceback
@@ -686,7 +688,8 @@ def reenviar_confirmacion():
         from app import crear_app
         app_instance = crear_app('production')
         with app_instance.app_context():
-            email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
+            with app_instance.test_request_context():
+                email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
 
         if email_result:
             return jsonify({
