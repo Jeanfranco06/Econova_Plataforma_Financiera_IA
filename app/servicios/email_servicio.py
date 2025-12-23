@@ -71,9 +71,9 @@ class EmailService:
             html_part = MIMEText(html_content, 'html', 'utf-8')
             msg.attach(html_part)
 
-            # Conectar al servidor SMTP
+            # Conectar al servidor SMTP con timeout reducido para ahorrar memoria
             print(f"🔌 Paso 1: Conectando a {self.smtp_server}:{self.smtp_port}")
-            server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=10)
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=5)
             print(f"✅ Conexión SMTP establecida")
 
             # Usar TLS
@@ -133,64 +133,32 @@ class EmailService:
             url_confirmacion = f"{base_url}/api/v1/confirmar/{token_confirmacion or 'placeholder'}"
             print(f"🔗 URL de confirmación: {url_confirmacion}")
 
-            # Template HTML del email
+            # Template HTML optimizado para menor uso de memoria
             html_template = """
             <!DOCTYPE html>
-            <html lang="es">
+            <html>
             <head>
                 <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Confirma tu cuenta - Econova</title>
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
-                    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #ddd; }
-                    .header { background-color: #2c3e50; color: white; padding: 30px 30px; text-align: center; }
-                    .content { padding: 30px; }
-                    .button { display: inline-block; background-color: #3498db; color: white; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; margin: 20px 0; }
-                    .footer { background-color: #f5f5f5; padding: 20px 30px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; }
-                    .highlight { color: #2c3e50; font-weight: bold; }
-                </style>
+                <style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#f5f5f5;}.container{max-width:600px;margin:0 auto;background:#fff;border:1px solid #ddd;}.header{background:#2c3e50;color:#fff;padding:20px;text-align:center;}.content{padding:20px;}.button{display:inline-block;background:#3498db;color:#fff;text-decoration:none;padding:12px 24px;border-radius:4px;font-weight:bold;margin:20px 0;}.footer{background:#f5f5f5;padding:15px;text-align:center;color:#666;font-size:12px;}</style>
             </head>
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1 style="margin: 0; font-size: 24px;">Bienvenido a Econova</h1>
-                        <p style="margin: 10px 0 0 0; opacity: 0.9;">Plataforma de Simulación Financiera</p>
+                        <h1>Bienvenido a Econova</h1>
+                        <p>Confirma tu cuenta</p>
                     </div>
-
                     <div class="content">
-                        <p>Estimado {{ nombre_usuario }},</p>
-
-                        <p>Gracias por registrarte en <span class="highlight">Econova</span>. Para completar el proceso de registro y activar tu cuenta, es necesario confirmar tu dirección de correo electrónico.</p>
-
-                        <p>Por favor, haz clic en el siguiente enlace para confirmar tu cuenta:</p>
-
-                        <div style="text-align: center; margin: 30px 0;">
+                        <p>Hola {{ nombre_usuario }},</p>
+                        <p>Para activar tu cuenta en Econova, haz clic en el botón:</p>
+                        <div style="text-align:center;">
                             <a href="{{ url_confirmacion }}" class="button">Confirmar Cuenta</a>
                         </div>
-
-                        <p>Una vez confirmada tu cuenta, podrás acceder a todas las funcionalidades de la plataforma, incluyendo:</p>
-                        <ul style="margin: 20px 0;">
-                            <li>Simulación de VAN, TIR y portafolios de inversión</li>
-                            <li>Análisis de sensibilidad con Monte Carlo</li>
-                            <li>Benchmarking anónimo con otros empresarios</li>
-                            <li>Asistente de IA para interpretación de resultados</li>
-                            <li>Reportes y exportación de datos</li>
-                        </ul>
-
-                        <p style="color: #666; font-size: 12px; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
-                            Si no solicitaste este registro, puedes ignorar este mensaje de forma segura.
-                        </p>
-
-                        <p style="color: #666; font-size: 12px;">
-                            Si el enlace no funciona, copia y pega la siguiente dirección en tu navegador:<br>
-                            <span style="word-break: break-all;">{{ url_confirmacion }}</span>
-                        </p>
+                        <p>O copia este enlace: <a href="{{ url_confirmacion }}">{{ url_confirmacion }}</a></p>
+                        <p>Si no solicitaste este registro, ignora este email.</p>
                     </div>
-
                     <div class="footer">
-                        <p><strong>Econova</strong> - Plataforma Inteligente de Simulación Financiera</p>
-                        <p>Este es un mensaje automático, por favor no respondas a este correo.</p>
+                        <p>Econova - Plataforma de Simulación Financiera</p>
                     </div>
                 </div>
             </body>
