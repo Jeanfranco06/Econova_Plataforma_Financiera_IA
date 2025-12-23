@@ -49,9 +49,17 @@ class EmailService:
         if self.use_mock:
             print(f"📧 [MOCK] Email enviado a {to_email}")
             print(f"   Asunto: {subject}")
+            print(f"   Modo mock activado - no se envía email real")
             return True
 
         try:
+            print(f"🔄 INICIANDO ENVÍO DE EMAIL REAL")
+            print(f"   Destinatario: {to_email}")
+            print(f"   Asunto: {subject}")
+            print(f"   Servidor: {self.smtp_server}:{self.smtp_port}")
+            print(f"   Usuario: {self.username}")
+            print(f"   Remitente: {self.sender}")
+
             # Crear mensaje con codificación UTF-8
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
@@ -64,26 +72,54 @@ class EmailService:
             msg.attach(html_part)
 
             # Conectar al servidor SMTP
-            print(f"🔌 Conectando a {self.smtp_server}:{self.smtp_port}")
-            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
-            server.starttls()  # Usar TLS
+            print(f"🔌 Paso 1: Conectando a {self.smtp_server}:{self.smtp_port}")
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=10)
+            print(f"✅ Conexión SMTP establecida")
+
+            # Usar TLS
+            print(f"🔒 Paso 2: Estableciendo conexión TLS")
+            server.starttls()
+            print(f"✅ TLS activado")
 
             # Autenticar
-            print(f"🔐 Autenticando como {self.username}")
+            print(f"🔐 Paso 3: Autenticando como {self.username}")
             server.login(self.username, self.password)
+            print(f"✅ Autenticación exitosa")
 
             # Enviar email con codificación UTF-8
-            print(f"📤 Enviando email a {to_email}")
-            server.sendmail(self.sender, to_email, msg.as_string().encode('utf-8'))
-            server.quit()
+            print(f"📤 Paso 4: Enviando email a {to_email}")
+            result = server.sendmail(self.sender, to_email, msg.as_string().encode('utf-8'))
+            print(f"📤 Resultado del envío: {result}")
 
-            print(f"✅ Email enviado exitosamente a {to_email}")
+            server.quit()
+            print(f"🔌 Conexión cerrada")
+
+            print(f"✅ EMAIL ENVIADO EXITOSAMENTE A {to_email}")
+            print(f"   Verifica tu bandeja de entrada y carpeta de spam")
             return True
 
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"❌ ERROR DE AUTENTICACIÓN SMTP: {e}")
+            print(f"   Posibles causas:")
+            print(f"   - Credenciales incorrectas")
+            print(f"   - Gmail: Necesitas usar una 'App Password' si tienes 2FA activado")
+            print(f"   - Gmail: La opción 'Acceso de aplicaciones menos seguras' está deshabilitada")
+            return False
+
+        except smtplib.SMTPConnectError as e:
+            print(f"❌ ERROR DE CONEXIÓN SMTP: {e}")
+            print(f"   No se puede conectar al servidor SMTP")
+            return False
+
+        except smtplib.SMTPException as e:
+            print(f"❌ ERROR GENERAL SMTP: {e}")
+            return False
+
         except Exception as e:
-            print(f"❌ Error enviando email: {e}")
+            print(f"❌ ERROR INESPERADO: {e}")
             import traceback
-            print(f"📋 Traceback: {traceback.format_exc()}")
+            print(f"📋 Traceback completo:")
+            print(traceback.format_exc())
             return False
 
     def enviar_email_confirmacion(self, email, nombre_usuario, token_confirmacion=None):
