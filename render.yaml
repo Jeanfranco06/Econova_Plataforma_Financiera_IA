@@ -1,11 +1,19 @@
 services:
   - type: web
-    name: econova-api
+    name: econova-plataforma
     runtime: python3
     buildCommand: |
-      pip install -r requirements.txt
+      echo "🚀 Iniciando construcción del proyecto..."
+      pip install --upgrade pip
+      pip install -r requirements.txt --no-cache-dir
+      echo "✅ Dependencias instaladas"
+      echo "🔍 Ejecutando verificaciones pre-despliegue..."
+      python check_render_deployment.py
+      echo "✅ Verificaciones completadas"
       python init_render_db.py
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+      echo "✅ Base de datos inicializada"
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app
+    healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
         value: production
@@ -13,10 +21,16 @@ services:
         value: 3.9.18
       - key: API_VERSION
         value: 1.0.0
-    # Database will be configured via environment variables in Render dashboard
-    # Add these environment variables in Render:
+      - key: RENDER
+        value: "true"
+      - key: PRODUCTION
+        value: "true"
+    # Variables de entorno críticas (configurar en dashboard de Render):
     # - DATABASE_URL (PostgreSQL connection string)
-    # - SECRET_KEY (secure random key)
-    # - GROQ_API_KEY
-    # - OPENAI_API_KEY
-    # - MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD, etc.
+    # - SECRET_KEY (clave segura aleatoria de al menos 32 caracteres)
+    # - GROQ_API_KEY (para chatbot)
+    # - OPENAI_API_KEY (opcional, para funcionalidades avanzadas)
+    # - MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
+    # - CORS_ORIGINS (URLs permitidas, ej: https://tu-dominio.onrender.com)
+    # - GOOGLE_SHEETS_CREDENTIALS_PATH (opcional)
+    # - TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER (opcional)

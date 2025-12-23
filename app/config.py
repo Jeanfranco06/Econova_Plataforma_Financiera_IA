@@ -11,15 +11,19 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'econova-secret-key-2025-dev')
     DEBUG = os.getenv('FLASK_DEBUG', 'True') == 'True'
 
-    # Configuración de base de datos PostgreSQL
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_PORT = os.getenv('DB_PORT', '5432')
-    DB_NAME = os.getenv('DB_NAME', 'econova_db')
-    DB_USER = os.getenv('DB_USER', 'postgres')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', 'postgres')
-
-    # String de conexión PostgreSQL
-    DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # Configuración de base de datos - Soporte para DATABASE_URL (Render)
+    DATABASE_URL = os.getenv('DATABASE_URL', '')
+    if DATABASE_URL:
+        # Usar DATABASE_URL si está disponible (producción)
+        DATABASE_URI = DATABASE_URL
+    else:
+        # Configuración tradicional para desarrollo
+        DB_HOST = os.getenv('DB_HOST', 'localhost')
+        DB_PORT = os.getenv('DB_PORT', '5432')
+        DB_NAME = os.getenv('DB_NAME', 'econova_db')
+        DB_USER = os.getenv('DB_USER', 'postgres')
+        DB_PASSWORD = os.getenv('DB_PASSWORD', 'postgres')
+        DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
     # Configuración CORS
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
@@ -48,10 +52,12 @@ class Config:
     GOOGLE_SHEETS_SPREADSHEET_ID = os.getenv('GOOGLE_SHEETS_SPREADSHEET_ID', '')
 
     # Email configuration
-    SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-    SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
-    SMTP_USERNAME = os.getenv('SMTP_USERNAME', '')
-    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', '587'))
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME', '')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
 
     # WhatsApp configuration (using Twilio)
     TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')

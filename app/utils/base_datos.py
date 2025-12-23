@@ -18,12 +18,13 @@ except ImportError:
 # Detectar entorno (desarrollo vs producción)
 IS_PRODUCTION = os.getenv('RENDER', False) or os.getenv('PRODUCTION', False)
 
-# Forzar SQLite si DB_NAME es un archivo .db (como hace run.py)
-if Config.DB_NAME and Config.DB_NAME.endswith('.db'):
-    USE_POSTGRESQL = False
-    print("🐘 Usando SQLite (desarrollo - forzado por DB_NAME)")
+# Detectar si usar PostgreSQL (producción) o SQLite (desarrollo)
+if Config.DATABASE_URL and POSTGRESQL_AVAILABLE:
+    # Producción: PostgreSQL con DATABASE_URL
+    USE_POSTGRESQL = True
+    print("🐘 Usando PostgreSQL (producción con DATABASE_URL)")
 elif IS_PRODUCTION and Config.DB_USER and Config.DB_USER != '' and POSTGRESQL_AVAILABLE:
-    # Producción: PostgreSQL
+    # Producción: PostgreSQL con configuración individual
     USE_POSTGRESQL = True
     print("🐘 Usando PostgreSQL (producción)")
 else:
@@ -40,21 +41,29 @@ class DatabaseConnection:
     def connect(self):
         try:
             if self.use_postgresql:
-                # Conexión PostgreSQL
-                self.conn = psycopg2.connect(
-                    dbname=Config.DB_NAME,
-                    user=Config.DB_USER,
-                    password=Config.DB_PASSWORD,
-                    host=Config.DB_HOST,
-                    port=Config.DB_PORT,
-                    options="-c client_encoding=UTF8"
-                )
+                # Conexión PostgreSQL usando DATABASE_URI completa
+                if Config.DATABASE_URL:
+                    # Usar DATABASE_URL completa (Render)
+                    self.conn = psycopg2.connect(
+                        Config.DATABASE_URI,
+                        options="-c client_encoding=UTF8"
+                    )
+                else:
+                    # Usar configuración individual (desarrollo/producción alternativa)
+                    self.conn = psycopg2.connect(
+                        dbname=Config.DB_NAME,
+                        user=Config.DB_USER,
+                        password=Config.DB_PASSWORD,
+                        host=Config.DB_HOST,
+                        port=Config.DB_PORT,
+                        options="-c client_encoding=UTF8"
+                    )
                 self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
                 print("✅ Conexión PostgreSQL exitosa")
                 return True
             else:
                 # Conexión SQLite
-                db_path = Config.DB_NAME if Config.DB_NAME.endswith('.db') else 'econova.db'
+                db_path = Config.DB_NAME if hasattr(Config, 'DB_NAME') and Config.DB_NAME and Config.DB_NAME.endswith('.db') else 'econova.db'
                 self.conn = sqlite3.connect(db_path)
                 self.conn.row_factory = sqlite3.Row
                 self.cur = self.conn.cursor()

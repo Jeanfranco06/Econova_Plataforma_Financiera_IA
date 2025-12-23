@@ -26,8 +26,13 @@ def init_render_database():
             if USE_POSTGRESQL:
                 print("📊 Usando PostgreSQL para producción")
 
-                # Crear tablas para PostgreSQL
-                db.connect()
+                # Verificar conexión a PostgreSQL
+                try:
+                    db.connect()
+                    print("✅ Conexión a PostgreSQL exitosa")
+                except Exception as conn_error:
+                    print(f"❌ Error conectando a PostgreSQL: {conn_error}")
+                    return False
 
                 # Leer esquema SQL
                 schema_path = os.path.join(os.path.dirname(__file__), 'base_datos', 'esquema.sql')
