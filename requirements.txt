@@ -35,3 +35,7 @@ openpyxl==3.1.2
 
 # SMS/WhatsApp
 twilio>=8.0.0
+
+# Google APIs
+google-auth>=2.0.0
+google-api-python-client>=2.0.0
