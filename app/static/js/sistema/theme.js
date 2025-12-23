@@ -6,50 +6,32 @@
 // Clase para manejar el sistema de temas
 class ThemeManager {
     constructor() {
-        this.currentTheme = this.getStoredTheme() || 'light';
-        this.init();
-    }
+        this.currentTheme = this.getStoredTheme() || 'light';this.init();}
 
     // Obtener tema almacenado
     getStoredTheme() {
         if (typeof localStorage !== 'undefined') {
-            return localStorage.getItem('econova-theme');
-        }
-        return null;
-    }
+            return localStorage.getItem('econova-theme');}
+        return null;}
 
     // Almacenar tema
     storeTheme(theme) {
         if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('econova-theme', theme);
-        }
+            localStorage.setItem('econova-theme', theme);}
     }
 
     // Aplicar tema
     applyTheme(theme) {
-        this.currentTheme = theme;
-        this.storeTheme(theme);
-        
-        // Actualizar clase del body
-        document.body.classList.remove('theme-light', 'theme-dark');
-        document.body.classList.add(`theme-${theme}`);
-        
-        // Aplicar estilos CSS variables
-        this.setCSSVariables(theme);
-        
-        // Disparar evento de cambio de tema
+        this.currentTheme = theme;this.storeTheme(theme);// Actualizar clase del body
+        document.body.classList.remove('theme-light', 'theme-dark');document.body.classList.add(`theme-${theme}`);// Aplicar estilos CSS variables
+        this.setCSSVariables(theme);// Disparar evento de cambio de tema
         document.dispatchEvent(new CustomEvent('themeChanged', { 
             detail: { theme: theme } 
-        }));
-        
-        console.log(`🌙 Tema cambiado a: ${theme}`);
-    }
+        }));}
 
     // Establecer variables CSS según el tema
     setCSSVariables(theme) {
-        const root = document.documentElement;
-
-        if (theme === 'dark') {
+        const root = document.documentElement;if (theme === 'dark') {
             // Modo oscuro - paleta elegante y profesional
             root.style.setProperty('--color-primary', '#2563eb');       // Azul profesional
             root.style.setProperty('--color-secondary', '#64748b');    // Gris medio elegante
@@ -61,8 +43,7 @@ class ThemeManager {
             root.style.setProperty('--color-text-primary', '#f1f5f9'); // Blanco casi puro
             root.style.setProperty('--color-text-secondary', '#cbd5e1'); // Gris claro suave
             root.style.setProperty('--color-border', '#334155');       // Gris azulado medio
-            root.style.setProperty('--color-shadow', 'rgba(0, 0, 0, 0.25)');
-            root.style.setProperty('--color-card-bg', '#1e293b');      // Fondo de tarjetas
+            root.style.setProperty('--color-shadow', 'rgba(0, 0, 0, 0.25)');root.style.setProperty('--color-card-bg', '#1e293b');      // Fondo de tarjetas
             root.style.setProperty('--color-input-bg', '#374151');     // Fondo de inputs
 
             // Colores adicionales para chatbot y componentes específicos
@@ -74,10 +55,7 @@ class ThemeManager {
             root.style.setProperty('--color-header-accent', '#334155'); // Acentos de header
 
             // Colores para gamificación
-            root.style.setProperty('--color-achievement-bg', '#1e293b');
-            root.style.setProperty('--color-progress-bg', '#374151');
-            root.style.setProperty('--color-progress-fill', '#2563eb');
-        } else {
+            root.style.setProperty('--color-achievement-bg', '#1e293b');root.style.setProperty('--color-progress-bg', '#374151');root.style.setProperty('--color-progress-fill', '#2563eb');} else {
             // Modo claro - paleta elegante y profesional
             root.style.setProperty('--color-primary', '#1e40af');       // Azul marino
             root.style.setProperty('--color-secondary', '#475569');    // Gris pizarra
@@ -89,8 +67,7 @@ class ThemeManager {
             root.style.setProperty('--color-text-primary', '#0f172a'); // Azul marino oscuro
             root.style.setProperty('--color-text-secondary', '#475569'); // Gris pizarra
             root.style.setProperty('--color-border', '#cbd5e1');       // Gris claro elegante
-            root.style.setProperty('--color-shadow', 'rgba(15, 23, 42, 0.08)');
-            root.style.setProperty('--color-card-bg', '#ffffff');      // Fondo blanco de tarjetas
+            root.style.setProperty('--color-shadow', 'rgba(15, 23, 42, 0.08)');root.style.setProperty('--color-card-bg', '#ffffff');      // Fondo blanco de tarjetas
             root.style.setProperty('--color-input-bg', '#ffffff');     // Fondo blanco de inputs
 
             // Colores adicionales para chatbot y componentes específicos
@@ -102,54 +79,34 @@ class ThemeManager {
             root.style.setProperty('--color-header-accent', '#e2e8f0'); // Acentos de header
 
             // Colores para gamificación
-            root.style.setProperty('--color-achievement-bg', '#ffffff');
-            root.style.setProperty('--color-progress-bg', '#e2e8f0');
-            root.style.setProperty('--color-progress-fill', '#1e40af');
-        }
+            root.style.setProperty('--color-achievement-bg', '#ffffff');root.style.setProperty('--color-progress-bg', '#e2e8f0');root.style.setProperty('--color-progress-fill', '#1e40af');}
     }
 
     // Inicializar el sistema de temas
     init() {
         // Aplicar tema almacenado o por defecto
-        this.applyTheme(this.currentTheme);
-        
-        // Escuchar cambios en localStorage (para sincronizar entre pestañas)
+        this.applyTheme(this.currentTheme);// Escuchar cambios en localStorage (para sincronizar entre pestañas)
         window.addEventListener('storage', (e) => {
             if (e.key === 'econova-theme' && e.newValue) {
-                this.applyTheme(e.newValue);
-            }
-        });
-    }
+                this.applyTheme(e.newValue);}
+        });}
 
     // Alternar entre temas
     toggleTheme() {
-        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        this.applyTheme(newTheme);
-        return newTheme;
-    }
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';this.applyTheme(newTheme);return newTheme;}
 
     // Obtener tema actual
     getCurrentTheme() {
-        return this.currentTheme;
-    }
+        return this.currentTheme;}
 }
 
 // Inicializar el sistema de temas cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     // Crear instancia del gestor de temas
-    window.themeManager = new ThemeManager();
-    
-    // Exponer métodos globales para compatibilidad con el código existente
+    window.themeManager = new ThemeManager();// Exponer métodos globales para compatibilidad con el código existente
     window.switchTheme = (theme) => {
         if (window.themeManager) {
-            window.themeManager.applyTheme(theme);
-        }
-    };
-    
-    console.log('🎨 Sistema de temas inicializado');
-});
-
-// Exportar para uso en otros módulos (si se usa ES6)
+            window.themeManager.applyTheme(theme);}
+    };});// Exportar para uso en otros módulos (si se usa ES6)
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ThemeManager;
-}
+    module.exports = ThemeManager;}
