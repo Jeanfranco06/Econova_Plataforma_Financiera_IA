@@ -309,7 +309,7 @@ def registrar_usuario():
                 }
             }), 400
 
-        # Create user
+        # Create user (automatically confirmed, no email needed)
         usuario = Usuario.crear(
             nombres=nombres,
             apellidos=apellidos,
@@ -326,25 +326,7 @@ def registrar_usuario():
         if usuario:
             # Set default level to 'basico'
             Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
-
-            # Send confirmation email synchronously to ensure user knows if registration was successful
-            from app import crear_app
-            app_instance = crear_app('production')
-            email_sent = False
-
-            try:
-                with app_instance.app_context():
-                    with app_instance.test_request_context():
-                        email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
-                        if email_result:
-                            print(f"✅ Email de confirmación enviado exitosamente a {email}")
-                            email_sent = True
-                        else:
-                            print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
-            except Exception as e:
-                print(f"⚠️ Excepción enviando email de confirmación: {e}")
-                import traceback
-                print(f"📋 Traceback: {traceback.format_exc()}")
+            print(f"✅ Usuario registrado exitosamente: {nombre_usuario}")
 
             # Check if this is an AJAX request (has X-Requested-With header)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -352,16 +334,12 @@ def registrar_usuario():
                 return jsonify({
                     'success': True,
                     'message': 'Usuario registrado exitosamente',
-                    'email_sent': email_sent,
                     'usuario': usuario.to_dict()
                 }), 201
             else:
-                # For regular form submissions, redirect to login page with appropriate message
+                # For regular form submissions, redirect to login page
                 from flask import flash, redirect, url_for
-                if email_sent:
-                    flash('¡Registro exitoso! Te hemos enviado un email de confirmación a tu bandeja de entrada. Revisa tu email y haz clic en el enlace para activar tu cuenta.', 'success')
-                else:
-                    flash('¡Registro exitoso! Sin embargo, hubo un problema enviando el email de confirmación. Puedes hacer clic en "Reenviar confirmación" en la página de login para intentarlo de nuevo.', 'warning')
+                flash('¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.', 'success')
                 return redirect(url_for('login'))
         else:
             if not request.is_json:
@@ -420,13 +398,6 @@ def procesar_login():
 
         # Verificar si el usuario existe y la contraseña es correcta
         if usuario and usuario.password_hash:
-            # Check if email is confirmed
-            if not usuario.email_confirmado:
-                return jsonify({
-                    'success': False,
-                    'error': 'Debes confirmar tu cuenta desde el email que te enviamos antes de poder iniciar sesión.'
-                }), 403
-
             if check_password_hash(usuario.password_hash, password):
                 # Login exitoso - crear sesión
                 session['usuario_id'] = usuario.usuario_id
@@ -663,110 +634,3 @@ def check_username_availability():
     except Exception as e:
         print(f"Error checking username availability: {e}")
         return jsonify({'available': False, 'error': 'Error interno del servidor'}), 500
-
-@usuarios_bp.route('/reenviar-confirmacion', methods=['POST'])
-def reenviar_confirmacion():
-    """Reenviar email de confirmación"""
-    try:
-        data = request.get_json() or request.form
-        email = data.get('email', '').strip().lower()
-
-        if not email:
-            return jsonify({'success': False, 'error': 'Email requerido'}), 400
-
-        # Buscar usuario por email
-        usuario = Usuario.obtener_usuario_por_email(email)
-        if not usuario:
-            return jsonify({'success': False, 'error': 'Usuario no encontrado'}), 404
-
-        if usuario.email_confirmado:
-            return jsonify({'success': False, 'error': 'La cuenta ya está confirmada'}), 400
-
-        # Enviar email de confirmación de forma síncrona con app context (para feedback inmediato)
-        from app import crear_app
-        app_instance = crear_app('production')
-        with app_instance.app_context():
-            with app_instance.test_request_context():
-                email_result = email_service.enviar_email_confirmacion(email, f"{usuario.nombres} {usuario.apellidos}", usuario.confirmation_token)
-
-        if email_result:
-            return jsonify({
-                'success': True,
-                'message': 'Email de confirmación reenviado exitosamente'
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Error enviando el email. Por favor, intenta más tarde.'
-            }), 500
-
-    except Exception as e:
-        print(f"Error reenviando confirmación: {e}")
-        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
-
-@usuarios_bp.route('/confirmar/<token>', methods=['GET'])
-def confirmar_cuenta(token):
-    """Confirmar cuenta de usuario mediante token"""
-    try:
-        print(f"🔍 CONFIRMACIÓN: Received token: '{token}'")
-        print(f"🔍 CONFIRMACIÓN: Token length: {len(token) if token else 0}")
-
-        # Find user by confirmation token
-        db = get_db_connection()
-        query = adapt_query("SELECT * FROM Usuarios WHERE confirmation_token = %s")
-        print(f"🔍 CONFIRMACIÓN: Query: {query}")
-        print(f"🔍 CONFIRMACIÓN: Token parameter: '{token}'")
-
-        db.connect()
-        result = db.execute_query(query, (token,), fetch=True)
-        print(f"🔍 CONFIRMACIÓN: Query result: {result}")
-
-        if not result:
-            print(f"❌ CONFIRMACIÓN: No user found with token '{token}'")
-            flash('Token de confirmación inválido o expirado.', 'error')
-            return redirect(url_for('login'))
-
-        usuario_data = result[0]
-        usuario_id = usuario_data['usuario_id']
-        email = usuario_data['email']
-        print(f"✅ CONFIRMACIÓN: Found user ID {usuario_id} with email {email}")
-
-        # Check if already confirmed
-        email_confirmado = usuario_data['email_confirmado']
-        print(f"🔍 CONFIRMACIÓN: Current email_confirmado status: {email_confirmado} (type: {type(email_confirmado)})")
-
-        # Convert boolean if needed
-        if isinstance(email_confirmado, int):
-            email_confirmado = bool(email_confirmado)
-
-        if email_confirmado:
-            print(f"ℹ️ CONFIRMACIÓN: User {usuario_id} already confirmed")
-            flash('Tu cuenta ya ha sido confirmada. Puedes iniciar sesión.', 'info')
-            return redirect(url_for('login'))
-
-        # Update user as confirmed
-        update_query = adapt_query("UPDATE Usuarios SET email_confirmado = 1, confirmation_token = NULL WHERE usuario_id = %s")
-        print(f"🔄 CONFIRMACIÓN: Updating user {usuario_id} to confirmed")
-        db.execute_query(update_query, (usuario_id,))
-        db.commit()
-        print(f"✅ CONFIRMACIÓN: User {usuario_id} confirmed successfully")
-
-        # Send welcome email
-        usuario = Usuario(**usuario_data)
-        try:
-            email_service.enviar_email_bienvenida(usuario.email, usuario.nombre_usuario)
-            print(f"✅ Email de bienvenida enviado a {usuario.email}")
-        except Exception as e:
-            print(f"⚠️ Error enviando email de bienvenida: {e}")
-
-        flash('¡Cuenta confirmada exitosamente! Ahora puedes iniciar sesión.', 'success')
-        return redirect(url_for('login'))
-
-    except Exception as e:
-        print(f"❌ CONFIRMACIÓN: Exception during confirmation: {e}")
-        import traceback
-        print(f"📋 CONFIRMACIÓN: Traceback: {traceback.format_exc()}")
-        flash('Error al confirmar la cuenta. Inténtalo de nuevo.', 'error')
-        return redirect(url_for('login'))
-    finally:
-        db.disconnect()

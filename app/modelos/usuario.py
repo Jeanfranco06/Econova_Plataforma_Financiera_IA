@@ -150,12 +150,12 @@ class Usuario:
         # Convertir newsletter a entero para SQLite
         newsletter_int = 1 if newsletter else 0
 
-        # Generar token de confirmación
-        confirmation_token = secrets.token_urlsafe(32)
+        # No necesitamos token de confirmación - usuarios quedan confirmados automáticamente
+        confirmation_token = None
 
         params = (nombres, apellidos, email, telefono, nombre_usuario,
                  hashed_password, empresa, sector, tamano_empresa,
-                 newsletter_int, 'basico', confirmation_token)
+                 newsletter_int, 'basico', confirmation_token, 1)  # email_confirmado = True
 
         print(f"🔍 Parámetros para crear usuario: {params}")
 
@@ -166,8 +166,8 @@ class Usuario:
                 query = """
                 INSERT INTO Usuarios (nombres, apellidos, email, telefono, nombre_usuario,
                                     password_hash, empresa, sector, tamano_empresa, newsletter,
-                                    nivel, confirmation_token)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                    nivel, confirmation_token, email_confirmado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING usuario_id
                 """
                 result = db.execute_query(query, params, fetch=True)
@@ -181,8 +181,8 @@ class Usuario:
                 query = """
                 INSERT INTO Usuarios (nombres, apellidos, email, telefono, nombre_usuario,
                                     password_hash, empresa, sector, tamano_empresa, newsletter,
-                                    nivel, confirmation_token)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    nivel, confirmation_token, email_confirmado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
 
                 db.execute_query(query, params)
@@ -210,7 +210,7 @@ class Usuario:
                 'tamano_empresa': tamano_empresa,
                 'newsletter': newsletter_int,
                 'nivel': 'basico',
-                'email_confirmado': False,
+                'email_confirmado': True,  # Usuarios quedan confirmados automáticamente
                 'confirmation_token': confirmation_token
             }
             return Usuario(**usuario_data)
