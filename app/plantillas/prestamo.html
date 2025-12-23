@@ -18,18 +18,46 @@
 <!-- Main Content -->
 <section class="py-16 bg-gray-50">
   <div class="container mx-auto px-6">
-    <div class="max-w-5xl mx-auto">
-      
-      <!-- Tabs for different loan analyses -->
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-        <div class="flex border-b border-gray-200">
-          <button class="loan-tab-btn active flex-1 py-4 px-6 text-center font-semibold border-b-2 border-blue-600" data-tab="basico">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Loan Calculator -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <!-- Header with Financial Context -->
+        <div class="flex items-start justify-between mb-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-2xl font-bold text-gray-800">Análisis de Préstamos y Créditos</h3>
+              <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                <i class="fas fa-calculator mr-1"></i>Finanzas Personales
+              </div>
+            </div>
+            <p class="text-gray-600 mb-3">Evaluación completa del costo y capacidad de pago de créditos</p>
+
+            <!-- Educational Content -->
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+              <div class="flex items-start">
+                <i class="fas fa-graduation-cap text-blue-600 mt-1 mr-3"></i>
+                <div>
+                  <h5 class="font-semibold text-blue-800 mb-1">Conceptos Financieros</h5>
+                  <p class="text-sm text-blue-700">
+                    El análisis de préstamos incluye el cálculo de cuotas mediante amortización, evaluación del costo total
+                    considerando intereses y comisiones, y determinación de la capacidad de pago según reglas bancarias.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs for different loan analyses -->
+        <div class="flex border-b border-gray-200 mb-6 flex-wrap">
+          <button class="loan-tab-btn active flex-1 py-4 px-4 md:px-6 text-center font-semibold border-b-2 border-blue-600 text-sm md:text-base" data-tab="basico">
             <i class="fas fa-calculator mr-2"></i>Cálculo Básico
           </button>
-          <button class="loan-tab-btn flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-gray-800" data-tab="sensibilidad">
+          <button class="loan-tab-btn flex-1 py-4 px-4 md:px-6 text-center font-semibold text-gray-600 hover:text-gray-800 text-sm md:text-base" data-tab="sensibilidad">
             <i class="fas fa-chart-line mr-2"></i>Sensibilidad
           </button>
-          <button class="loan-tab-btn flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-gray-800" data-tab="comparar">
+          <button class="loan-tab-btn flex-1 py-4 px-4 md:px-6 text-center font-semibold text-gray-600 hover:text-gray-800 text-sm md:text-base" data-tab="comparar">
             <i class="fas fa-balance-scale mr-2"></i>Comparar Plazos
           </button>
         </div>

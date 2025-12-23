@@ -1,632 +1,278 @@
 /**
- * Módulo de Préstamos - Econova
- * Funcionalidades para análisis de préstamos y capacidad de pago
+ * JavaScript para la página de Préstamos
+ * Maneja formularios y llamadas a la API
  */
 
 class PrestamoManager {
     constructor() {
-        this.calculos = {};
         this.init();
     }
 
     init() {
         console.log('🏦 Módulo de Préstamos inicializado');
         this.setupEventListeners();
+        this.setupTabs();
     }
 
     setupEventListeners() {
-        // Escuchar eventos de formularios de préstamos
-        document.addEventListener('submit', (e) => {
-            if (e.target.id === 'form-calculo-prestamo') {
+        // Formulario principal de cálculo de préstamo
+        const loanForm = document.getElementById('loan-form');
+        if (loanForm) {
+            loanForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.calcularPrestamo(e.target);
-            }
-            if (e.target.id === 'form-capacidad-pago') {
-                e.preventDefault();
-                this.analizarCapacidadPago(e.target);
-            }
-            if (e.target.id === 'form-comparador-prestamos') {
-                e.preventDefault();
-                this.compararPrestamos(e.target);
-            }
-        });
-
-        // Escuchar eventos de cambio en inputs
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('prestamo-input')) {
-                this.actualizarCalculosTiempoReal(e.target);
-            }
-        });
-    }
-
-    /**
-     * Calcular préstamo (cuota mensual)
-     */
-    calcularPrestamo(form) {
-        const formData = new FormData(form);
-        const datos = {
-            capital: parseFloat(formData.get('capital')) || 0,
-            tasaAnual: parseFloat(formData.get('tasa_anual')) || 0,
-            plazoMeses: parseInt(formData.get('plazo_meses')) || 0,
-            tipoPrestamo: formData.get('tipo_prestamo') || 'frances'
-        };
-
-        // Validar datos
-        if (!this.validarDatosPrestamo(datos)) {
-            this.mostrarError('Por favor, complete todos los campos correctamente.');
-            return;
+                this.calcularPrestamo();
+            });
         }
 
-        // Calcular préstamo
-        const resultado = this.calculoPrestamo(datos);
+        // Formulario de sensibilidad
+        const loanSensibilidadForm = document.getElementById('loan-sensibilidad-form');
+        if (loanSensibilidadForm) {
+            loanSensibilidadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.analizarSensibilidad();
+            });
+        }
 
-        // Mostrar resultados
-        this.mostrarResultadosPrestamo(resultado, datos);
-
-        // Guardar cálculo
-        this.guardarCalculo('prestamo', { datos, resultado });
-
-        // Disparar evento
-        this.dispararEvento('prestamoCalculado', resultado);
+        // Formulario de comparación de plazos
+        const loanCompararForm = document.getElementById('loan-comparar-form');
+        if (loanCompararForm) {
+            loanCompararForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.compararPlazos();
+            });
+        }
     }
 
-    calculoPrestamo(datos) {
-        const { capital, tasaAnual, plazoMeses, tipoPrestamo } = datos;
-        const tasaMensual = (tasaAnual / 100) / 12;
+    setupTabs() {
+        const tabButtons = document.querySelectorAll('.loan-tab-btn');
+        const tabContents = document.querySelectorAll('.loan-tab-content');
 
-        let cuotaMensual = 0;
-        let totalPagar = 0;
-        let totalIntereses = 0;
-        const amortizacion = [];
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
 
-        if (tipoPrestamo === 'frances') {
-            // Sistema Francés (cuota constante)
-            if (tasaMensual === 0) {
-                cuotaMensual = capital / plazoMeses;
-            } else {
-                cuotaMensual = capital * (tasaMensual * Math.pow(1 + tasaMensual, plazoMeses)) /
-                              (Math.pow(1 + tasaMensual, plazoMeses) - 1);
-            }
-
-            let saldoPendiente = capital;
-
-            for (let mes = 1; mes <= plazoMeses; mes++) {
-                const interesMes = saldoPendiente * tasaMensual;
-                const capitalMes = cuotaMensual - interesMes;
-                saldoPendiente -= capitalMes;
-
-                amortizacion.push({
-                    mes: mes,
-                    cuota: cuotaMensual,
-                    interes: interesMes,
-                    capital: capitalMes,
-                    saldoPendiente: Math.max(0, saldoPendiente)
+                // Remove active class and blue border from all buttons
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('border-b-2', 'border-blue-600');
+                    btn.classList.add('text-gray-600', 'hover:text-gray-800');
                 });
 
-                totalIntereses += interesMes;
-            }
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.add('hidden'));
 
-            totalPagar = capital + totalIntereses;
+                // Add active class and blue border to clicked button
+                button.classList.add('active');
+                button.classList.remove('text-gray-600', 'hover:text-gray-800');
+                button.classList.add('border-b-2', 'border-blue-600');
 
-        } else if (tipoPrestamo === 'aleman') {
-            // Sistema Alemán (capital constante)
-            const capitalMensual = capital / plazoMeses;
-
-            for (let mes = 1; mes <= plazoMeses; mes++) {
-                const saldoPendiente = capital - (capitalMensual * (mes - 1));
-                const interesMes = saldoPendiente * tasaMensual;
-                const cuotaMes = capitalMensual + interesMes;
-
-                amortizacion.push({
-                    mes: mes,
-                    cuota: cuotaMes,
-                    interes: interesMes,
-                    capital: capitalMensual,
-                    saldoPendiente: Math.max(0, saldoPendiente - capitalMensual)
-                });
-
-                totalIntereses += interesMes;
-            }
-
-            cuotaMensual = amortizacion[0].cuota; // Primera cuota
-            totalPagar = capital + totalIntereses;
-        }
-
-        return {
-            cuotaMensual: cuotaMensual,
-            totalPagar: totalPagar,
-            totalIntereses: totalIntereses,
-            porcentajeInteres: (totalIntereses / capital) * 100,
-            amortizacion: amortizacion
-        };
-    }
-
-    /**
-     * Analizar capacidad de pago
-     */
-    analizarCapacidadPago(form) {
-        const formData = new FormData(form);
-        const datos = {
-            ingresosMensuales: parseFloat(formData.get('ingresos_mensuales')) || 0,
-            gastosMensuales: parseFloat(formData.get('gastos_mensuales')) || 0,
-            cuotaMaxima: parseFloat(formData.get('cuota_maxima')) || 0,
-            scoreCrediticio: parseInt(formData.get('score_crediticio')) || 0
-        };
-
-        // Validar datos
-        if (!this.validarDatosCapacidadPago(datos)) {
-            this.mostrarError('Por favor, complete todos los campos correctamente.');
-            return;
-        }
-
-        // Analizar capacidad
-        const analisis = this.analisisCapacidadPago(datos);
-
-        // Mostrar resultados
-        this.mostrarAnalisisCapacidadPago(analisis, datos);
-
-        // Guardar análisis
-        this.guardarCalculo('capacidad_pago', { datos, analisis });
-
-        // Disparar evento
-        this.dispararEvento('capacidadPagoAnalizada', analisis);
-    }
-
-    analisisCapacidadPago(datos) {
-        const { ingresosMensuales, gastosMensuales, cuotaMaxima, scoreCrediticio } = datos;
-
-        // Calcular ratios financieros
-        const capacidadAhorro = ingresosMensuales - gastosMensuales;
-        const ratioDeudaIngreso = (gastosMensuales / ingresosMensuales) * 100;
-        const ratioPagoDeuda = (cuotaMaxima / ingresosMensuales) * 100;
-
-        // Evaluar capacidad según reglas bancarias
-        const regla35 = ingresosMensuales * 0.35; // Máximo 35% de ingresos para deuda
-        const regla30 = ingresosMensuales * 0.30; // Recomendado 30% de ingresos para deuda
-
-        let capacidadPago = 'baja';
-        let montoMaximoRecomendado = 0;
-        let nivelRiesgo = 'alto';
-        const recomendaciones = [];
-
-        // Evaluar capacidad
-        if (ratioPagoDeuda <= 25) {
-            capacidadPago = 'excelente';
-            nivelRiesgo = 'bajo';
-            montoMaximoRecomendado = regla35 - cuotaMaxima;
-        } else if (ratioPagoDeuda <= 30) {
-            capacidadPago = 'buena';
-            nivelRiesgo = 'medio';
-            montoMaximoRecomendado = regla30 - cuotaMaxima;
-        } else if (ratioPagoDeuda <= 35) {
-            capacidadPago = 'regular';
-            nivelRiesgo = 'medio-alto';
-            montoMaximoRecomendado = Math.max(0, regla30 - cuotaMaxima);
-        } else {
-            capacidadPago = 'limitada';
-            nivelRiesgo = 'alto';
-            montoMaximoRecomendado = 0;
-            recomendaciones.push('Considera reducir gastos antes de solicitar préstamos');
-        }
-
-        // Evaluar score crediticio
-        if (scoreCrediticio >= 800) {
-            recomendaciones.push('Excelente score crediticio - tendrás las mejores tasas');
-        } else if (scoreCrediticio >= 700) {
-            recomendaciones.push('Buen score crediticio - tasas competitivas disponibles');
-        } else if (scoreCrediticio >= 600) {
-            recomendaciones.push('Score regular - revisa opciones con tasas más altas');
-        } else {
-            recomendaciones.push('Score bajo - considera mejorar historial crediticio primero');
-            nivelRiesgo = 'muy_alto';
-        }
-
-        // Evaluar capacidad de ahorro
-        if (capacidadAhorro < 0) {
-            recomendaciones.push('Tus gastos superan ingresos - revisa presupuesto');
-            nivelRiesgo = 'muy_alto';
-        } else if (capacidadAhorro < ingresosMensuales * 0.1) {
-            recomendaciones.push('Capacidad de ahorro limitada - considera aumentar ingresos');
-        }
-
-        return {
-            capacidadPago: capacidadPago,
-            nivelRiesgo: nivelRiesgo,
-            montoMaximoRecomendado: Math.max(0, montoMaximoRecomendado),
-            ratioDeudaIngreso: ratioDeudaIngreso,
-            ratioPagoDeuda: ratioPagoDeuda,
-            capacidadAhorro: capacidadAhorro,
-            regla35: regla35,
-            regla30: regla30,
-            recomendaciones: recomendaciones,
-            scoreCrediticio: scoreCrediticio
-        };
-    }
-
-    /**
-     * Comparar préstamos
-     */
-    compararPrestamos(form) {
-        const formData = new FormData(form);
-        const datos = {
-            capital: parseFloat(formData.get('capital_comparar')) || 0,
-            plazoMeses: parseInt(formData.get('plazo_comparar')) || 0,
-            opciones: [
-                {
-                    nombre: 'Banco A',
-                    tasaAnual: parseFloat(formData.get('tasa_banco_a')) || 0
-                },
-                {
-                    nombre: 'Banco B',
-                    tasaAnual: parseFloat(formData.get('tasa_banco_b')) || 0
-                },
-                {
-                    nombre: 'Banco C',
-                    tasaAnual: parseFloat(formData.get('tasa_banco_c')) || 0
+                // Show corresponding content
+                const targetContent = document.getElementById(`${tabName}-tab`);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
                 }
-            ]
+            });
+        });
+    }
+
+    async calcularPrestamo() {
+        const formData = new FormData(document.getElementById('loan-form'));
+        const data = {
+            monto: parseFloat(formData.get('monto')) || 0,
+            tasa_anual: parseFloat(formData.get('tasa_anual')) || 0,
+            plazo_meses: parseInt(formData.get('plazo_meses')) || 0,
+            tasa_impuesto: parseFloat(formData.get('tasa_impuesto')) || 0,
+            comision_inicial: parseFloat(formData.get('comision_inicial')) || 0,
+            nombre_simulacion: formData.get('nombre_simulacion') || 'Simulación Préstamo'
         };
 
-        // Validar datos
-        if (!this.validarDatosComparacion(datos)) {
-            this.mostrarError('Por favor, complete todos los campos correctamente.');
-            return;
+        try {
+            const response = await fetch('/api/v1/financiero/prestamo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.mostrarResultadosPrestamo(result.data);
+            } else {
+                this.mostrarError(result.error || 'Error en el cálculo');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarError('Error de conexión. Intente nuevamente.');
         }
-
-        // Comparar opciones
-        const comparacion = this.compararOpcionesPrestamo(datos);
-
-        // Mostrar comparación
-        this.mostrarComparacionPrestamos(comparacion, datos);
-
-        // Guardar comparación
-        this.guardarCalculo('comparacion_prestamos', { datos, comparacion });
-
-        // Disparar evento
-        this.dispararEvento('prestamosComparados', comparacion);
     }
 
-    compararOpcionesPrestamo(datos) {
-        const { capital, plazoMeses, opciones } = datos;
-        const resultados = [];
-
-        opciones.forEach(opcion => {
-            const calculo = this.calculoPrestamo({
-                capital: capital,
-                tasaAnual: opcion.tasaAnual,
-                plazoMeses: plazoMeses,
-                tipoPrestamo: 'frances'
-            });
-
-            resultados.push({
-                nombre: opcion.nombre,
-                tasaAnual: opcion.tasaAnual,
-                cuotaMensual: calculo.cuotaMensual,
-                totalPagar: calculo.totalPagar,
-                totalIntereses: calculo.totalIntereses,
-                ahorro: 0 // Se calcula después
-            });
-        });
-
-        // Calcular ahorros respecto a la opción más cara
-        const masCara = Math.max(...resultados.map(r => r.totalPagar));
-        resultados.forEach(resultado => {
-            resultado.ahorro = masCara - resultado.totalPagar;
-        });
-
-        // Ordenar por cuota mensual (más conveniente)
-        resultados.sort((a, b) => a.cuotaMensual - b.cuotaMensual);
-
-        return {
-            opciones: resultados,
-            mejorOpcion: resultados[0],
-            peorOpcion: resultados[resultados.length - 1],
-            ahorroMaximo: Math.max(...resultados.map(r => r.ahorro))
+    async analizarSensibilidad() {
+        const formData = new FormData(document.getElementById('loan-sensibilidad-form'));
+        const data = {
+            monto: parseFloat(formData.get('monto')) || 0,
+            tasa_anual: parseFloat(formData.get('tasa_anual')) || 0,
+            plazo_meses: parseInt(formData.get('plazo_meses')) || 0,
+            variacion_tasa: parseFloat(formData.get('variacion_tasa')) || 0.5
         };
+
+        try {
+            const response = await fetch('/api/v1/financiero/prestamo/sensibilidad', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.mostrarResultadosSensibilidad(result.data);
+            } else {
+                this.mostrarError(result.error || 'Error en el análisis');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarError('Error de conexión. Intente nuevamente.');
+        }
     }
 
-    /**
-     * Funciones de validación
-     */
-    validarDatosPrestamo(datos) {
-        return datos.capital > 0 &&
-               datos.tasaAnual >= 0 && datos.tasaAnual <= 50 &&
-               datos.plazoMeses > 0 && datos.plazoMeses <= 360;
+    async compararPlazos() {
+        const formData = new FormData(document.getElementById('loan-comparar-form'));
+        const plazosInput = document.getElementById('plazos-input').value;
+        const plazos = plazosInput.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p));
+
+        const data = {
+            monto: parseFloat(formData.get('monto')) || 0,
+            tasa_anual: parseFloat(formData.get('tasa_anual')) || 0,
+            plazos: plazos
+        };
+
+        try {
+            const response = await fetch('/api/v1/financiero/prestamo/comparar-plazos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.mostrarResultadosComparacion(result.data);
+            } else {
+                this.mostrarError(result.error || 'Error en la comparación');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarError('Error de conexión. Intente nuevamente.');
+        }
     }
 
-    validarDatosCapacidadPago(datos) {
-        return datos.ingresosMensuales > 0 &&
-               datos.gastosMensuales >= 0 &&
-               datos.cuotaMaxima >= 0 &&
-               datos.scoreCrediticio >= 0 && datos.scoreCrediticio <= 1000;
-    }
+    mostrarResultadosPrestamo(data) {
+        // Update summary cards
+        document.getElementById('result-cuota').textContent = `S/ ${data.resumen.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}`;
+        document.getElementById('result-interes').textContent = `S/ ${data.costos.costo_interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}`;
+        document.getElementById('result-ted').textContent = `${data.resumen.ted_tasa_efectiva.toFixed(2)}%`;
+        document.getElementById('result-total').textContent = `S/ ${data.costos.costo_total_desembolsado.toLocaleString('es-PE', {minimumFractionDigits: 2})}`;
 
-    validarDatosComparacion(datos) {
-        return datos.capital > 0 &&
-               datos.plazoMeses > 0 &&
-               datos.opciones.every(op => op.tasaAnual >= 0 && op.tasaAnual <= 50);
-    }
-
-    /**
-     * Funciones de UI
-     */
-    mostrarResultadosPrestamo(resultado, datos) {
-        const resultadoDiv = document.getElementById('resultado-prestamo');
-        if (!resultadoDiv) return;
-
-        resultadoDiv.innerHTML = `
-            <div class="resultado-card">
-                <h3>Resultados del Préstamo</h3>
-                <div class="resultado-grid">
-                    <div class="resultado-item">
-                        <label>Cuota Mensual:</label>
-                        <span class="valor-destacado">${this.formatearMoneda(resultado.cuotaMensual)}</span>
-                    </div>
-                    <div class="resultado-item">
-                        <label>Total a Pagar:</label>
-                        <span>${this.formatearMoneda(resultado.totalPagar)}</span>
-                    </div>
-                    <div class="resultado-item">
-                        <label>Total Intereses:</label>
-                        <span class="valor-negativo">${this.formatearMoneda(resultado.totalIntereses)}</span>
-                    </div>
-                    <div class="resultado-item">
-                        <label>Porcentaje Interés:</label>
-                        <span>${resultado.porcentajeInteres.toFixed(2)}%</span>
-                    </div>
+        // Update cost summary
+        const costSummaryDiv = document.getElementById('loan-cost-summary');
+        costSummaryDiv.innerHTML = `
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <strong>Monto Solicitado:</strong> S/ ${data.resumen.monto_solicitado.toLocaleString('es-PE', {minimumFractionDigits: 2})}
                 </div>
-
-                <div class="detalles-adicionales">
-                    <h4>Detalles del Préstamo</h4>
-                    <ul>
-                        <li><strong>Capital:</strong> ${this.formatearMoneda(datos.capital)}</li>
-                        <li><strong>Tasa Anual:</strong> ${datos.tasaAnual}%</li>
-                        <li><strong>Plazo:</strong> ${datos.plazoMeses} meses</li>
-                        <li><strong>Sistema:</strong> ${datos.tipoPrestamo === 'frances' ? 'Francés' : 'Alemán'}</li>
-                    </ul>
+                <div>
+                    <strong>Monto Neto Desembolsado:</strong> S/ ${data.resumen.monto_neto_desembolsado.toLocaleString('es-PE', {minimumFractionDigits: 2})}
                 </div>
-
-                <div class="amortizacion-preview">
-                    <h4>Primeras Cuotas</h4>
-                    <div class="amortizacion-table">
-                        <div class="amortizacion-row header">
-                            <span>Mes</span>
-                            <span>Cuota</span>
-                            <span>Interés</span>
-                            <span>Capital</span>
-                            <span>Saldo</span>
-                        </div>
-                        ${resultado.amortizacion.slice(0, 5).map(cuota => `
-                            <div class="amortizacion-row">
-                                <span>${cuota.mes}</span>
-                                <span>${this.formatearMoneda(cuota.cuota)}</span>
-                                <span>${this.formatearMoneda(cuota.interes)}</span>
-                                <span>${this.formatearMoneda(cuota.capital)}</span>
-                                <span>${this.formatearMoneda(cuota.saldoPendiente)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
+                <div>
+                    <strong>Comisión Inicial:</strong> S/ ${data.costos.comision_inicial.toLocaleString('es-PE', {minimumFractionDigits: 2})}
+                </div>
+                <div>
+                    <strong>Costo Promedio Mensual:</strong> S/ ${data.costos.costo_promedio_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}
+                </div>
+                <div>
+                    <strong>Impuestos:</strong> S/ ${data.costos.impuestos.toLocaleString('es-PE', {minimumFractionDigits: 2})}
+                </div>
+                <div>
+                    <strong>Plazo:</strong> ${data.resumen.plazo_anos.toFixed(1)} años (${data.resumen.plazo_meses} meses)
                 </div>
             </div>
         `;
 
-        resultadoDiv.style.display = 'block';
-        resultadoDiv.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    mostrarAnalisisCapacidadPago(analisis, datos) {
-        const resultadoDiv = document.getElementById('resultado-capacidad-pago');
-        if (!resultadoDiv) return;
-
-        const colorCapacidad = {
-            'excelente': 'success',
-            'buena': 'success',
-            'regular': 'warning',
-            'limitada': 'error'
-        };
-
-        const recomendacionesHTML = analisis.recomendaciones.map(rec =>
-            `<li>${rec}</li>`
-        ).join('');
-
-        resultadoDiv.innerHTML = `
-            <div class="resultado-card">
-                <h3>Análisis de Capacidad de Pago</h3>
-
-                <div class="capacidad-resumen">
-                    <div class="capacidad-principal">
-                        <span class="capacidad-label">Capacidad de Pago:</span>
-                        <span class="capacidad-valor ${colorCapacidad[analisis.capacidadPago]}">
-                            ${analisis.capacidadPago.toUpperCase()}
-                        </span>
-                    </div>
-                    <div class="capacidad-secundaria">
-                        <span class="riesgo-label">Nivel de Riesgo:</span>
-                        <span class="riesgo-valor ${analisis.nivelRiesgo.replace('_', '-')}">
-                            ${analisis.nivelRiesgo.replace('_', ' ').toUpperCase()}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="metricas-financieras">
-                    <div class="metrica">
-                        <span class="metrica-label">Ratio Deuda/Ingreso:</span>
-                        <span class="metrica-valor">${analisis.ratioDeudaIngreso.toFixed(1)}%</span>
-                    </div>
-                    <div class="metrica">
-                        <span class="metrica-label">Ratio Pago Deuda:</span>
-                        <span class="metrica-valor">${analisis.ratioPagoDeuda.toFixed(1)}%</span>
-                    </div>
-                    <div class="metrica">
-                        <span class="metrica-label">Capacidad Ahorro:</span>
-                        <span class="metrica-valor">${this.formatearMoneda(analisis.capacidadAhorro)}</span>
-                    </div>
-                    <div class="metrica">
-                        <span class="metrica-label">Monto Máximo Recomendado:</span>
-                        <span class="metrica-valor ${analisis.montoMaximoRecomendado > 0 ? 'success' : 'error'}">
-                            ${this.formatearMoneda(analisis.montoMaximoRecomendado)}
-                        </span>
-                    </div>
-                </div>
-
-                ${analisis.recomendaciones.length > 0 ? `
-                    <div class="recomendaciones">
-                        <h4>Recomendaciones</h4>
-                        <ul>${recomendacionesHTML}</ul>
-                    </div>
-                ` : ''}
-
-                <div class="reglas-bancarias">
-                    <h4>Referencias Bancarias</h4>
-                    <div class="regla">
-                        <span>Regla 35% (máximo):</span>
-                        <span>${this.formatearMoneda(analisis.regla35)}</span>
-                    </div>
-                    <div class="regla">
-                        <span>Regla 30% (recomendado):</span>
-                        <span>${this.formatearMoneda(analisis.regla30)}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        resultadoDiv.style.display = 'block';
-        resultadoDiv.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    mostrarComparacionPrestamos(comparacion, datos) {
-        const resultadoDiv = document.getElementById('resultado-comparador');
-        if (!resultadoDiv) return;
-
-        const opcionesHTML = comparacion.opciones.map(opcion => `
-            <div class="opcion-prestamo ${opcion.nombre === comparacion.mejorOpcion.nombre ? 'mejor-opcion' : ''}">
-                <h4>${opcion.nombre}</h4>
-                <div class="opcion-detalles">
-                    <div class="opcion-metrica">
-                        <span>Tasa Anual:</span>
-                        <span>${opcion.tasaAnual}%</span>
-                    </div>
-                    <div class="opcion-metrica">
-                        <span>Cuota Mensual:</span>
-                        <span>${this.formatearMoneda(opcion.cuotaMensual)}</span>
-                    </div>
-                    <div class="opcion-metrica">
-                        <span>Total a Pagar:</span>
-                        <span>${this.formatearMoneda(opcion.totalPagar)}</span>
-                    </div>
-                    <div class="opcion-metrica">
-                        <span>Total Intereses:</span>
-                        <span>${this.formatearMoneda(opcion.totalIntereses)}</span>
-                    </div>
-                    ${opcion.ahorro > 0 ? `
-                        <div class="opcion-metrica ahorro">
-                            <span>Ahorro vs más caro:</span>
-                            <span>${this.formatearMoneda(opcion.ahorro)}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
+        // Fill amortization table (first 12 months)
+        const tableBody = document.getElementById('loan-table-body');
+        const first12Months = data.tabla_amortizacion.slice(0, 12);
+        tableBody.innerHTML = first12Months.map(cuota => `
+            <tr>
+                <td class="px-4 py-3 text-center">${cuota.mes}</td>
+                <td class="px-4 py-3 text-right">S/ ${cuota.cuota.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${cuota.capital.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${cuota.interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${cuota.saldo_restante.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+            </tr>
         `).join('');
 
-        resultadoDiv.innerHTML = `
-            <div class="resultado-card">
-                <h3>Comparación de Préstamos</h3>
+        // Show results
+        document.getElementById('loan-results').classList.remove('hidden');
+        document.getElementById('loan-results').scrollIntoView({ behavior: 'smooth' });
+    }
 
-                <div class="comparacion-info">
-                    <p><strong>Capital:</strong> ${this.formatearMoneda(datos.capital)}</p>
-                    <p><strong>Plazo:</strong> ${datos.plazoMeses} meses</p>
-                </div>
+    mostrarResultadosSensibilidad(data) {
+        const tableBody = document.getElementById('sensibilidad-table');
+        tableBody.innerHTML = data.escenarios.map(escenario => `
+            <tr>
+                <td class="px-4 py-3 text-left">${escenario.tasa}%</td>
+                <td class="px-4 py-3 text-right">S/ ${escenario.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${escenario.costo_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">${escenario.variacion_cuota_porcentaje.toFixed(2)}%</td>
+                <td class="px-4 py-3 text-left">${escenario.escenario}</td>
+            </tr>
+        `).join('');
 
-                <div class="opciones-comparacion">
-                    ${opcionesHTML}
-                </div>
+        document.getElementById('sensibilidad-results').classList.remove('hidden');
+        document.getElementById('sensibilidad-results').scrollIntoView({ behavior: 'smooth' });
+    }
 
-                <div class="comparacion-resumen">
-                    <div class="resumen-item">
-                        <span>Mejor Opción:</span>
-                        <span class="mejor-opcion">${comparacion.mejorOpcion.nombre}</span>
-                    </div>
-                    <div class="resumen-item">
-                        <span>Ahorro Máximo:</span>
-                        <span class="ahorro-maximo">${this.formatearMoneda(comparacion.ahorroMaximo)}</span>
-                    </div>
-                </div>
+    mostrarResultadosComparacion(data) {
+        const tableBody = document.getElementById('comparar-table');
+        tableBody.innerHTML = data.comparativa_plazos.map(item => `
+            <tr>
+                <td class="px-4 py-3 text-center">${item.plazo_anos.toFixed(1)}</td>
+                <td class="px-4 py-3 text-right">S/ ${item.cuota_mensual.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${item.costo_interes.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-3 text-right">S/ ${item.costo_total.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `).join('');
 
-                <div class="comparacion-nota">
-                    <p><em>💡 La comparación se basa en el sistema francés de amortización.</em></p>
-                </div>
-            </div>
-        `;
-
-        resultadoDiv.style.display = 'block';
-        resultadoDiv.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('comparar-results').classList.remove('hidden');
+        document.getElementById('comparar-results').scrollIntoView({ behavior: 'smooth' });
     }
 
     mostrarError(mensaje) {
-        // Usar sistema de mensajes contextuales si está disponible
-        if (window.contextualMessages) {
-            window.contextualMessages.error({
-                title: 'Error en el cálculo',
-                body: mensaje
-            });
-        } else {
-            alert(`Error: ${mensaje}`);
-        }
-    }
-
-    /**
-     * Funciones auxiliares
-     */
-    formatearMoneda(valor) {
-        return new Intl.NumberFormat('es-PE', {
-            style: 'currency',
-            currency: 'PEN'
-        }).format(valor);
-    }
-
-    actualizarCalculosTiempoReal(input) {
-        // Implementar cálculos en tiempo real si es necesario
-        const form = input.closest('form');
-        if (form && form.id === 'form-calculo-prestamo') {
-            clearTimeout(this.calculoTimeout);
-            this.calculoTimeout = setTimeout(() => {
-                this.calcularPrestamo(form);
-            }, 500);
-        }
-    }
-
-    guardarCalculo(tipo, datos) {
-        this.calculos[tipo] = {
-            ...datos,
-            timestamp: new Date(),
-            id: Date.now()
-        };
-
-        // Guardar en localStorage
-        try {
-            const calculosGuardados = JSON.parse(localStorage.getItem('econova_calculos_prestamos') || '{}');
-            calculosGuardados[tipo] = this.calculos[tipo];
-            localStorage.setItem('econova_calculos_prestamos', JSON.stringify(calculosGuardados));
-        } catch (error) {
-            console.warn('No se pudo guardar el cálculo:', error);
-        }
-    }
-
-    dispararEvento(evento, datos) {
-        const customEvent = new CustomEvent(`prestamo${evento.charAt(0).toUpperCase() + evento.slice(1)}`, {
-            detail: datos
-        });
-        document.dispatchEvent(customEvent);
+        // Simple alert for now, could be enhanced with a better notification system
+        alert(`Error: ${mensaje}`);
     }
 }
 
-// Inicialización
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     window.prestamoManager = new PrestamoManager();
     console.log('🏦 Gestor de Préstamos inicializado');
 });
-
-// Exportar para módulos
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PrestamoManager;
-}
