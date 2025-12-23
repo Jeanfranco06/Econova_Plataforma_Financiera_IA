@@ -1473,6 +1473,22 @@ class MLCalculator {
     exportarExcel() {
         UIUtils.exportarExcel('ml');
     }
+
+    /**
+     * Obtiene los datos actuales de la simulación ML
+     */
+    obtenerDatosActuales() {
+        const simulacion = UIUtils.obtenerSimulacion('ml');
+        if (!simulacion) return null;
+
+        return {
+            tipo: 'ml',
+            tipo_analisis: simulacion.datos?.tipo_analisis || 'predicciones',
+            simulaciones: simulacion.datos?.nSimulaciones || 0,
+            confianza: simulacion.datos?.nivelConfianza || 95,
+            nombre_proyecto: 'Análisis ML'
+        };
+    }
 }
 
 // Exportar para uso en módulos

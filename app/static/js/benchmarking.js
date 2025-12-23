@@ -14,7 +14,127 @@ class BenchmarkingManager {
     init() {
         console.log('🔍 Módulo de Benchmarking inicializado');
         this.setupEventListeners();
+        this.setupTabNavigation();
+        this.setupGroupManagement();
+        this.setupMetricInputs();
+        this.setupPersonalizedComparison();
         this.cargarDatosPrecomputados();
+        this.cargarGruposBenchmarking();
+        this.cargarHistorialResultados();
+    }
+
+    setupTabNavigation() {
+        const tabs = document.querySelectorAll('.benchmarking-tab');
+        const contents = document.querySelectorAll('.benchmarking-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active', 'bg-blue-600', 'text-white'));
+                tabs.forEach(t => t.classList.add('bg-gray-200', 'text-gray-700'));
+
+                // Add active class to clicked tab
+                tab.classList.remove('bg-gray-200', 'text-gray-700');
+                tab.classList.add('active', 'bg-blue-600', 'text-white');
+
+                // Hide all content
+                contents.forEach(content => content.classList.add('hidden'));
+
+                // Show corresponding content
+                const targetId = tab.id.replace('btn-', 'tab-');
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
+                }
+            });
+        });
+    }
+
+    setupGroupManagement() {
+        // Crear grupo
+        const btnCrearGrupo = document.getElementById('btn-crear-grupo');
+        if (btnCrearGrupo) {
+            btnCrearGrupo.addEventListener('click', () => {
+                this.mostrarModalCrearGrupo();
+            });
+        }
+
+        // Modal events
+        const cerrarModal = document.getElementById('cerrar-modal');
+        const cancelarCrearGrupo = document.getElementById('cancelar-crear-grupo');
+        const modal = document.getElementById('modal-crear-grupo');
+
+        [cerrarModal, cancelarCrearGrupo].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                });
+            }
+        });
+
+        // Form crear grupo
+        const formCrearGrupo = document.getElementById('form-crear-grupo');
+        if (formCrearGrupo) {
+            formCrearGrupo.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.crearGrupoBenchmarking(e.target);
+            });
+        }
+    }
+
+    setupMetricInputs() {
+        // Enable/disable metric inputs based on checkboxes
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox' && e.target.name === 'metricas[]') {
+                const metrica = e.target.value;
+                const input = document.querySelector(`input[name="${metrica}"]`);
+                if (input) {
+                    input.disabled = !e.target.checked;
+                    if (!e.target.checked) {
+                        input.value = '';
+                    }
+                }
+            }
+        });
+    }
+
+    setupPersonalizedComparison() {
+        // Agregar empresa de comparación
+        const btnAgregarEmpresa = document.getElementById('btn-agregar-empresa');
+        if (btnAgregarEmpresa) {
+            btnAgregarEmpresa.addEventListener('click', () => {
+                this.agregarEmpresaComparacion();
+            });
+        }
+
+        // Remover empresas
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remover-empresa')) {
+                e.target.closest('.empresa-comparacion').remove();
+            }
+        });
+    }
+
+    async cargarGruposBenchmarking() {
+        try {
+            const response = await fetch('/api/v1/benchmarking/grupos');
+            const data = await response.json();
+
+            if (data.success) {
+                this.mostrarGruposBenchmarking(data.grupos);
+            }
+        } catch (error) {
+            console.error('Error cargando grupos de benchmarking:', error);
+        }
+    }
+
+    cargarHistorialResultados() {
+        try {
+            const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
+            this.mostrarHistorialResultados(analisisGuardados);
+        } catch (error) {
+            console.error('Error cargando historial de resultados:', error);
+        }
     }
 
     setupEventListeners() {
@@ -41,10 +161,21 @@ class BenchmarkingManager {
      */
     async generarBenchmarkingSectorial(form) {
         const formData = new FormData(form);
+        const metricasSeleccionadas = formData.getAll('metricas[]');
+
+        // Parsear métricas desde el formulario
+        const metricas = {};
+        metricasSeleccionadas.forEach(metrica => {
+            const valor = parseFloat(formData.get(metrica));
+            if (!isNaN(valor) && valor > 0) {
+                metricas[metrica] = valor;
+            }
+        });
+
         const datos = {
             sector: formData.get('sector'),
             tamanoEmpresa: formData.get('tamano_empresa'),
-            metricas: this.parsearMetricas(formData.get('metricas')),
+            metricas: metricas,
             periodo: formData.get('periodo') || 'ultimo_anio'
         };
 
@@ -72,9 +203,13 @@ class BenchmarkingManager {
 
             // Crear gráficos comparativos
             this.crearGraficosBenchmarking(analisis, datos);
+            document.getElementById('graficos-container').classList.remove('hidden');
 
             // Guardar análisis
             this.guardarAnalisisBenchmarking('sectorial', { datos, analisis, recomendaciones });
+
+            // Actualizar historial
+            this.cargarHistorialResultados();
 
             // Disparar evento
             this.dispararEvento('benchmarkingSectorialGenerado', analisis);
@@ -92,13 +227,48 @@ class BenchmarkingManager {
      */
     async generarComparacionPersonalizada(form) {
         const formData = new FormData(form);
+
+        // Parsear datos de la empresa base
+        const empresaBase = {
+            nombre: formData.get('empresa_base_nombre'),
+            metricas: {
+                ingresos: parseFloat(formData.get('empresa_base_ingresos')) || 0,
+                margen_beneficio: parseFloat(formData.get('empresa_base_margen_beneficio')) / 100 || 0,
+                roi: parseFloat(formData.get('empresa_base_roi')) / 100 || 0,
+                empleados: parseFloat(formData.get('empresa_base_empleados')) || 0,
+                crecimiento: parseFloat(formData.get('empresa_base_crecimiento')) / 100 || 0
+            }
+        };
+
+        // Parsear empresas de comparación
+        const empresasComparacion = [];
+        const container = document.getElementById('empresas-comparacion-container');
+        if (container) {
+            const empresas = container.querySelectorAll('.empresa-comparacion');
+            empresas.forEach((empresaDiv, index) => {
+                const empresaIndex = index + 1;
+                const nombre = formData.get(`empresa_${empresaIndex}_nombre`);
+                if (nombre) {
+                    empresasComparacion.push({
+                        nombre: nombre,
+                        metricas: {
+                            ingresos: parseFloat(formData.get(`empresa_${empresaIndex}_ingresos`)) || 0,
+                            margen_beneficio: parseFloat(formData.get(`empresa_${empresaIndex}_margen_beneficio`)) / 100 || 0,
+                            roi: parseFloat(formData.get(`empresa_${empresaIndex}_roi`)) / 100 || 0,
+                            empleados: parseFloat(formData.get(`empresa_${empresaIndex}_empleados`)) || 0,
+                            crecimiento: parseFloat(formData.get(`empresa_${empresaIndex}_crecimiento`)) / 100 || 0
+                        }
+                    });
+                }
+            });
+        }
+
+        const criteriosComparacion = formData.getAll('criterios_comparacion[]');
+
         const datos = {
-            empresaBase: {
-                nombre: formData.get('empresa_base_nombre'),
-                metricas: this.parsearMetricas(formData.get('empresa_base_metricas'))
-            },
-            empresasComparacion: this.parsearEmpresasComparacion(formData.get('empresas_comparacion')),
-            criteriosComparacion: formData.getAll('criterios_comparacion[]')
+            empresaBase,
+            empresasComparacion,
+            criteriosComparacion
         };
 
         // Validar datos
@@ -122,9 +292,13 @@ class BenchmarkingManager {
 
             // Crear gráficos de comparación
             this.crearGraficosComparacion(comparacion);
+            document.getElementById('graficos-container').classList.remove('hidden');
 
             // Guardar comparación
             this.guardarAnalisisBenchmarking('personalizada', { datos, comparacion, insights });
+
+            // Actualizar historial
+            this.cargarHistorialResultados();
 
             // Disparar evento
             this.dispararEvento('comparacionPersonalizadaGenerada', comparacion);
@@ -607,6 +781,421 @@ class BenchmarkingManager {
             return Math.round(valor).toString();
         }
         return valor.toFixed(2);
+    }
+
+    /**
+     * Funciones de gestión de grupos
+     */
+    mostrarGruposBenchmarking(grupos) {
+        const container = document.getElementById('grupos-container');
+        if (!container) return;
+
+        if (grupos.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-users text-4xl mb-4"></i>
+                    <p>No hay grupos de benchmarking disponibles.</p>
+                    <p>Crea tu primer grupo para comenzar.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        grupos.forEach(grupo => {
+            html += `
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">${grupo.nombre_grupo}</h3>
+                            <p class="text-gray-600 mt-1">${grupo.descripcion || 'Sin descripción'}</p>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                            Grupo ${grupo.benchmarking_id}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-calendar mr-1"></i>
+                            ID: ${grupo.benchmarking_id}
+                        </div>
+                        <div class="space-x-2">
+                            <button class="unirse-grupo bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300 text-sm"
+                                    data-grupo-id="${grupo.benchmarking_id}">
+                                <i class="fas fa-user-plus mr-1"></i>Unirse
+                            </button>
+                            <button class="ver-grupo bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 text-sm"
+                                    data-grupo-id="${grupo.benchmarking_id}">
+                                <i class="fas fa-eye mr-1"></i>Ver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        // Agregar event listeners a los botones
+        this.setupGrupoButtons();
+    }
+
+    setupGrupoButtons() {
+        // Botones de unirse a grupo
+        document.querySelectorAll('.unirse-grupo').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const grupoId = e.target.closest('.unirse-grupo').dataset.grupoId;
+                this.unirseAGrupo(grupoId);
+            });
+        });
+
+        // Botones de ver grupo
+        document.querySelectorAll('.ver-grupo').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const grupoId = e.target.closest('.ver-grupo').dataset.grupoId;
+                this.verGrupo(grupoId);
+            });
+        });
+    }
+
+    async unirseAGrupo(grupoId) {
+        try {
+            // Obtener usuario actual (esto debería venir de la sesión)
+            const usuarioId = this.obtenerUsuarioActual();
+
+            const response = await fetch(`/api/v1/benchmarking/grupos/${grupoId}/usuarios`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ usuario_id: usuarioId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.mostrarExito('Te has unido al grupo exitosamente');
+                this.cargarGruposBenchmarking(); // Recargar grupos
+            } else {
+                this.mostrarError(data.error || 'Error al unirse al grupo');
+            }
+        } catch (error) {
+            console.error('Error uniendo al grupo:', error);
+            this.mostrarError('Error al unirse al grupo');
+        }
+    }
+
+    async verGrupo(grupoId) {
+        try {
+            const response = await fetch(`/api/v1/benchmarking/grupos/${grupoId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.mostrarDetalleGrupo(data.grupo, data.usuarios);
+            } else {
+                this.mostrarError(data.error || 'Error al cargar el grupo');
+            }
+        } catch (error) {
+            console.error('Error cargando grupo:', error);
+            this.mostrarError('Error al cargar el grupo');
+        }
+    }
+
+    mostrarDetalleGrupo(grupo, usuarios) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">${grupo.nombre_grupo}</h3>
+                        <button id="cerrar-detalle" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-gray-600 mb-4">${grupo.descripcion || 'Sin descripción'}</p>
+
+                    <h4 class="font-semibold text-gray-800 mb-2">Miembros del grupo (${usuarios.length})</h4>
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        ${usuarios.map(usuario => `
+                            <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    ${usuario.nombre_usuario.charAt(0).toUpperCase()}
+                                </div>
+                                <span class="text-gray-700">${usuario.nombre_usuario}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Cerrar modal
+        modal.querySelector('#cerrar-detalle').addEventListener('click', () => {
+            modal.remove();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    mostrarModalCrearGrupo() {
+        const modal = document.getElementById('modal-crear-grupo');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    async crearGrupoBenchmarking(form) {
+        const formData = new FormData(form);
+        const nombreGrupo = formData.get('nombre_grupo');
+        const descripcion = formData.get('descripcion');
+
+        try {
+            const response = await fetch('/api/v1/benchmarking/grupos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nombre_grupo: nombreGrupo,
+                    descripcion: descripcion
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.mostrarExito('Grupo creado exitosamente');
+                document.getElementById('modal-crear-grupo').classList.add('hidden');
+                form.reset();
+                this.cargarGruposBenchmarking(); // Recargar grupos
+            } else {
+                this.mostrarError(data.error || 'Error al crear el grupo');
+            }
+        } catch (error) {
+            console.error('Error creando grupo:', error);
+            this.mostrarError('Error al crear el grupo');
+        }
+    }
+
+    /**
+     * Funciones de comparación personalizada
+     */
+    agregarEmpresaComparacion() {
+        const container = document.getElementById('empresas-comparacion-container');
+        if (!container) return;
+
+        const empresaCount = container.querySelectorAll('.empresa-comparacion').length + 1;
+
+        const nuevaEmpresa = document.createElement('div');
+        nuevaEmpresa.className = 'empresa-comparacion bg-gray-50 p-4 rounded-lg mb-4';
+        nuevaEmpresa.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-medium text-gray-700">Empresa ${empresaCount}</h4>
+                <button type="button" class="remover-empresa text-red-600 hover:text-red-800">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">Nombre</label>
+                    <input type="text" name="empresa_${empresaCount}_nombre" placeholder="Empresa Competidora S.A." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Ingresos (S/)</label>
+                        <input type="number" name="empresa_${empresaCount}_ingresos" placeholder="450000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Margen (%)</label>
+                        <input type="number" step="0.01" name="empresa_${empresaCount}_margen_beneficio" placeholder="12.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">ROI (%)</label>
+                        <input type="number" step="0.01" name="empresa_${empresaCount}_roi" placeholder="18.7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Empleados</label>
+                        <input type="number" name="empresa_${empresaCount}_empleados" placeholder="22" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Crecimiento (%)</label>
+                        <input type="number" step="0.01" name="empresa_${empresaCount}_crecimiento" placeholder="15.2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(nuevaEmpresa);
+    }
+
+    /**
+     * Funciones de historial
+     */
+    mostrarHistorialResultados(analisisGuardados) {
+        const container = document.getElementById('historial-resultados');
+        if (!container) return;
+
+        const analisis = Object.values(analisisGuardados);
+        if (analisis.length === 0) return;
+
+        let html = '';
+
+        // Ordenar por fecha (más reciente primero)
+        analisis.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        analisis.forEach(analisis => {
+            const fecha = new Date(analisis.timestamp).toLocaleDateString('es-ES');
+            const tipo = analisis.datos ? 'Sectorial' : 'Personalizada';
+
+            html += `
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Análisis ${tipo}</h3>
+                            <p class="text-gray-600 text-sm">${fecha}</p>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                            ${tipo}
+                        </span>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        ${analisis.datos ? `
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Sector:</span>
+                                <span class="text-gray-600 ml-2">${analisis.datos.sector}</span>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Tamaño:</span>
+                                <span class="text-gray-600 ml-2">${analisis.datos.tamanoEmpresa}</span>
+                            </div>
+                        ` : `
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Empresa:</span>
+                                <span class="text-gray-600 ml-2">${analisis.datos.empresaBase.nombre}</span>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Comparaciones:</span>
+                                <span class="text-gray-600 ml-2">${analisis.datos.empresasComparacion.length} empresas</span>
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            ${Object.keys(analisis.analisis || analisis.comparacion?.resultados || {}).length} métricas analizadas
+                        </div>
+                        <button class="ver-resultado bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 text-sm"
+                                data-analisis-id="${analisis.id}">
+                            <i class="fas fa-eye mr-1"></i>Ver Resultado
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Reemplazar el contenido vacío
+        container.innerHTML = html;
+
+        // Agregar event listeners
+        this.setupHistorialButtons();
+    }
+
+    setupHistorialButtons() {
+        document.querySelectorAll('.ver-resultado').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const analisisId = e.target.closest('.ver-resultado').dataset.analisisId;
+                this.verResultadoHistorial(analisisId);
+            });
+        });
+    }
+
+    verResultadoHistorial(analisisId) {
+        try {
+            const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
+            const analisis = Object.values(analisisGuardados).find(a => a.id == analisisId);
+
+            if (analisis) {
+                // Cambiar a la pestaña de resultados
+                document.getElementById('btn-resultados').click();
+
+                // Mostrar el resultado
+                if (analisis.analisis) {
+                    this.mostrarResultadosBenchmarking(analisis.analisis, analisis.recomendaciones, analisis.datos);
+                    if (Object.keys(analisis.analisis).length > 0) {
+                        document.getElementById('graficos-container').classList.remove('hidden');
+                        this.crearGraficosBenchmarking(analisis.analisis, analisis.datos);
+                    }
+                } else if (analisis.comparacion) {
+                    this.mostrarResultadosComparacion(analisis.comparacion, analisis.insights, analisis.datos);
+                    if (analisis.comparacion.resultados && Object.keys(analisis.comparacion.resultados).length > 0) {
+                        document.getElementById('graficos-container').classList.remove('hidden');
+                        this.crearGraficosComparacion(analisis.comparacion);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando resultado del historial:', error);
+            this.mostrarError('Error al cargar el resultado');
+        }
+    }
+
+    /**
+     * Funciones de comparación personalizada (continuación)
+     */
+    generarInsightsComparacion(comparacion) {
+        const insights = [];
+
+        Object.entries(comparacion.resultados).forEach(([criterio, resultado]) => {
+            const nombreCriterio = this.nombreMetrica(criterio);
+            const diferencia = resultado.diferencia_promedio;
+
+            if (Math.abs(diferencia) > 20) {
+                if (diferencia > 0) {
+                    insights.push(`Tu ${nombreCriterio} está ${diferencia.toFixed(1)}% por encima del promedio de comparación. ¡Excelente rendimiento!`);
+                } else {
+                    insights.push(`Tu ${nombreCriterio} está ${Math.abs(diferencia).toFixed(1)}% por debajo del promedio de comparación. Considera mejorar esta métrica.`);
+                }
+            }
+
+            if (resultado.posicion === 'Mejor') {
+                insights.push(`Eres el mejor en ${nombreCriterio} entre las empresas comparadas.`);
+            } else if (resultado.posicion === 'Por debajo del promedio') {
+                insights.push(`En ${nombreCriterio}, estás por debajo del promedio. Revisa estrategias de mejora.`);
+            }
+        });
+
+        return insights;
+    }
+
+    /**
+     * Funciones auxiliares adicionales
+     */
+    obtenerUsuarioActual() {
+        // Esta función debería obtener el ID del usuario actual desde la sesión
+        // Por ahora, devolver un valor por defecto para testing
+        return 1; // TODO: Implementar obtención real del usuario actual
+    }
+
+    mostrarExito(mensaje) {
+        // Usar sistema de mensajes contextuales si está disponible
+        if (window.contextualMessages) {
+            window.contextualMessages.success({
+                title: 'Éxito',
+                body: mensaje
+            });
+        } else {
+            alert(`Éxito: ${mensaje}`);
+        }
     }
 
     /**

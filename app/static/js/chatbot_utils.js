@@ -273,17 +273,107 @@ class ChatbotUtils {
             return false;
         }
     }
+
+    /**
+     * Renderiza markdown con soporte para colores y preguntas sugeridas
+     * @param {string} text - Texto con formato markdown
+     * @returns {string} HTML renderizado
+     */
+    static renderMarkdown(text) {
+        if (!text) return '';
+
+        let html = text;
+
+        // Procesar colores primero [color]texto[/color]
+        html = html.replace(/\[red\](.*?)\[\/red\]/gi, '<span style="color: #dc2626; font-weight: 500;">$1</span>');
+        html = html.replace(/\[blue\](.*?)\[\/blue\]/gi, '<span style="color: #2563eb; font-weight: 500;">$1</span>');
+        html = html.replace(/\[green\](.*?)\[\/green\]/gi, '<span style="color: #16a34a; font-weight: 500;">$1</span>');
+        html = html.replace(/\[orange\](.*?)\[\/orange\]/gi, '<span style="color: #ea580c; font-weight: 500;">$1</span>');
+        html = html.replace(/\[purple\](.*?)\[\/purple\]/gi, '<span style="color: #9333ea; font-weight: 500;">$1</span>');
+        html = html.replace(/\[yellow\](.*?)\[\/yellow\]/gi, '<span style="color: #ca8a04; font-weight: 500;">$1</span>');
+
+        // Procesar negritas **texto**
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Procesar preguntas sugeridas [¿Pregunta1?|¿Pregunta2?|¿Pregunta3?]
+        // Convertir a botones clickeables
+        const questionPattern = /\[([¿\?][^\[\]]*[|][^\[\]]*(?:[|][^\[\]]*)*)\]/g;
+        html = html.replace(questionPattern, (match, questions) => {
+            const questionList = questions.split('|').map(q => q.trim());
+            const buttonsHtml = questionList.map(question =>
+                `<button type="button" class="quick-suggestion-btn" data-question="${question.replace(/"/g, '"')}" style="display: inline-block; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin: 2px; font-size: 14px; transition: all 0.2s;">${question}</button>`
+            ).join('');
+
+            return `<div class="suggested-questions" style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Preguntas sugeridas:</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">${buttonsHtml}</div>
+            </div>`;
+        });
+
+        // Procesar saltos de línea
+        html = html.replace(/\n/g, '<br>');
+
+        return html;
+    }
+
+    /**
+     * Envía una pregunta sugerida al chatbot
+     * @param {string} question - La pregunta a enviar
+     */
+    static sendSuggestedQuestion(question) {
+        console.log('📤 Enviando pregunta sugerida:', question);
+
+        // Encontrar elementos del chat
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        if (chatInput && sendButton) {
+            // Establecer la pregunta en el input
+            chatInput.value = question;
+
+            // Simular envío
+            const elements = {
+                chatInput: chatInput,
+                sendButton: sendButton,
+                chatMessages: document.getElementById('chat-messages'),
+                typingIndicator: document.getElementById('typing-indicator')
+            };
+
+            // Usar la función de envío del messaging module si está disponible
+            if (window.chatbotMessaging && window.chatbotMessaging.sendMessage) {
+                window.chatbotMessaging.sendMessage(elements);
+            } else {
+                // Fallback: simular click en el botón de envío
+                sendButton.click();
+            }
+        } else {
+            console.error('❌ No se encontraron elementos del chat para enviar pregunta sugerida');
+        }
+    }
+
+    /**
+     * Función de prueba para verificar que renderMarkdown funciona
+     */
+    static testRenderMarkdown() {
+        const testText = "Este es un texto de prueba con [red]colores[/red] y [blue]azul[/blue].\n\n[¿Pregunta 1?|¿Pregunta 2?|¿Pregunta 3?]";
+        const result = ChatbotUtils.renderMarkdown(testText);
+        console.log('🧪 Test renderMarkdown result:', result);
+
+        // Crear un elemento de prueba para mostrar el resultado
+        const testDiv = document.createElement('div');
+        testDiv.innerHTML = result;
+        testDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: white; border: 2px solid red; padding: 10px; z-index: 9999; max-width: 300px;';
+        document.body.appendChild(testDiv);
+
+        // Agregar botón para cerrar
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Cerrar';
+        closeBtn.onclick = () => testDiv.remove();
+        closeBtn.style.cssText = 'display: block; margin-top: 10px;';
+        testDiv.appendChild(closeBtn);
+
+        return result;
+    }
 }
 
 // Funciones de utilidad globales
-window.ChatbotUtils = ChatbotUtils;
-
-// Funciones de ayuda para el chatbot
-window.formatCurrency = (amount, currency = 'PEN') => ChatbotUtils.formatCurrency(amount, currency);
-window.formatPercentage = (value, decimals = 2) => ChatbotUtils.formatPercentage(value, decimals);
-window.formatNumber = (num, decimals = 2) => ChatbotUtils.formatNumber(num, decimals);
-
-// Exportar para módulos
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ChatbotUtils;
-}

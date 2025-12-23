@@ -28,6 +28,9 @@ def crear_tablas_sqlite():
                 tamano_empresa TEXT,
                 newsletter BOOLEAN DEFAULT 0,
                 nivel TEXT DEFAULT 'basico',
+                foto_perfil TEXT,
+                email_confirmado BOOLEAN DEFAULT 0,
+                confirmation_token TEXT,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -128,6 +131,37 @@ def crear_tablas_sqlite():
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_nombre_usuario ON Usuarios(nombre_usuario)")
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_simulaciones_usuario ON Simulaciones(usuario_id)")
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_resultados_simulacion ON Resultados(simulacion_id)")
+
+        # Agregar columnas faltantes si no existen (para migración)
+        try:
+            db.cur.execute("ALTER TABLE Usuarios ADD COLUMN foto_perfil TEXT")
+            print("✅ Columna foto_perfil agregada a tabla Usuarios")
+        except Exception as e:
+            # La columna ya existe, ignorar error
+            if "duplicate column name" in str(e).lower() or "already exists" in str(e).lower():
+                pass
+            else:
+                print(f"⚠️ Nota sobre columna foto_perfil: {e}")
+
+        # Agregar columna email_confirmado si no existe
+        try:
+            db.cur.execute("ALTER TABLE Usuarios ADD COLUMN email_confirmado BOOLEAN DEFAULT 0")
+            print("✅ Columna email_confirmado agregada a tabla Usuarios")
+        except Exception as e:
+            if "duplicate column name" in str(e).lower() or "already exists" in str(e).lower():
+                pass
+            else:
+                print(f"⚠️ Nota sobre columna email_confirmado: {e}")
+
+        # Agregar columna confirmation_token si no existe
+        try:
+            db.cur.execute("ALTER TABLE Usuarios ADD COLUMN confirmation_token TEXT")
+            print("✅ Columna confirmation_token agregada a tabla Usuarios")
+        except Exception as e:
+            if "duplicate column name" in str(e).lower() or "already exists" in str(e).lower():
+                pass
+            else:
+                print(f"⚠️ Nota sobre columna confirmation_token: {e}")
 
         db.conn.commit()
         print("✅ Tablas SQLite creadas exitosamente")
@@ -230,7 +264,35 @@ def crear_app(config_name="development"):
 
     @app.route("/chatbot")
     def chatbot():
-        return render_template("chatbot.html")
+        from flask import request, session
+        contexto = None
+        mensaje_inicial = None
+
+        # Check for contextual data in URL parameters
+        contexto_param = request.args.get('contexto')
+        if contexto_param:
+            try:
+                import json
+                contexto = json.loads(contexto_param)
+                mensaje_inicial = contexto.get('mensaje_contextual', '')
+            except json.JSONDecodeError:
+                contexto = None
+
+        # Get user info for avatar
+        usuario_id = session.get('usuario_id')
+        foto_perfil = None
+
+        if usuario_id:
+            # Import here to avoid circular imports
+            from app.modelos.usuario import Usuario
+            usuario = Usuario.obtener_usuario_por_id(usuario_id)
+            if usuario and usuario.foto_perfil:
+                foto_perfil = usuario.foto_perfil
+
+        return render_template('chatbot.html',
+                             contexto=contexto,
+                             mensaje_inicial=mensaje_inicial,
+                             foto_perfil=foto_perfil)
 
     @app.route("/benchmarking")
     def benchmarking():
@@ -273,14 +335,18 @@ def crear_app(config_name="development"):
     def perfil():
         """Mostrar perfil del usuario"""
         from flask import session, flash, redirect, url_for
+        print("🔍 DEBUG - PERFIL ROUTE CALLED")
         if 'usuario_id' not in session:
+            print("🔍 DEBUG - No user ID in session")
             flash('Debes iniciar sesión para acceder a tu perfil.', 'error')
             return redirect(url_for('login'))
 
         # Obtener datos del perfil
         from app.modelos.usuario import Usuario
         usuario_id = session['usuario_id']
+        print(f"🔍 DEBUG - User ID from session: {usuario_id}")
         usuario = Usuario.obtener_usuario_por_id(usuario_id)
+        print(f"🔍 DEBUG - Usuario object returned: {usuario}")
 
         return render_template('perfil.html', perfil_data=usuario)
 

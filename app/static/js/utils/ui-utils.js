@@ -186,8 +186,8 @@ class UIUtils {
                 simulacion.simulacion_id = result.data.simulacion_id;
                 UIUtils.guardarSimulacion(tipo, simulacion);
 
-                // Mostrar mensaje de éxito
-                UIUtils.mostrarModal('¡Éxito!', 'Análisis guardado exitosamente en su cuenta.', 'success');
+                // Mostrar mensaje de éxito (estilo notificación como subir foto de perfil)
+                UIUtils.mostrarNotificacion('Análisis guardado exitosamente en su cuenta.');
             } else {
                 throw new Error(result.error || 'Error al guardar el análisis');
             }
@@ -303,6 +303,47 @@ class UIUtils {
                 mensajeDiv.classList.add('opacity-0', 'transition-opacity', 'duration-300');
                 setTimeout(() => mensajeDiv.remove(), 300);
             }
+        }, 3000);
+    }
+
+    /**
+     * Mostrar notificación estilo perfil (similar a subir foto)
+     */
+    static mostrarNotificacion(mensaje, tipo = 'success') {
+        // Crear notificación element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+
+        if (tipo === 'success') {
+            notification.classList.add('bg-green-500', 'text-white');
+        } else if (tipo === 'error') {
+            notification.classList.add('bg-red-500', 'text-white');
+        } else {
+            notification.classList.add('bg-blue-500', 'text-white');
+        }
+
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                <span>${mensaje}</span>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
         }, 3000);
     }
 

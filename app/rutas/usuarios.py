@@ -3,10 +3,19 @@ from app.modelos.usuario import Usuario
 from app.modelos.logro import Usuario_Insignia, Ranking
 from app.modelos.notificacion import Notificacion
 from app.utils.exportar import GoogleSheetsExporter, ExcelExporter
+from app.utils.base_datos import get_db_connection, USE_POSTGRESQL
 from app.servicios.email_servicio import email_service
 from werkzeug.security import check_password_hash
 import re
 import secrets
+
+def adapt_query(query):
+    """Adaptar consulta SQL para el tipo de base de datos"""
+    if USE_POSTGRESQL:
+        return query
+    else:
+        # SQLite: cambiar %s por ?
+        return query.replace('%s', '?')
 
 usuarios_bp = Blueprint('usuarios', __name__)
 
@@ -194,12 +203,16 @@ def actualizar_nivel_usuario(usuario_id):
 def registrar_usuario():
     """API para registrar un nuevo usuario"""
     try:
-        # Get JSON data
-        data = request.get_json()
+        # Get form data (from HTML form) or JSON data (from API)
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
+
         if not data:
             return jsonify({
                 'success': False,
-                'error': 'Datos JSON requeridos'
+                'error': 'Datos requeridos'
             }), 400
 
         nombres = data.get('nombres', '').strip()
@@ -209,10 +222,39 @@ def registrar_usuario():
         nombre_usuario = data.get('nombre_usuario', '').strip()
         password = data.get('password', '')
         empresa = data.get('empresa', '').strip()
-        sector = data.get('sector', '')
-        tamano_empresa = data.get('tamano_empresa', '')
-        terminos = data.get('terminos')
+        sector = data.get('sector', '').strip()
+        tamano_empresa = data.get('tamano_empresa', '').strip()
+        terminos = data.get('terminos')  # This will be 'on' if checked in form data
         newsletter = data.get('newsletter', False)
+
+        # Debug logging
+        print(f"DEBUG REGISTRO - Raw data received: {dict(data)}")
+        print(f"DEBUG REGISTRO - Processed fields:")
+        print(f"  nombres: '{nombres}'")
+        print(f"  apellidos: '{apellidos}'")
+        print(f"  email: '{email}'")
+        print(f"  telefono: '{telefono}'")
+        print(f"  nombre_usuario: '{nombre_usuario}'")
+        print(f"  empresa: '{empresa}'")
+        print(f"  sector: '{sector}'")
+        print(f"  tamano_empresa: '{tamano_empresa}'")
+        print(f"  terminos: '{terminos}'")
+        print(f"  newsletter: '{newsletter}'")
+
+        # Convert form data to proper types
+        if isinstance(terminos, str) and terminos.lower() == 'on':
+            terminos = True
+        elif terminos:
+            terminos = True
+        else:
+            terminos = False
+
+        if isinstance(newsletter, str) and newsletter.lower() == 'on':
+            newsletter = True
+        elif newsletter:
+            newsletter = True
+        else:
+            newsletter = False
 
         # Validation
         errors = []
@@ -284,16 +326,44 @@ def registrar_usuario():
             # Set default level to 'basico'
             Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
 
-            return jsonify({
-                'success': True,
-                'message': 'Usuario registrado exitosamente',
-                'usuario': usuario.to_dict()
-            }), 201
+            # Send confirmation email
+            try:
+                email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
+                if email_result:
+                    print(f"✅ Email de confirmación enviado exitosamente a {email}")
+                else:
+                    print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
+                    # Don't fail registration, but log the issue
+            except Exception as e:
+                print(f"⚠️ Excepción enviando email de confirmación: {e}")
+                import traceback
+                print(f"📋 Traceback: {traceback.format_exc()}")
+                # Don't fail registration, but log the issue
+
+            # Check if this is an AJAX request (has X-Requested-With header)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # For AJAX calls, return JSON response
+                return jsonify({
+                    'success': True,
+                    'message': 'Usuario registrado exitosamente',
+                    'usuario': usuario.to_dict()
+                }), 201
+            else:
+                # For regular form submissions, redirect to login page with success message
+                from flask import flash, redirect, url_for
+                flash('¡Registro exitoso! Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.', 'info')
+                return redirect(url_for('login'))
         else:
-            return jsonify({
-                'success': False,
-                'error': 'Error al crear la cuenta'
-            }), 500
+            if not request.is_json:
+                # For form submissions, redirect back with error
+                from flask import flash, redirect, request as flask_request
+                flash('Error al crear la cuenta. Inténtalo de nuevo.', 'error')
+                return redirect(url_for('main.registro'))
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Error al crear la cuenta'
+                }), 500
 
     except Exception as e:
         print(f"Error en registro API: {e}")
@@ -306,12 +376,16 @@ def registrar_usuario():
 def procesar_login():
     """API para procesar inicio de sesión"""
     try:
-        # Get JSON data
-        data = request.get_json()
+        # Get data from JSON or form
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
+
         if not data:
             return jsonify({
                 'success': False,
-                'error': 'Datos JSON requeridos'
+                'error': 'Datos requeridos'
             }), 400
 
         email_username = data.get('email_username', '').strip()
@@ -336,12 +410,20 @@ def procesar_login():
 
         # Verificar si el usuario existe y la contraseña es correcta
         if usuario and usuario.password_hash:
+            # Check if email is confirmed
+            if not usuario.email_confirmado:
+                return jsonify({
+                    'success': False,
+                    'error': 'Debes confirmar tu cuenta desde el email que te enviamos antes de poder iniciar sesión.'
+                }), 403
+
             if check_password_hash(usuario.password_hash, password):
                 # Login exitoso - crear sesión
                 session['usuario_id'] = usuario.usuario_id
                 session['usuario_email'] = usuario.email
                 session['usuario_nombre'] = f"{usuario.nombres} {usuario.apellidos}"
                 session['usuario_nivel'] = usuario.nivel
+                session['usuario_foto_perfil'] = usuario.foto_perfil
 
                 return jsonify({
                     'success': True,
@@ -494,6 +576,10 @@ def upload_profile_picture():
 
             print("Database updated successfully via model")
 
+            # Update session data with new photo filename
+            session['usuario_foto_perfil'] = filename
+            print(f"Session updated with new photo: {filename}")
+
             # Generate URL for the uploaded image
             image_url = f"/static/uploads/profile_pictures/{filename}"
 
@@ -533,3 +619,104 @@ def obtener_usuario_actual():
         usuario_id = session['usuario_id']
         return Usuario.obtener_usuario_por_id(usuario_id)
     return None
+
+@usuarios_bp.route('/check-email', methods=['GET'])
+def check_email_availability():
+    """Verificar si un email está disponible"""
+    try:
+        email = request.args.get('email', '').strip().lower()
+        if not email:
+            return jsonify({'available': False, 'error': 'Email requerido'}), 400
+
+        # Check if email exists
+        existing_user = Usuario.obtener_usuario_por_email(email)
+        available = existing_user is None
+
+        return jsonify({'available': available})
+    except Exception as e:
+        print(f"Error checking email availability: {e}")
+        return jsonify({'available': False, 'error': 'Error interno del servidor'}), 500
+
+@usuarios_bp.route('/check-username', methods=['GET'])
+def check_username_availability():
+    """Verificar si un nombre de usuario está disponible"""
+    try:
+        username = request.args.get('username', '').strip()
+        if not username:
+            return jsonify({'available': False, 'error': 'Nombre de usuario requerido'}), 400
+
+        # Check if username exists
+        existing_user = Usuario.obtener_usuario_por_nombre_usuario(username)
+        available = existing_user is None
+
+        return jsonify({'available': available})
+    except Exception as e:
+        print(f"Error checking username availability: {e}")
+        return jsonify({'available': False, 'error': 'Error interno del servidor'}), 500
+
+@usuarios_bp.route('/confirmar/<token>', methods=['GET'])
+def confirmar_cuenta(token):
+    """Confirmar cuenta de usuario mediante token"""
+    try:
+        print(f"🔍 CONFIRMACIÓN: Received token: '{token}'")
+        print(f"🔍 CONFIRMACIÓN: Token length: {len(token) if token else 0}")
+
+        # Find user by confirmation token
+        db = get_db_connection()
+        query = adapt_query("SELECT * FROM Usuarios WHERE confirmation_token = %s")
+        print(f"🔍 CONFIRMACIÓN: Query: {query}")
+        print(f"🔍 CONFIRMACIÓN: Token parameter: '{token}'")
+
+        db.connect()
+        result = db.execute_query(query, (token,), fetch=True)
+        print(f"🔍 CONFIRMACIÓN: Query result: {result}")
+
+        if not result:
+            print(f"❌ CONFIRMACIÓN: No user found with token '{token}'")
+            flash('Token de confirmación inválido o expirado.', 'error')
+            return redirect(url_for('login'))
+
+        usuario_data = result[0]
+        usuario_id = usuario_data['usuario_id']
+        email = usuario_data['email']
+        print(f"✅ CONFIRMACIÓN: Found user ID {usuario_id} with email {email}")
+
+        # Check if already confirmed
+        email_confirmado = usuario_data['email_confirmado']
+        print(f"🔍 CONFIRMACIÓN: Current email_confirmado status: {email_confirmado} (type: {type(email_confirmado)})")
+
+        # Convert boolean if needed
+        if isinstance(email_confirmado, int):
+            email_confirmado = bool(email_confirmado)
+
+        if email_confirmado:
+            print(f"ℹ️ CONFIRMACIÓN: User {usuario_id} already confirmed")
+            flash('Tu cuenta ya ha sido confirmada. Puedes iniciar sesión.', 'info')
+            return redirect(url_for('login'))
+
+        # Update user as confirmed
+        update_query = adapt_query("UPDATE Usuarios SET email_confirmado = 1, confirmation_token = NULL WHERE usuario_id = %s")
+        print(f"🔄 CONFIRMACIÓN: Updating user {usuario_id} to confirmed")
+        db.execute_query(update_query, (usuario_id,))
+        db.commit()
+        print(f"✅ CONFIRMACIÓN: User {usuario_id} confirmed successfully")
+
+        # Send welcome email
+        usuario = Usuario(**usuario_data)
+        try:
+            email_service.enviar_email_bienvenida(usuario.email, usuario.nombre_usuario)
+            print(f"✅ Email de bienvenida enviado a {usuario.email}")
+        except Exception as e:
+            print(f"⚠️ Error enviando email de bienvenida: {e}")
+
+        flash('¡Cuenta confirmada exitosamente! Ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('login'))
+
+    except Exception as e:
+        print(f"❌ CONFIRMACIÓN: Exception during confirmation: {e}")
+        import traceback
+        print(f"📋 CONFIRMACIÓN: Traceback: {traceback.format_exc()}")
+        flash('Error al confirmar la cuenta. Inténtalo de nuevo.', 'error')
+        return redirect(url_for('login'))
+    finally:
+        db.disconnect()

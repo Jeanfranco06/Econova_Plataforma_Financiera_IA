@@ -287,16 +287,31 @@ class EconovaRobot3D {
 
 // Inicialización cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si Three.js está disponible
-    if (typeof THREE === 'undefined') {
-        console.warn('Three.js no está cargado. Usando animación CSS alternativa.');
-        // Crear robot CSS alternativo
-        window.econovaRobot = new EconovaRobotCSS('robot-container');
+    const robotContainer = document.getElementById('robot-container');
+    const chatbotRobotContainer = document.getElementById('chatbot-robot');
+
+    // Solo inicializar si existe un contenedor
+    if (!robotContainer && !chatbotRobotContainer) {
+        console.log('🤖 No robot containers found - skipping robot initialization');
         return;
     }
 
-    // Crear instancia del robot 3D
-    window.econovaRobot = new EconovaRobot3D('robot-container');
+    // Verificar si Three.js está disponible
+    if (typeof THREE === 'undefined') {
+        console.warn('Three.js no está cargado. Usando animación CSS alternativa.');
+        // Crear robot CSS alternativo solo si existe el contenedor
+        if (robotContainer) {
+            window.econovaRobot = new EconovaRobotCSS('robot-container');
+        }
+        return;
+    }
+
+    // Crear instancia del robot 3D solo si existe el contenedor
+    if (robotContainer) {
+        window.econovaRobot = new EconovaRobot3D('robot-container');
+    } else if (chatbotRobotContainer) {
+        window.econovaRobot = new EconovaRobot3D('chatbot-robot');
+    }
 });
 
 // Clase alternativa CSS para cuando Three.js no está disponible

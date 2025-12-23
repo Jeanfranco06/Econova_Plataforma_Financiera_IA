@@ -22,6 +22,8 @@ CREATE TABLE Usuarios(
     newsletter BOOLEAN DEFAULT 0,
     nivel VARCHAR(80) DEFAULT 'basico',
     foto_perfil VARCHAR(255),
+    email_confirmado BOOLEAN DEFAULT 0,
+    confirmation_token VARCHAR(255),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

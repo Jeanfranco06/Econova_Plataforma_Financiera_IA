@@ -53,11 +53,18 @@ document.addEventListener('DOMContentLoaded', function() {
             window.chatbotWelcome.messageDelay = 800;
         }
 
-        // Configurar mensajería
-        if (window.chatbotMessaging) {
-            window.chatbotMessaging.typingDelay = 1200;
-            window.chatbotMessaging.responseDelay = 300;
-        }
+    // Configurar mensajería
+    if (window.chatbotMessaging) {
+        window.chatbotMessaging.typingDelay = 1200;
+        window.chatbotMessaging.responseDelay = 300;
+    }
+
+    // Check for analysis context and send contextual message
+    console.log('⏰ Setting timeout for contextual message check...');
+    setTimeout(() => {
+        console.log('⏰ Timeout fired, calling checkAndSendContextualMessage...');
+        checkAndSendContextualMessage();
+    }, 1000);
     }
 
     // Configurar atajos de teclado
@@ -370,6 +377,78 @@ window.ChatbotDebug = {
         console.log(`⚡ Chatbot Performance [${label}]: ${duration}ms`);
     }
 };
+
+/**
+ * Check for analysis context and send contextual message automatically
+ */
+function checkAndSendContextualMessage() {
+    console.log('🔍 Checking for analysis context on chatbot load...');
+
+    // Check if we have analysis context from calculator
+    if (window.currentAnalysisContext) {
+        console.log('✅ Found analysis context:', window.currentAnalysisContext);
+
+        const context = window.currentAnalysisContext;
+        let contextualMessage = '';
+
+        // Create contextual message based on analysis type
+        if (context.tipo_analisis === 'tir') {
+            const tir = context.resultados?.tir;
+            const van = context.resultados?.van;
+            const metodo = context.resultados?.metodo;
+            const evaluacion = context.resultados?.evaluacion;
+
+            contextualMessage = `Hola, acabo de calcular la TIR (Tasa Interna de Retorno) y me gustaría analizar los resultados más profundamente. `;
+
+            if (tir !== null && tir !== undefined) {
+                contextualMessage += `Los resultados son: TIR = ${tir.toFixed(1)}%, VAN a la TIR = S/ ${van?.toLocaleString() || 'N/A'}. `;
+            } else {
+                contextualMessage += `No se pudo calcular la TIR con los datos proporcionados. `;
+            }
+
+            contextualMessage += `Los parámetros fueron: Inversión inicial = S/ ${context.resultados?.inversion?.toLocaleString() || 'N/A'}, `;
+            contextualMessage += `Flujos de caja: ${context.resultados?.flujos ? context.resultados.flujos.map((f, i) => `Año ${i+1}: S/ ${f.toLocaleString()}`).join(', ') : 'No disponibles'}. `;
+            contextualMessage += `Método de cálculo utilizado: ${metodo === 'newton' ? 'Newton-Raphson' : metodo === 'biseccion' ? 'Bisección' : 'Aproximación'}. `;
+
+            if (evaluacion && evaluacion !== 'no_calculable') {
+                contextualMessage += `La evaluación de la TIR es: ${evaluacion === 'excelente' ? 'Excelente' : evaluacion === 'muy_buena' ? 'Muy Buena' : evaluacion === 'buena' ? 'Buena' : evaluacion === 'aceptable' ? 'Aceptable' : 'Baja'}. `;
+            }
+
+            contextualMessage += '¿Qué opinas sobre la rentabilidad de este proyecto? ¿Debería compararlo con el WACC? ¿Qué factores podrían afectar la TIR calculada?';
+        }
+
+        if (contextualMessage) {
+            console.log('📤 Sending contextual message:', contextualMessage.substring(0, 100) + '...');
+
+            // Send the contextual message using the messaging module
+            if (window.chatbotMessaging && window.chatbotMessaging.sendMessage) {
+                // Create mock elements for sendMessage function
+                const mockElements = {
+                    chatInput: { value: contextualMessage },
+                    sendButton: { disabled: false },
+                    chatMessages: document.getElementById('chat-messages'),
+                    typingIndicator: document.getElementById('typing-indicator')
+                };
+
+                // Clear the input after "sending"
+                setTimeout(() => {
+                    if (mockElements.chatInput) {
+                        mockElements.chatInput.value = '';
+                    }
+                }, 100);
+
+                window.chatbotMessaging.sendMessage(mockElements);
+                console.log('✅ Contextual message sent automatically via messaging module');
+            } else {
+                console.error('❌ window.chatbotMessaging.sendMessage not available');
+            }
+        } else {
+            console.log('❌ No contextual message to send');
+        }
+    } else {
+        console.log('❌ No analysis context found');
+    }
+}
 
 /**
  * Inicializar funcionalidades avanzadas al cargar

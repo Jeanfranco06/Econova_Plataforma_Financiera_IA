@@ -1,5 +1,5 @@
 <!-- VAN Calculator -->
-<div id="van-calculator" class="simulation-calculator">
+<div id="van-calculator" class="simulation-calculator" style="display: none;">
   <div class="bg-white rounded-2xl shadow-xl p-8">
     <!-- Header with Engineering Economics Context -->
     <div class="flex items-start justify-between mb-6">
@@ -7,10 +7,10 @@
         <div class="flex items-center gap-3 mb-2">
           <h3 class="text-2xl font-bold text-gray-800">Valor Actual Neto (VAN)</h3>
           <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-            <i class="fas fa-lightbulb mr-1"></i>Método Principal
+            <i class="fas fa-calculator mr-1"></i>Método Fundamental
           </div>
         </div>
-        <p class="text-gray-600 mb-3">Métrica fundamental de evaluación económica de proyectos de inversión</p>
+        <p class="text-gray-600 mb-3">Métrica principal de evaluación económica de proyectos</p>
 
         <!-- Educational Content -->
         <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
@@ -19,8 +19,8 @@
             <div>
               <h5 class="font-semibold text-blue-800 mb-1">Concepto Económico</h5>
               <p class="text-sm text-blue-700">
-                El VAN mide la rentabilidad absoluta de una inversión comparando el valor presente de los flujos de caja futuros
-                con la inversión inicial. Un VAN positivo indica que el proyecto crea valor económico.
+                El VAN mide el valor económico neto de un proyecto al descontar todos los flujos de caja futuros
+                a una tasa que refleja el costo de oportunidad del capital.
               </p>
             </div>
           </div>
@@ -45,22 +45,20 @@
               id="van-nombre-proyecto"
               name="nombre_proyecto"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Ej: Planta Solar 50MW"
+              placeholder="Ej: Expansión Planta Industrial"
             >
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Sector Industrial
+              Sector
             </label>
             <select id="van-sector" name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Seleccionar sector...</option>
-              <option value="energia">Energía y Recursos</option>
+              <option value="general">General</option>
               <option value="manufactura">Manufactura</option>
+              <option value="servicios">Servicios</option>
               <option value="tecnologia">Tecnología</option>
               <option value="construccion">Construcción</option>
-              <option value="transporte">Transporte</option>
-              <option value="salud">Salud</option>
-              <option value="otros">Otros</option>
+              <option value="energia">Energía</option>
             </select>
           </div>
         </div>
@@ -88,7 +86,7 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <i class="fas fa-percentage mr-2 text-gray-500"></i>
+            <i class="fas fa-percent mr-2 text-gray-500"></i>
             Tasa de Descuento (%)
           </label>
           <input
@@ -100,9 +98,9 @@
             max="50"
             step="0.01"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-            placeholder="12.5"
+            placeholder="12"
           >
-          <p class="text-xs text-gray-500 mt-1">Costo de oportunidad del capital (WACC)</p>
+          <p class="text-xs text-gray-500 mt-1">Tasa de descuento para calcular VAN</p>
         </div>
       </div>
 
@@ -189,7 +187,7 @@
           type="submit"
           class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-300 transition duration-300 text-lg font-semibold shadow-lg"
         >
-          <i class="fas fa-calculator mr-2"></i>Calcular VAN y Métricas
+          <i class="fas fa-calculator mr-2"></i>Calcular VAN y Análisis
         </button>
       </div>
     </form>
@@ -199,10 +197,10 @@
       <div class="flex items-center justify-between mb-6">
         <h4 class="text-xl font-bold text-gray-800">Resultados del Análisis Económico</h4>
         <div class="flex gap-2">
-          <button class="text-gray-500 hover:text-gray-700" title="Exportar PDF">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF" onclick="window.vanCalculator.exportarPDF()">
             <i class="fas fa-file-pdf"></i>
           </button>
-          <button class="text-gray-500 hover:text-gray-700" title="Exportar Excel">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel" onclick="window.vanCalculator.exportarExcel()">
             <i class="fas fa-file-excel"></i>
           </button>
         </div>
@@ -229,7 +227,7 @@
         </div>
 
         <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
-          <div class="text-2xl font-bold text-orange-600 mb-1" id="van-vpn-inversion">0%</div>
+          <div class="text-2xl font-bold text-orange-600 mb-1" id="van-vpn-inversion">0.0%</div>
           <div class="text-sm text-gray-600 font-medium">VAN/Inversión</div>
           <div class="text-xs text-gray-500 mt-1">Rentabilidad Relativa</div>
         </div>
@@ -249,14 +247,14 @@
               <span id="van-evaluation" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
             </div>
             <div class="text-sm text-gray-600" id="van-evaluation-text">
-              Evaluando criterios de decisión...
+              Evaluando viabilidad económica del proyecto...
             </div>
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="font-medium text-gray-800">Confianza:</span>
-              <span id="van-confidence" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+              <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
                 Alta
               </span>
             </div>
@@ -292,16 +290,31 @@
         </div>
       </div>
 
+      <!-- Additional Metrics -->
+      <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-lg font-bold text-indigo-600 mb-1" id="van-roi">0.0%</div>
+          <div class="text-sm text-gray-600">Retorno sobre Inversión</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-lg font-bold text-teal-600 mb-1" id="van-bcr">0.00</div>
+          <div class="text-sm text-gray-600">Beneficio-Costo Ratio</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+          <div class="text-lg font-bold text-cyan-600 mb-1" id="van-horizonte">0 años</div>
+          <div class="text-sm text-gray-600">Horizonte de Análisis</div>
+        </div>
+      </div>
+
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center">
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.vanCalculator.guardarAnalisis()">
           <i class="fas fa-save mr-2"></i>Guardar Análisis
         </button>
-        <button class="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center">
-          <i class="fas fa-share mr-2"></i>Compartir Resultados
-        </button>
-        <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center">
-          <i class="fas fa-print mr-2"></i>Imprimir Reporte
+        <button id="van-consultar-ia" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-robot mr-2"></i>Consultar con IA
         </button>
       </div>
     </div>

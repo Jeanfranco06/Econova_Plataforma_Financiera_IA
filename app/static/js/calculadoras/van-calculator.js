@@ -288,11 +288,8 @@ class VANCalculator {
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.vanCalculator.guardarAnalisis()">
                 <i class="fas fa-save mr-2"></i>Guardar Análisis
               </button>
-              <button class="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.vanCalculator.compartirAnalisis()">
-                <i class="fas fa-share mr-2"></i>Compartir Resultados
-              </button>
-              <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.vanCalculator.imprimirAnalisis()">
-                <i class="fas fa-print mr-2"></i>Imprimir Reporte
+              <button id="van-consultar-ia" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+                <i class="fas fa-robot mr-2"></i>Consultar con IA
               </button>
             </div>
         `;
@@ -433,6 +430,27 @@ class VANCalculator {
      */
     actualizarSimulacionTiempoReal(input) {
         UIUtils.actualizarSimulacionTiempoReal(input);
+    }
+
+    /**
+     * Obtiene los datos actuales de la simulación VAN
+     */
+    obtenerDatosActuales() {
+        const simulacion = UIUtils.obtenerSimulacion('van');
+        if (!simulacion) return null;
+
+        return {
+            tipo_analisis: 'van',
+            tipo: 'van',
+            van: simulacion.resultado?.van || 0,
+            tir: simulacion.resultado?.tir || 0,
+            payback: simulacion.resultado?.payback || 0,
+            inversion: simulacion.datos?.inversion || 0,
+            tasa: simulacion.datos?.tasaDescuento || 0,
+            flujos: simulacion.datos?.flujos || [],
+            decision: simulacion.resultado?.decision || 'indiferente',
+            nombre_proyecto: simulacion.datos?.nombreProyecto || 'Proyecto VAN'
+        };
     }
 }
 

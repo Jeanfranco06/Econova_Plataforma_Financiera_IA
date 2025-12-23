@@ -20,7 +20,7 @@ xgboost>=2.0.3
 plotly==5.18.0
 
 # Chatbot (para integración con Ronaldo)
-openai==1.6.1
+groq==0.4.1
 
 # Utilidades
 python-dotenv==1.0.0

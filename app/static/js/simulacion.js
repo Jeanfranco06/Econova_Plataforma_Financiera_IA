@@ -141,6 +141,15 @@ class SimulacionFinanciera {
                 }
             });
         });
+
+        // Seleccionar VAN por defecto al cargar la página
+        const vanButton = document.getElementById('van-btn');
+        if (vanButton) {
+            // Simular click en el botón VAN para activarlo por defecto
+            setTimeout(() => {
+                vanButton.click();
+            }, 100);
+        }
     }
 
     /**
@@ -189,7 +198,8 @@ class SimulacionFinanciera {
             resultado,
             timestamp: new Date(),
             version: '2.0',
-            tipo: 'ingenieria_economica'
+            tipo: 'ingenieria_economica',
+            tipo_analisis: 'van'
         });
 
         // Disparar evento con datos completos
@@ -2102,11 +2112,8 @@ class SimulacionFinanciera {
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.guardarAnalisis('van')">
                 <i class="fas fa-save mr-2"></i>Guardar Análisis
               </button>
-              <button class="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.compartirAnalisis('van')">
-                <i class="fas fa-share mr-2"></i>Compartir Resultados
-              </button>
-              <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.simulacionFinanciera.imprimirAnalisis('van')">
-                <i class="fas fa-print mr-2"></i>Imprimir Reporte
+              <button id="van-consultar-ia" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+                <i class="fas fa-robot mr-2"></i>Consultar con IA
               </button>
             </div>
         `;

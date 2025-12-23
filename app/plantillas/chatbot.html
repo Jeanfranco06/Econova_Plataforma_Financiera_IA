@@ -1,6 +1,159 @@
 {% extends "base.html" %}
 
-{% block title %}Chatbot Asesor - Econova{% endblock %}
+{% block title %}Chatbot Asesor Financiero - Econova{% endblock %}
+
+{% block styles %}
+<style>
+/* Avatar del robot */
+.avatar-container {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(74, 85, 104, 0.4);
+    animation: float 3s ease-in-out infinite;
+    border: 2px solid #1a202c;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+.avatar-container canvas {
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.3));
+}
+
+/* Chat styling */
+.chatbot-messages {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.05) 0%, transparent 50%);
+    min-height: 400px;
+}
+
+/* User messages */
+.message-user {
+    justify-content: flex-end;
+}
+
+.message-user .message-content {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+/* Bot messages */
+.message-bot .message-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #1a202c;
+    border-radius: 18px 18px 18px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+/* Typing indicator */
+.message-bot .message-content:has(.flex.space-x-1) {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border: 1px solid rgba(203, 213, 225, 0.8);
+}
+
+/* Enhanced text styling */
+.message-content p {
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.message-content strong {
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.message-content ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.message-content li {
+    margin: 4px 0;
+    color: #4a5568;
+}
+
+.message-content li::marker {
+    color: #3b82f6;
+}
+
+/* Avatar styling */
+.message-user .avatar-container {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 2px solid #047857;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Scrollbar styling */
+.chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* Enhanced welcome message */
+.message-bot:first-child .message-content {
+    background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);
+    border: 2px solid #fbbf24;
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.2);
+}
+
+/* Hover effects */
+.message-content:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+/* Typing animation enhancement */
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+.flex.space-x-1 div {
+    animation: typing 1.4s ease-in-out infinite;
+}
+
+.flex.space-x-1 div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.flex.space-x-1 div:nth-child(3) {
+    animation-delay: 0.4s;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Chatbot Hero -->
@@ -10,372 +163,1046 @@
       Chatbot Asesor Financiero
     </h1>
     <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-      Tu asistente inteligente para análisis financiero y toma de decisiones
+      Tu compañero inteligente para decisiones financieras empresariales con IA avanzada
     </p>
   </div>
 </section>
 
 <!-- Chatbot Interface -->
 <section class="py-16 bg-gray-50">
-  <div class="container mx-auto px-6">
-    <div class="max-w-6xl mx-auto">
-      <div class="grid lg:grid-cols-2 gap-12 items-start">
+  <div class="container-fluid px-6">
 
-        <!-- Left Column: Chatbot Interface -->
-        <div class="order-2 lg:order-1">
-          <div class="bg-white rounded-2xl shadow-xl p-8">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-800">Chatbot Financiero IA</h2>
-            <p class="text-gray-600">Tu asistente inteligente especializado en finanzas empresariales</p>
+      <!-- Chatbot Container -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+
+        <!-- Header with Actions -->
+        <div class="flex flex-col lg:flex-row gap-8 mb-8">
+          <div class="flex-1">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Econova AI Assistant</h3>
+                <p class="text-sm text-gray-600">Conectado • Inteligencia Artificial</p>
+              </div>
+            </div>
           </div>
-          <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-            <i class="fas fa-circle text-green-500 mr-1"></i>En Línea
+
+          <!-- Quick Actions -->
+          <div class="flex flex-wrap gap-3">
+            <a href="/simulacion" class="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition duration-300">
+              <i class="fas fa-play-circle text-blue-600"></i>
+              <span class="text-blue-700 font-medium text-sm">Nueva Simulación</span>
+            </a>
+            <a href="/benchmarking" class="flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-lg hover:bg-green-100 transition duration-300">
+              <i class="fas fa-chart-bar text-green-600"></i>
+              <span class="text-green-700 font-medium text-sm">Benchmarking</span>
+            </a>
+            <a href="/calculadoras/van" class="flex items-center space-x-2 px-4 py-2 bg-purple-50 rounded-lg hover:bg-purple-100 transition duration-300">
+              <i class="fas fa-calculator text-purple-600"></i>
+              <span class="text-purple-700 font-medium text-sm">VAN</span>
+            </a>
+            <a href="/calculadoras/tir" class="flex items-center space-x-2 px-4 py-2 bg-orange-50 rounded-lg hover:bg-orange-100 transition duration-300">
+              <i class="fas fa-chart-line text-orange-600"></i>
+              <span class="text-orange-700 font-medium text-sm">TIR</span>
+            </a>
           </div>
         </div>
 
-        <!-- Chat Container -->
-        <div class="bg-gray-50 rounded-lg p-6 mb-6">
-          <div id="chat-messages" class="space-y-4 mb-4 max-h-96 overflow-y-auto">
-            <!-- Welcome Message -->
-            <div class="flex items-start space-x-3">
-              <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-robot text-white text-sm"></i>
-              </div>
-              <div class="bg-blue-50 p-4 rounded-lg max-w-lg">
-                <p class="text-gray-800">
-                  ¡Hola! Soy <strong>Econova AI</strong>, tu asesor financiero inteligente.
-                  Puedo ayudarte con análisis de VAN, TIR, WACC, presupuestos, inversiones y toma de decisiones financieras.
-                </p>
-                <p class="text-gray-600 text-sm mt-2">
-                  ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre conceptos financieros,
-                  interpretar resultados de tus simulaciones, o pedir recomendaciones para tu negocio.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Typing Indicator -->
-          <div id="typing-indicator" class="hidden flex items-center space-x-2 mb-4">
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-robot text-white text-xs"></i>
-            </div>
-            <div class="bg-blue-50 p-3 rounded-lg">
-              <div class="flex space-x-1">
-                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+        <!-- Chat Interface - Improved Layout -->
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Main Chat Area - Takes most of the space -->
+          <div class="flex-1">
+            <div class="chatbot-messages border rounded-lg p-6 mb-4 max-h-96 overflow-y-auto bg-gray-50" id="chatbot-messages">
+              <!-- Welcome Message -->
+              <div class="message message-bot mb-4" id="welcome-message">
+                <div class="flex justify-start mb-2">
+                  <div class="flex items-start space-x-3 w-full">
+                    <div class="avatar-container">
+                      <canvas id="welcome-bot-avatar" width="32" height="32"></canvas>
+                    </div>
+                    <div class="flex-1">
+                      <div class="bg-white rounded-lg p-4 shadow-sm border">
+                        <p class="text-gray-800">¡Hola! Soy tu asistente financiero inteligente. Puedo ayudarte con:</p>
+                        <ul class="mt-2 space-y-1 text-sm text-gray-600">
+                          <li>• Simulaciones de VAN, TIR y WACC</li>
+                          <li>• Análisis de portafolios de inversión</li>
+                          <li>• Benchmarking del mercado</li>
+                          <li>• Asesoramiento financiero personalizado</li>
+                        </ul>
+                        <p class="text-gray-800 mt-2">¿En qué puedo ayudarte hoy?</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Chat Input -->
-          <div class="flex space-x-3">
-            <input
-              type="text"
-              id="chat-input"
-              placeholder="Escribe tu pregunta sobre finanzas..."
-              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              maxlength="500"
-            >
-            <button
-              id="send-button"
-              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-
-          <!-- Quick Questions -->
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
-              ¿Qué es VAN?
-            </button>
-            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
-              TIR vs VAN
-            </button>
-            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
-              Costo de capital
-            </button>
-            <button class="quick-question bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition duration-300">
-              Riesgo financiero
-            </button>
-          </div>
-        </div>
-
-        <!-- Features -->
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-brain text-blue-600"></i>
+            <!-- Input Area -->
+            <div class="flex space-x-3">
+              <input type="text"
+                     id="chatbot-input"
+                     class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     placeholder="Escribe tu consulta financiera...">
+              <button id="chatbot-send"
+                      class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-paper-plane"></i>
+              </button>
             </div>
-            <h3 class="font-semibold text-gray-800 mb-2">IA Avanzada</h3>
-            <p class="text-sm text-gray-600">Respuestas inteligentes y contextuales basadas en tu perfil empresarial</p>
           </div>
 
-          <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-chart-line text-green-600"></i>
-            </div>
-            <h3 class="font-semibold text-gray-800 mb-2">Análisis en Tiempo Real</h3>
-            <p class="text-sm text-gray-600">Interpretación instantánea de resultados y escenarios hipotéticos</p>
-          </div>
+          <!-- Sidebar with divider line -->
+          <div class="lg:w-80 flex-shrink-0">
+            <!-- Divider line (visible only on large screens) -->
+            <div class="hidden lg:block w-px bg-gray-300 mr-8"></div>
 
-          <div class="text-center">
-            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-lightbulb text-purple-600"></i>
+            <div class="lg:pl-8 space-y-6">
+              <!-- Quick Actions -->
+              <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h4>
+                <div class="space-y-3">
+                  <a href="/simulacion" class="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition duration-300">
+                    <i class="fas fa-play-circle text-blue-600"></i>
+                    <span class="text-blue-700 font-medium text-sm">Nueva Simulación</span>
+                  </a>
+                  <a href="/benchmarking" class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition duration-300">
+                    <i class="fas fa-chart-bar text-green-600"></i>
+                    <span class="text-green-700 font-medium text-sm">Benchmarking</span>
+                  </a>
+                  <a href="/calculadoras/van" class="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition duration-300">
+                    <i class="fas fa-calculator text-purple-600"></i>
+                    <span class="text-purple-700 font-medium text-sm">VAN</span>
+                  </a>
+                  <a href="/calculadoras/tir" class="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition duration-300">
+                    <i class="fas fa-chart-line text-orange-600"></i>
+                    <span class="text-orange-700 font-medium text-sm">TIR</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Features -->
+              <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Características</h4>
+                <div class="space-y-3">
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-brain text-blue-600"></i>
+                    <span class="text-sm text-gray-600">IA Avanzada</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-clock text-green-600"></i>
+                    <span class="text-sm text-gray-600">Disponible 24/7</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-shield-alt text-purple-600"></i>
+                    <span class="text-sm text-gray-600">Datos Seguros</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-comments text-orange-600"></i>
+                    <span class="text-sm text-gray-600">Conversación Natural</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="font-semibold text-gray-800 mb-2">Recomendaciones</h3>
-            <p class="text-sm text-gray-600">Sugerencias personalizadas adaptadas a tu sector y tamaño de empresa</p>
           </div>
         </div>
       </div>
 
       <!-- Back to Dashboard -->
-      <div class="text-center mt-8">
+      <div class="text-center">
         <a href="/api/v1/dashboard" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 inline-flex items-center">
           <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
         </a>
       </div>
     </div>
-
-        <!-- Right Column: 3D Robot with Economic Context -->
-        <div class="order-1 lg:order-2">
-          <div class="sticky top-8">
-            <!-- Robot Container -->
-            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
-              <div class="text-center mb-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Tu Asesor Financiero IA</h3>
-                <p class="text-gray-600 text-sm">Tecnología avanzada para decisiones inteligentes</p>
-              </div>
-
-              <!-- Robot 3D Display -->
-              <div class="flex justify-center mb-6">
-                <div id="chatbot-robot-container" class="relative">
-                  <div id="chatbot-robot" class="robot-3d-display"></div>
-
-                  <!-- Economic Context Elements -->
-                  <div class="absolute -top-2 -left-2 w-6 h-6 bg-green-400 rounded-full animate-pulse opacity-80">
-                    <i class="fas fa-chart-line text-white text-xs flex items-center justify-center h-full"></i>
-                  </div>
-                  <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-400 rounded-full animate-pulse opacity-80" style="animation-delay: 0.5s;">
-                    <i class="fas fa-calculator text-white text-xs flex items-center justify-center h-full"></i>
-                  </div>
-                  <div class="absolute top-1/2 -right-3 w-5 h-5 bg-purple-400 rounded-full animate-bounce opacity-80" style="animation-delay: 1s;">
-                    <i class="fas fa-brain text-white text-xs flex items-center justify-center h-full"></i>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Economic Insights -->
-              <div class="space-y-4">
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border-l-4 border-blue-500">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-lightbulb text-blue-600 mr-2"></i>
-                    <span class="text-sm font-semibold text-blue-800">Análisis Predictivo</span>
-                  </div>
-                  <p class="text-xs text-blue-700">Machine Learning para pronósticos precisos basados en datos históricos del mercado peruano</p>
-                </div>
-
-                <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border-l-4 border-green-500">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-balance-scale text-green-600 mr-2"></i>
-                    <span class="text-sm font-semibold text-green-800">VAN & TIR Optimizados</span>
-                  </div>
-                  <p class="text-xs text-green-700">Cálculos automáticos considerando inflación, riesgo país y tendencias económicas locales</p>
-                </div>
-
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border-l-4 border-purple-500">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-users text-purple-600 mr-2"></i>
-                    <span class="text-sm font-semibold text-purple-800">Benchmarking Anónimo</span>
-                  </div>
-                  <p class="text-xs text-purple-700">Compara tus resultados con estrategias exitosas de empresas similares en el mercado peruano</p>
-                </div>
-
-                <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border-l-4 border-orange-500">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-shield-alt text-orange-600 mr-2"></i>
-                    <span class="text-sm font-semibold text-orange-800">Gestión de Riesgos</span>
-                  </div>
-                  <p class="text-xs text-orange-700">Análisis de sensibilidad y escenarios Monte Carlo para evaluar riesgos financieros</p>
-                </div>
-              </div>
-
-              <!-- Economic Stats -->
-              <div class="mt-6 grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 p-3 rounded-lg text-center">
-                  <div class="text-lg font-bold text-blue-600">98%</div>
-                  <div class="text-xs text-gray-600">Precisión</div>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-lg text-center">
-                  <div class="text-lg font-bold text-green-600">24/7</div>
-                  <div class="text-xs text-gray-600">Disponible</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Quick Tips -->
-            <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
-              <h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-                <i class="fas fa-star text-blue-600 mr-2"></i>
-                Consejos Rápidos
-              </h4>
-              <ul class="space-y-2 text-sm text-blue-700">
-                <li class="flex items-start">
-                  <span class="text-blue-500 mr-2">•</span>
-                  Pregunta sobre VAN, TIR o WACC
-                </li>
-                <li class="flex items-start">
-                  <span class="text-blue-500 mr-2">•</span>
-                  Interpreta resultados de simulaciones
-                </li>
-                <li class="flex items-start">
-                  <span class="text-blue-500 mr-2">•</span>
-                  Obtén recomendaciones personalizadas
-                </li>
-                <li class="flex items-start">
-                  <span class="text-blue-500 mr-2">•</span>
-                  Analiza riesgos de inversión
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
+<!-- Hidden element to store template data -->
+<div id="template-data" style="display: none;"
+     data-contexto='{% if contexto %}{{ contexto | tojson }}{% else %}null{% endif %}'
+     data-mensaje-inicial="{{ mensaje_inicial }}"
+     data-foto-perfil="{{ foto_perfil }}">
+</div>
+
+<!-- Chatbot Initialization -->
 <script>
-// Chatbot functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const chatInput = document.getElementById('chat-input');
-  const sendButton = document.getElementById('send-button');
-  const chatMessages = document.getElementById('chat-messages');
-  const typingIndicator = document.getElementById('typing-indicator');
-  const quickQuestions = document.querySelectorAll('.quick-question');
+    console.log('🚀 Inicializando Chatbot Econova...');
 
-  // Quick questions functionality
-  quickQuestions.forEach(button => {
-    button.addEventListener('click', function() {
-      chatInput.value = this.textContent;
-      sendMessage();
-    });
-  });
+    // Get template data
+    const templateDataEl = document.getElementById('template-data');
+    if (templateDataEl) {
+        const contextoData = templateDataEl.dataset.contexto;
+        const mensajeInicial = templateDataEl.dataset.mensajeInicial;
+        const fotoPerfil = templateDataEl.dataset.fotoPerfil;
 
-  // Send message on button click
-  sendButton.addEventListener('click', sendMessage);
+        window.currentUser = {
+            foto_perfil: fotoPerfil ? `/static/uploads/profile_pictures/${fotoPerfil}` : null
+        };
 
-  // Send message on Enter key
-  chatInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+        let contexto = null;
+        try {
+            contexto = contextoData && contextoData !== 'null' ? JSON.parse(contextoData) : null;
+        } catch (e) {
+            console.error('Error parsing contexto:', e);
+        }
+
+        if (contexto) {
+            window.currentAnalysisContext = contexto;
+        }
+
+        if (mensajeInicial && mensajeInicial.trim() && mensajeInicial !== 'None' && mensajeInicial !== 'null') {
+            window.initialChatbotMessage = mensajeInicial;
+        }
     }
-  });
 
-  function sendMessage() {
-    const message = chatInput.value.trim();
-    if (!message) return;
+    // Check for contextual data from calculators (URL parameters or sessionStorage)
+    const urlParams = new URLSearchParams(window.location.search);
+    const contextoParam = urlParams.get('contexto');
+    console.log('🔍 Checking for contextual data in URL:', contextoParam);
 
-    // Add user message to chat
-    addMessage(message, 'user');
-    chatInput.value = '';
+    let contextoData = null;
+    let mensajeContextual = null;
 
-    // Disable input while processing
-    chatInput.disabled = true;
-    sendButton.disabled = true;
+    // Try URL parameter first
+    if (contextoParam) {
+        try {
+            contextoData = JSON.parse(decodeURIComponent(contextoParam));
+            mensajeContextual = contextoData.mensaje_contextual;
+            console.log('📊 Datos contextuales desde URL:', contextoData);
+        } catch (e) {
+            console.error('❌ Error parsing contextual data from URL:', e);
+        }
+    }
 
-    // Show typing indicator
-    typingIndicator.classList.remove('hidden');
+    // Always try sessionStorage first for contextual data, then fall back to URL
+    let sessionContext = null;
+    const sessionData = sessionStorage.getItem('currentAnalysisContext');
+    console.log('🔍 Checking for contextual data in sessionStorage:', sessionData);
 
-    // Scroll to bottom
-    scrollToBottom();
+    if (sessionData) {
+        try {
+            sessionContext = JSON.parse(sessionData);
+            console.log('📊 Datos contextuales desde sessionStorage:', sessionContext);
 
-    // Send to backend and get response
-    fetch('/api/v1/chatbot', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: message })
-    })
-    .then(response => response.json())
-    .then(data => {
-      // Hide typing indicator
-      typingIndicator.classList.add('hidden');
+            // Create contextual message from session data
+            mensajeContextual = crearMensajeDesdeContexto(sessionContext);
+            contextoData = sessionContext;
 
-      // Add bot response
-      if (data.success) {
-        addMessage(data.response, 'bot');
-      } else {
-        addMessage('Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.', 'bot');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      typingIndicator.classList.add('hidden');
-      addMessage('Lo siento, no pude conectarme al servidor. Por favor, verifica tu conexión a internet.', 'bot');
-    })
-    .finally(() => {
-      // Re-enable input
-      chatInput.disabled = false;
-      sendButton.disabled = false;
-      chatInput.focus();
-    });
-  }
+            console.log('📝 Mensaje contextual creado desde sessionStorage:', mensajeContextual);
+        } catch (e) {
+            console.error('❌ Error parsing contextual data from sessionStorage:', e);
+        }
+    }
 
-  function addMessage(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `flex items-start space-x-3 ${sender === 'user' ? 'justify-end' : ''}`;
+    // If no sessionStorage data, try URL parameter as fallback
+    if (!mensajeContextual && contextoParam) {
+        try {
+            contextoData = JSON.parse(decodeURIComponent(contextoParam));
+            console.log('📊 Datos contextuales desde URL (fallback):', contextoData);
 
-    if (sender === 'user') {
-      messageDiv.innerHTML = `
-        <div class="bg-green-50 p-4 rounded-lg max-w-lg">
-          <p class="text-gray-800">${escapeHtml(text)}</p>
-        </div>
-        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-          <i class="fas fa-user text-white text-sm"></i>
-        </div>
-      `;
+            // Try to create message from URL data if it has results
+            if (contextoData.resultados) {
+                mensajeContextual = crearMensajeDesdeContexto(contextoData);
+                console.log('📝 Mensaje contextual creado desde URL:', mensajeContextual);
+            }
+        } catch (e) {
+            console.error('❌ Error parsing contextual data from URL:', e);
+        }
+    }
+
+    if (contextoData && mensajeContextual && mensajeContextual.trim()) {
+        console.log('🚀 Adding contextual message to chat...');
+
+        // Set context for AI responses
+        window.currentAnalysisContext = contextoData;
+
+        // Automatically add the contextual message as user message
+        setTimeout(() => {
+            console.log('💬 Adding user message:', mensajeContextual);
+            addMessage(mensajeContextual, 'user');
+
+            // Show typing indicator and get AI response
+            setTimeout(() => {
+                console.log('🤖 Getting bot response...');
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const botResponse = getBotResponse(mensajeContextual);
+                    console.log('💭 Bot response:', botResponse);
+                    addMessage(botResponse, 'bot');
+
+                    // Keep context available for the entire conversation session
+                    // Context will persist until a new analysis is done or page is reloaded
+                    console.log('💾 Context maintained for ongoing conversation');
+                }, 2000);
+            }, 500);
+        }, 500); // Reduced delay for faster response
     } else {
-      messageDiv.innerHTML = `
-        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-          <i class="fas fa-robot text-white text-sm"></i>
-        </div>
-        <div class="bg-blue-50 p-4 rounded-lg max-w-lg">
-          <p class="text-gray-800">${formatBotResponse(text)}</p>
-        </div>
-      `;
+        console.log('ℹ️ No contextual data found');
     }
 
-    chatMessages.appendChild(messageDiv);
-    scrollToBottom();
-  }
+    /**
+     * Creates a contextual message from session context data
+     */
+    function crearMensajeDesdeContexto(context) {
+        const resultados = context.resultados;
+        const tipo = context.tipo_analisis;
 
-  function formatBotResponse(text) {
-    // Simple formatting for bot responses
-    return escapeHtml(text)
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\n/g, '<br>');
-  }
+        switch (tipo) {
+            case 'van':
+                return `Hola, acabo de realizar un análisis de VAN (Valor Actual Neto) y me gustaría obtener más insights. Los resultados principales son: VAN = S/ ${resultados.van?.toLocaleString() || 'N/A'}, TIR = ${resultados.tir?.toFixed(1) || 'N/A'}%, Periodo de recuperación = ${resultados.payback?.toFixed(1) || 'N/A'} años. Los parámetros utilizados fueron: Inversión inicial = S/ ${resultados.inversion?.toLocaleString() || 'N/A'}, Tasa de descuento = ${resultados.tasa || 'N/A'}%, Flujos de caja: ${resultados.flujos ? resultados.flujos.map((f, i) => `Año ${i+1}: S/ ${f.toLocaleString()}`).join(', ') : 'No disponibles'}. ¿Podrías ayudarme a interpretar estos resultados y sugerir mejoras o análisis adicionales?`;
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
+            case 'tir':
+                return `Hola, acabo de calcular la TIR (Tasa Interna de Retorno) y me gustaría analizar los resultados más profundamente. ${resultados.tir !== null && resultados.tir !== 0 ? `Los resultados son: TIR = ${resultados.tir.toFixed(1)}%, VAN a la TIR = S/ ${resultados.vanATir?.toLocaleString() || 'N/A'}.` : 'No se pudo calcular la TIR con los datos proporcionados.'} Los parámetros fueron: Inversión inicial = S/ ${resultados.inversion?.toLocaleString() || 'N/A'}, Flujos de caja: ${resultados.flujos ? resultados.flujos.map((f, i) => `Año ${i+1}: S/ ${f.toLocaleString()}`).join(', ') : 'No disponibles'}. Método de cálculo utilizado: ${resultados.metodo === 'newton' ? 'Newton-Raphson' : resultados.metodo === 'biseccion' ? 'Bisección' : 'Aproximación'}. ${resultados.evaluacion && resultados.evaluacion !== 'no_calculable' ? `La evaluación de la TIR es: ${resultados.evaluacion === 'excelente' ? 'Excelente' : resultados.evaluacion === 'muy_buena' ? 'Muy Buena' : resultados.evaluacion === 'buena' ? 'Buena' : resultados.evaluacion === 'aceptable' ? 'Aceptable' : 'Baja'}.` : ''} ¿Qué opinas sobre la rentabilidad de este proyecto? ¿Debería compararlo con el WACC? ¿Qué factores podrían afectar la TIR calculada?`;
 
-  function scrollToBottom() {
-    setTimeout(() => {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 100);
-  }
+            case 'wacc':
+                return `Hola, acabo de calcular el WACC (Costo Promedio Ponderado del Capital) y necesito ayuda para interpretarlo. El resultado es: WACC = ${resultados.wacc?.toFixed(1) || 'N/A'}%. Los componentes son: Costo de deuda = ${resultados.costo_deuda?.toFixed(1) || 'N/A'}%, Peso de deuda = ${resultados.peso_deuda?.toFixed(1) || 'N/A'}%, Costo de capital propio = ${resultados.costo_capital?.toFixed(1) || 'N/A'}%, Peso de capital propio = ${resultados.peso_capital?.toFixed(1) || 'N/A'}%, Tasa de impuestos = ${resultados.tasa_impuestos?.toFixed(1) || 'N/A'}%. ¿Cómo debería usar este WACC en mis análisis de VAN y TIR? ¿Está en línea con el sector?`;
 
-  // Initialize
-  chatInput.focus();
+            case 'portafolio':
+                return `Hola, acabo de optimizar un portafolio de inversiones y me gustaría obtener recomendaciones adicionales. Los resultados son: Retorno esperado = ${resultados.retorno?.toFixed(1) || 'N/A'}%, Riesgo = ${resultados.riesgo?.toFixed(1) || 'N/A'}%, Ratio Sharpe = ${resultados.sharpe?.toFixed(2) || 'N/A'}. El portafolio actual tenía ${resultados.activos_actual?.length || 0} activos, y el óptimo tiene ${resultados.activos_optimo?.length || 0} activos. ¿Qué opinas sobre esta distribución? ¿Debería considerar otros factores como diversificación geográfica o sectorial?`;
+
+            case 'ml':
+                if (resultados.tipo_analisis === 'predicciones') {
+                    return `Hola, acabo de realizar predicciones financieras usando Machine Learning y me gustaría analizar los resultados obtenidos. Las predicciones muestran tendencias para ${resultados.periodos_prediccion || 'N/A'} períodos futuros basadas en ${resultados.variables_entrada?.length || 0} indicadores financieros. El modelo utilizado fue ${resultados.modelo || 'N/A'} con una precisión del ${resultados.precision?.toFixed(1) || 'N/A'}%. Las proyecciones indican ${resultados.tendencia_principal || 'tendencias mixtas'} para los próximos meses. ¿Podrías ayudarme a interpretar estas predicciones y sugerir estrategias basadas en ellas?`;
+                } else if (resultados.tipo_analisis === 'tornado') {
+                    return `Hola, acabo de completar un análisis tornado (análisis de sensibilidad) y me gustaría profundizar en los resultados. Se analizaron ${resultados.variables?.length || 0} variables críticas que afectan el VAN del proyecto. La variable más sensible resultó ser "${resultados.variable_mas_sensible || 'N/A'}" con un impacto del ${resultados.impacto_maximo?.toFixed(1) || 'N/A'}% en el VAN. El rango de variación analizado fue de ${resultados.rango_variacion || 'N/A'}% en cada variable. ¿Cómo debería considerar estos factores de riesgo en mi toma de decisiones?`;
+                } else if (resultados.tipo_analisis === 'montecarlo') {
+                    return `Hola, acabo de ejecutar una simulación Monte Carlo y me gustaría analizar los resultados obtenidos. Se generaron ${resultados.num_simulaciones?.toLocaleString() || 'N/A'} escenarios simulados. El VAN promedio resultó ser S/ ${resultados.van_promedio?.toLocaleString() || 'N/A'}, con una desviación estándar de S/ ${resultados.desviacion_van?.toLocaleString() || 'N/A'}. El intervalo de confianza del ${resultados.nivel_confianza || 'N/A'}% va desde S/ ${resultados.van_minimo?.toLocaleString() || 'N/A'} hasta S/ ${resultados.van_maximo?.toLocaleString() || 'N/A'}. La probabilidad de VAN positivo es del ${resultados.probabilidad_positivo?.toFixed(1) || 'N/A'}%. ¿Qué implicaciones tiene esta distribución de probabilidades para la viabilidad del proyecto?`;
+                } else if (resultados.tipo_analisis === 'sensibilidad') {
+                    return `Hola, acabo de realizar un análisis de sensibilidad completo y me gustaría obtener insights adicionales. Se evaluaron ${resultados.escenarios?.length || 0} escenarios diferentes variando ${resultados.variables_analizadas?.length || 0} parámetros clave. El punto de equilibrio se encontró en ${resultados.punto_equilibrio || 'N/A'} unidades con flujos de caja de S/ ${resultados.flujo_equilibrio?.toLocaleString() || 'N/A'}. La variable con mayor impacto resultó ser "${resultados.variable_critica || 'N/A'}" con una elasticidad del ${resultados.elasticidad_critica?.toFixed(2) || 'N/A'}. ¿Cómo debería usar esta información para gestionar riesgos y tomar decisiones más informadas?`;
+                }
+                return `Hola, acabo de realizar un análisis avanzado con Machine Learning y me gustaría profundizar en los resultados obtenidos. El análisis realizado fue de tipo ${resultados.tipo_analisis || 'general'} y generó insights valiosos para la toma de decisiones. ¿Podrías especificar qué aspectos del análisis te gustaría explorar más profundamente?`;
+
+            default:
+                return 'Hola, acabo de realizar un análisis financiero y me gustaría obtener más insights sobre los resultados obtenidos.';
+        }
+    }
+
+    // Initialize simple chatbot functionality
+    const messagesContainer = document.getElementById('chatbot-messages');
+    const inputElement = document.getElementById('chatbot-input');
+    const sendButton = document.getElementById('chatbot-send');
+
+    if (!messagesContainer || !inputElement || !sendButton) {
+        console.error('❌ Elementos del chatbot no encontrados');
+        return;
+    }
+
+    // Enable/disable send button based on input
+    inputElement.addEventListener('input', function() {
+        sendButton.disabled = this.value.trim() === '';
+    });
+
+    // Send message on Enter key
+    inputElement.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !sendButton.disabled) {
+            sendMessage();
+        }
+    });
+
+    // Send message on button click
+    sendButton.addEventListener('click', sendMessage);
+
+    function sendMessage() {
+        const message = inputElement.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addMessage(message, 'user');
+        inputElement.value = '';
+        sendButton.disabled = true;
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Send message to backend with analysis context
+        fetch('/api/v1/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                analysis_context: window.currentAnalysisContext
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideTypingIndicator();
+            if (data.success) {
+                addMessage(data.response, 'bot');
+            } else {
+                addMessage('Lo siento, hubo un error al procesar tu mensaje. ' + (data.error || ''), 'bot');
+            }
+        })
+        .catch(error => {
+            hideTypingIndicator();
+            console.error('Error sending message:', error);
+            addMessage('Lo siento, hubo un error de conexión. Por favor, inténtalo de nuevo.', 'bot');
+        })
+        .finally(() => {
+            sendButton.disabled = false;
+        });
+    }
+
+    function addMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message message-${type} mb-4`;
+
+        if (type === 'user') {
+            const userAvatar = getUserAvatar();
+            messageDiv.innerHTML = `
+                <div class="flex justify-end mb-2">
+                  <div class="flex items-start space-x-3 w-full max-w-2xl">
+                    <div class="flex-1">
+                      <div class="bg-blue-600 text-white rounded-lg p-3 shadow-sm">
+                        <p>${escapeHtml(text)}</p>
+                      </div>
+                    </div>
+                    ${userAvatar}
+                  </div>
+                </div>
+            `;
+        } else {
+            const botAvatar = getBotAvatar();
+
+            // Procesar el texto antes de mostrarlo
+            let processedText = text;
+
+            // Convertir códigos de colores [color]texto[/color] a HTML
+            processedText = processedText.replace(/\[blue\](.*?)\[\/blue\]/g, '<strong style="color: #2563eb;">$1</strong>');
+            processedText = processedText.replace(/\[green\](.*?)\[\/green\]/g, '<strong style="color: #059669;">$1</strong>');
+            processedText = processedText.replace(/\[red\](.*?)\[\/red\]/g, '<strong style="color: #dc2626;">$1</strong>');
+            processedText = processedText.replace(/\[orange\](.*?)\[\/orange\]/g, '<strong style="color: #ea580c;">$1</strong>');
+            processedText = processedText.replace(/\[purple\](.*?)\[\/purple\]/g, '<strong style="color: #7c3aed;">$1</strong>');
+
+            // Convertir **texto** a <strong>texto</strong>
+            processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Convertir saltos de línea en <br> o párrafos
+            processedText = processedText.replace(/\n\n/g, '</p><p>');
+            processedText = processedText.replace(/\n/g, '<br>');
+            processedText = '<p>' + processedText + '</p>';
+
+            // Procesar preguntas sugeridas
+            const suggestionMatch = processedText.match(/\[([^\]]+)\]$/);
+            let buttonsHtml = '';
+            if (suggestionMatch) {
+                const suggestionsText = suggestionMatch[1];
+                const suggestions = suggestionsText.split('|').map(s => s.trim());
+                buttonsHtml = suggestions.map(suggestion =>
+                    `<button class="suggestion-button bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm transition duration-200 mr-2 mb-2" onclick="window.sendSuggestion('${suggestion.replace(/'/g, '\\\'')}')">${suggestion}</button>`
+                ).join('');
+                processedText = processedText.replace(/\[[^\]]+\]$/, '');
+            }
+
+            messageDiv.innerHTML = `
+                <div class="flex justify-start mb-2">
+                  <div class="flex items-start space-x-3 w-full max-w-2xl">
+                    ${botAvatar}
+                    <div class="flex-1">
+                      <div class="bg-white rounded-lg p-4 shadow-sm border">
+                        <div class="text-gray-800 leading-relaxed">${processedText}${buttonsHtml ? '<div class="mt-3">' + buttonsHtml + '</div>' : ''}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            `;
+        }
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Función para enviar sugerencias clickeables
+    function sendSuggestion(suggestion) {
+        console.log('Sending suggestion:', suggestion);
+        // Simular envío del mensaje
+        const message = suggestion;
+        addMessage(message, 'user');
+        inputElement.value = '';
+
+        // Enviar al backend
+        fetch('/api/v1/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                analysis_context: window.currentAnalysisContext
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Suggestion response:', data);
+            if (data.success) {
+                addMessage(data.response, 'bot');
+            } else {
+                addMessage('Lo siento, hubo un error al procesar tu mensaje. ' + (data.error || ''), 'bot');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending suggestion:', error);
+            addMessage('Lo siento, hubo un error de conexión. Por favor, inténtalo de nuevo.', 'bot');
+        });
+    }
+
+    // Hacer sendSuggestion global para que funcione desde onclick
+    window.sendSuggestion = sendSuggestion;
+
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message message-bot mb-4';
+        typingDiv.id = 'typing-indicator';
+        const botAvatar = getBotAvatar();
+        typingDiv.innerHTML = `
+            <div class="flex justify-start mb-2">
+              <div class="flex items-start space-x-3 w-full max-w-2xl">
+                ${botAvatar}
+                <div class="flex-1">
+                  <div class="bg-white rounded-lg p-3 shadow-sm border">
+                    <div class="flex space-x-1">
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        `;
+        messagesContainer.appendChild(typingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) {
+            typingDiv.remove();
+        }
+    }
+
+    function getUserAvatar() {
+        const fotoPerfil = window.currentUser?.foto_perfil;
+        if (fotoPerfil) {
+            return `<img src="${fotoPerfil}" alt="Avatar" class="w-8 h-8 rounded-full object-cover border-2 border-blue-500">`;
+        } else {
+            const userName = '{{ session.usuario_nombre }}';
+            const initial = userName ? userName.charAt(0).toUpperCase() : 'U';
+            return `<div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">${initial}</div>`;
+        }
+    }
+
+    function getBotAvatar() {
+        return `<div class="avatar-container">
+            <canvas id="bot-avatar-${Date.now()}" width="32" height="32"></canvas>
+        </div>`;
+    }
+
+    // Initialize bot avatars after DOM is ready
+    function initializeBotAvatars() {
+        // Include welcome message canvas
+        const allCanvases = document.querySelectorAll('canvas[id^="bot-avatar-"], #welcome-bot-avatar');
+
+        allCanvases.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            let frame = 0;
+
+            function animateBotAvatar() {
+                ctx.clearRect(0, 0, 32, 32);
+
+                const bounce = Math.sin(frame * 0.08) * 0.5;
+                const armSwing = Math.sin(frame * 0.12) * 2.5;
+
+                // Antena con moneda dorada girando
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(16, 6 + bounce);
+                ctx.lineTo(16, 2 + bounce);
+                ctx.stroke();
+
+                // Moneda 3D girando
+                const coinRotation = (frame * 0.08) % (Math.PI * 2);
+                ctx.save();
+                ctx.translate(16, 2 + bounce);
+                ctx.rotate(coinRotation);
+
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 2.5);
+                gradient.addColorStop(0, '#FFD700');
+                gradient.addColorStop(0.7, '#FFA500');
+                gradient.addColorStop(1, '#FF8C00');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 2.5, 1.25, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FF8C00';
+                ctx.font = 'bold 2.5px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('$', 0, 1.25);
+                ctx.restore();
+
+                // Cabeza del robot
+                ctx.fillStyle = 'white';
+                ctx.fillRect(9, 6.5 + bounce, 14, 10);
+                ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(9, 6.5 + bounce, 14, 10);
+
+                // Ojos con símbolos de dinero
+                const blink = Math.abs(Math.sin(frame * 0.15)) > 0.95 ? 3 : 0;
+                ctx.fillStyle = '#667eea';
+                ctx.fillRect(11, 9 + bounce, 3, 4 - blink);
+                ctx.fillRect(18, 9 + bounce, 3, 4 - blink);
+
+                if (blink === 0) {
+                    ctx.fillStyle = '#00ff88';
+                    ctx.font = 'bold 3px Arial';
+                    ctx.fillText('$', 12.5, 12 + bounce);
+                    ctx.fillText('$', 19.5, 12 + bounce);
+                }
+
+                // Cuerpo con dashboard financiero
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fillRect(10, 17 + bounce, 12, 8);
+
+                // Gráfico de barras mini
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(11, 23 + bounce, 1.25, -1.5);
+                ctx.fillRect(13, 23 + bounce, 1.25, -2.5);
+                ctx.fillRect(15, 23 + bounce, 1.25, -3.5);
+                ctx.fillRect(17, 23 + bounce, 1.25, -3);
+
+                // Línea de tendencia alcista
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 0.75;
+                ctx.beginPath();
+                ctx.moveTo(11, 22 + bounce);
+                ctx.lineTo(13.5, 20.5 + bounce);
+                ctx.lineTo(15.5, 19 + bounce);
+                ctx.lineTo(18, 19.75 + bounce);
+                ctx.stroke();
+
+                // Brazos
+                ctx.fillStyle = 'white';
+                ctx.save();
+                ctx.translate(10, 18 + bounce);
+                ctx.rotate(armSwing * Math.PI / 180);
+                ctx.fillRect(-2, 0, 2, 6);
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(22, 18 + bounce);
+                ctx.rotate(-armSwing * Math.PI / 180);
+                ctx.fillRect(0, 0, 2, 6);
+                ctx.restore();
+
+                frame++;
+                requestAnimationFrame(animateBotAvatar);
+            }
+
+            animateBotAvatar();
+        });
+    }
+
+    // Initialize avatars immediately when DOM is ready
+    initializeBotAvatars();
+
+    // Observe for new canvases added to the DOM
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Check if the added element contains canvases
+                    const canvases = node.querySelectorAll ? node.querySelectorAll('canvas[id^="bot-avatar-"]') : [];
+                    if (canvases.length > 0 || (node.tagName === 'CANVAS' && node.id && node.id.startsWith('bot-avatar-'))) {
+                        initializeBotAvatars();
+                    }
+                }
+            });
+        });
+    });
+
+    // Start observing the messages container
+    observer.observe(messagesContainer, {
+        childList: true,
+        subtree: true
+    });
+
+    function getBotResponse(userMessage) {
+        const msg = userMessage.toLowerCase();
+        const context = window.currentAnalysisContext;
+
+        // Check if this is a contextual follow-up question
+        if (context && context.resultados && isFollowUpQuestion(msg, context)) {
+            return generateContextualFollowUp(context, userMessage);
+        }
+
+        // If we have contextual data from a calculator, provide specific analysis
+        if (context && context.resultados) {
+            return generateContextualResponse(context, userMessage);
+        }
+
+        // General responses
+        if (msg.includes('van') || msg.includes('valor actual')) {
+            return "El Valor Actual Neto (VAN) mide la rentabilidad de tu inversión. Un VAN positivo indica que el proyecto generará más dinero del que cuesta. ¿Te gustaría hacer una simulación específica?";
+        } else if (msg.includes('tir') || msg.includes('tasa interna')) {
+            return "La Tasa Interna de Retorno (TIR) es la tasa de descuento que hace que el VAN sea cero. Si tu TIR es mayor que tu costo de capital, el proyecto es rentable. ¿Quieres calcular la TIR de algún proyecto?";
+        } else if (msg.includes('wacc') || msg.includes('costo promedio')) {
+            return "El WACC (Costo Promedio Ponderado de Capital) representa el costo promedio de financiamiento de tu empresa. Es crucial para evaluar proyectos. ¿Necesitas calcular tu WACC?";
+        } else if (msg.includes('portafolio') || msg.includes('inversión')) {
+            return "Para optimizar tu portafolio de inversiones, necesito conocer: 1) Tus activos actuales, 2) Montos invertidos, 3) Rendimientos esperados, 4) Nivel de riesgo deseado. ¿Quieres comenzar el análisis?";
+        } else if (msg.includes('hola') || msg.includes('buen') || msg.includes('salud')) {
+            return "¡Hola! Soy tu asistente financiero. Puedo ayudarte con simulaciones de VAN, TIR, WACC, análisis de portafolios y más. ¿En qué necesitas ayuda hoy?";
+        } else if (msg.includes('gracias') || msg.includes('adiós') || msg.includes('chao')) {
+            return "¡Ha sido un placer ayudarte! Recuerda que estoy disponible 24/7 para tus consultas financieras. ¿Hay algo más en lo que pueda asistirte?";
+        } else {
+            return "Entendido. Para brindarte la mejor asesoría, ¿podrías especificar si necesitas ayuda con: VAN, TIR, WACC, análisis de portafolios, o alguna otra consulta financiera específica?";
+        }
+    }
+
+    /**
+     * Check if the user message is a follow-up question about the current analysis
+     */
+    function isFollowUpQuestion(msg, context) {
+        const followUpKeywords = [
+            'qué significa', 'qué quiere decir', 'explica', 'por qué', 'cómo',
+            'mejorar', 'optimizar', 'recomendaciones', 'sugerencias', 'consejos',
+            'riesgo', 'probabilidad', 'análisis', 'interpretar', 'evaluar',
+            'comparar', 'diferencia', 'ventaja', 'desventaja', 'problema',
+            'solución', 'estrategia', 'plan', 'acción', 'pasos'
+        ];
+
+        // Check if message contains follow-up keywords
+        const hasFollowUpKeyword = followUpKeywords.some(keyword => msg.includes(keyword));
+
+        // Check if message references analysis-specific terms
+        const resultados = context.resultados;
+        const analysisTerms = [];
+
+        if (resultados.van !== undefined) analysisTerms.push('van');
+        if (resultados.tir !== undefined) analysisTerms.push('tir');
+        if (resultados.wacc !== undefined) analysisTerms.push('wacc');
+        if (resultados.retorno !== undefined) analysisTerms.push('portafolio', 'retorno', 'riesgo');
+        if (resultados.tipo_analisis) analysisTerms.push(resultados.tipo_analisis);
+
+        const hasAnalysisReference = analysisTerms.some(term => msg.includes(term));
+
+        return hasFollowUpKeyword || hasAnalysisReference;
+    }
+
+    /**
+     * Generate contextual follow-up responses based on user questions
+     */
+    function generateContextualFollowUp(context, userMessage) {
+        const msg = userMessage.toLowerCase();
+        const resultados = context.resultados;
+        const tipo = context.tipo_analisis;
+
+        // VAN follow-ups
+        if (tipo === 'van') {
+            if (msg.includes('qué significa') || msg.includes('explica')) {
+                return `El <strong style="color: #2563eb;">VAN</strong> de S/ ${resultados.van?.toLocaleString() || 'N/A'} ${resultados.van > 0 ? 'es <strong style="color: #059669;">positivo</strong>, lo que significa que el proyecto generará más valor del que cuesta' : 'es <strong style="color: #dc2626;">negativo</strong>, indicando que el proyecto destruirá valor'}. Es como el "beneficio neto" descontado a valor presente.`;
+            }
+            if (msg.includes('mejorar') || msg.includes('optimizar')) {
+                return `Para mejorar el <strong style="color: #2563eb;">VAN</strong>, podrías: 1) Reducir la inversión inicial, 2) Aumentar los flujos de caja futuros, 3) Acelerar los ingresos, 4) Reducir costos operativos, o 5) Optimizar la tasa de descuento. ¿Quieres que analicemos algún escenario específico?`;
+            }
+        }
+
+        // TIR follow-ups
+        if (tipo === 'tir') {
+            if (msg.includes('qué significa') || msg.includes('explica')) {
+                return `La <strong style="color: #7c3aed;">TIR</strong> del ${resultados.tir?.toFixed(1) || 'N/A'}% representa la rentabilidad real del proyecto. Es la tasa de descuento que hace que el VAN sea cero. Una TIR alta indica mejor rentabilidad.`;
+            }
+            if (msg.includes('buena') || msg.includes('mala') || msg.includes('rentabilidad')) {
+                const evaluacion = resultados.evaluacion;
+                return `Esta TIR se considera <em style="color: ${evaluacion === 'excelente' ? '#059669' : evaluacion === 'muy_buena' ? '#059669' : evaluacion === 'buena' ? '#0ea5e9' : '#ea580c'}; font-style: italic; font-weight: 600;">${evaluacion === 'excelente' ? 'excelente' : evaluacion === 'muy_buena' ? 'muy buena' : evaluacion === 'buena' ? 'buena' : evaluacion === 'aceptable' ? 'aceptable' : 'baja'}</em>. ${resultados.tir > 15 ? 'Supera ampliamente el costo de capital promedio' : resultados.tir > 12 ? 'Es competitiva en el mercado' : 'Podría mejorarse con ajustes en el proyecto'}.`;
+            }
+            if (msg.includes('comparar') || msg.includes('wacc')) {
+                return `Comparando TIR (${resultados.tir?.toFixed(1) || 'N/A'}%) con WACC: ${resultados.tir > 12 ? '<strong style="color: #059669;">La TIR supera el costo de capital</strong> - proyecto viable' : '<strong style="color: #dc2626;">La TIR está por debajo del WACC</strong> - proyecto no viable'}. Esta comparación es crucial para la decisión de inversión.`;
+            }
+        }
+
+        // WACC follow-ups
+        if (tipo === 'wacc') {
+            if (msg.includes('qué significa') || msg.includes('explica')) {
+                return `El <strong style="color: #dc2626;">WACC</strong> del ${resultados.wacc?.toFixed(1) || 'N/A'}% es tu costo promedio de financiamiento. Combina el costo de deuda (${resultados.costo_deuda?.toFixed(1) || 'N/A'}%) y capital propio (${resultados.costo_capital?.toFixed(1) || 'N/A'}%) ponderados por su participación en la estructura de capital.`;
+            }
+            if (msg.includes('usar') || msg.includes('aplicar')) {
+                return `Usa este <strong style="color: #dc2626;">WACC</strong> como tasa de descuento en cálculos de VAN y como benchmark para comparar con la TIR. Proyectos con TIR > WACC son candidatos viables. También es útil para evaluar el costo de nuevos proyectos de capital.`;
+            }
+        }
+
+        // Portfolio follow-ups
+        if (tipo === 'portafolio') {
+            if (msg.includes('qué significa') || msg.includes('explica')) {
+                return `Tu portafolio tiene un retorno esperado del <strong style="color: #059669;">${resultados.retorno?.toFixed(1) || 'N/A'}%</strong> con riesgo del <strong style="color: #ea580c;">${resultados.riesgo?.toFixed(1) || 'N/A'}%</strong>. El Ratio Sharpe de ${resultados.sharpe?.toFixed(2) || 'N/A'} mide eficiencia: cuanto mayor, mejor relación riesgo-retorno.`;
+            }
+            if (msg.includes('mejorar') || msg.includes('optimizar')) {
+                return `Para optimizar: 1) Diversifica más activos, 2) Rebalancea pesos según tolerancia al riesgo, 3) Considera activos con mejor Sharpe, 4) Reduce exposición a activos correlacionados, 5) Incluye activos de diferentes clases para mejor diversificación.`;
+            }
+        }
+
+        // ML follow-ups
+        if (tipo === 'ml') {
+            if (resultados.tipo_analisis === 'predicciones') {
+                if (msg.includes('qué significa') || msg.includes('explica')) {
+                    return `Las predicciones muestran tendencias futuras basadas en patrones históricos. La precisión del ${resultados.precision?.toFixed(1) || 'N/A'}% indica confianza en las proyecciones. ${resultados.tendencia_principal || 'Las tendencias identificadas'} pueden ayudar a anticipar cambios en el mercado.`;
+                }
+            }
+            if (resultados.tipo_analisis === 'montecarlo') {
+                if (msg.includes('qué significa') || msg.includes('explica')) {
+                    return `La simulación Monte Carlo generó ${resultados.num_simulaciones?.toLocaleString() || 'N/A'} escenarios posibles. El VAN promedio de S/ ${resultados.van_promedio?.toLocaleString() || 'N/A'} con ${resultados.probabilidad_positivo?.toFixed(1) || 'N/A'}% de probabilidad de ser positivo te da una visión probabilística del riesgo del proyecto.`;
+                }
+            }
+        }
+
+        // Generic contextual response
+        return `Basándome en tu análisis de <strong style="color: #2563eb;">${tipo.toUpperCase()}</strong>, puedo ayudarte a interpretar los resultados. ¿Hay algún aspecto específico que te gustaría explorar más? Por ejemplo, significado de métricas, recomendaciones de mejora, o comparación con benchmarks.`;
+    }
+
+    function generateContextualResponse(context, userMessage) {
+        const resultados = context.resultados;
+        const tipo = context.tipo_analisis;
+
+        switch (tipo) {
+            case 'van':
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">¡Excelente análisis de <strong style="color: #2563eb;">VAN</strong> que realizaste! Veo que obtuviste un <strong style="color: #059669;">VAN de S/ ${resultados.van?.toLocaleString() || 'N/A'}</strong>, lo cual es <em style="color: ${resultados.van > 0 ? '#059669' : '#dc2626'}; font-style: italic;">${resultados.van > 0 ? 'muy positivo' : 'un resultado que requiere atención'}</em>.</p>
+
+                    <p style="margin-bottom: 16px;">La <strong style="color: #7c3aed;">TIR</strong> calculada es del <strong style="color: #7c3aed;">${resultados.tir?.toFixed(1) || 'N/A'}%</strong>, y el período de recuperación es de <strong style="color: #ea580c;">${resultados.payback?.toFixed(1) || 'N/A'} años</strong>.</p>
+
+                    <p style="margin-bottom: 16px;">${resultados.van > 0 ? '✅ El proyecto es <strong style="color: #059669;">financieramente viable</strong>.' : '❌ El proyecto no es viable financieramente.'} Compara la <strong style="color: #7c3aed;">TIR (${resultados.tir?.toFixed(1) || 'N/A'}%)</strong> con tu <strong style="color: #dc2626;">WACC</strong> para confirmar rentabilidad. El <strong style="color: #059669;">VAN/Inversión del ${((resultados.van / resultados.inversion) * 100)?.toFixed(1) || 'N/A'}%</strong> indica <em style="font-style: italic;">${resultados.van > resultados.inversion * 0.15 ? 'excelente' : resultados.van > 0 ? 'buena' : 'baja'}</em> rentabilidad relativa.</p>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Te gustaría que analicemos escenarios alternativos o que comparemos con otras métricas?</em></p>
+                </div>`;
+
+            case 'tir':
+                const evaluacion = resultados.evaluacion;
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">¡Perfecto cálculo de <strong style="color: #7c3aed;">TIR</strong>! Obtuviste una tasa interna de retorno del <strong style="color: #7c3aed; font-size: 18px;">${resultados.tir?.toFixed(1) || 'N/A'}%</strong>, lo cual se considera <em style="color: ${evaluacion === 'excelente' ? '#059669' : evaluacion === 'muy_buena' ? '#059669' : evaluacion === 'buena' ? '#0ea5e9' : '#ea580c'}; font-style: italic; font-weight: 600;">${evaluacion === 'excelente' ? 'excelente' : evaluacion === 'muy_buena' ? 'muy buena' : evaluacion === 'buena' ? 'buena' : evaluacion === 'aceptable' ? 'aceptable' : 'baja'}</em>.</p>
+
+                    <p style="margin-bottom: 16px;">El <strong style="color: #059669;">VAN a la TIR</strong> calculada es <strong style="color: #059669;">S/ ${resultados.van_tir?.toLocaleString() || 'N/A'}</strong>. Método de cálculo utilizado: <strong style="color: #0ea5e9;">${resultados.metodo === 'newton' ? 'Newton-Raphson (alta precisión)' : resultados.metodo === 'biseccion' ? 'Bisección (confiable)' : 'Aproximación inicial'}</strong>.</p>
+
+                    <p style="margin-bottom: 16px;">${resultados.tir > 15 ? '<strong style="color: #059669;">Excelente rentabilidad</strong> que supera ampliamente el costo de capital promedio' : resultados.tir > 12 ? '<strong style="color: #0ea5e9;">Buena rentabilidad</strong>, comparable con inversiones de calidad' : resultados.tir > 8 ? '<strong style="color: #ea580c;">Rentabilidad aceptable</strong> para inversiones conservadoras' : '<strong style="color: #dc2626;">Rentabilidad baja</strong> que requiere evaluación adicional'}.</p>
+
+                    <p style="margin-bottom: 16px;">Compara esta <strong style="color: #7c3aed;">TIR</strong> con tu <strong style="color: #dc2626;">WACC</strong> (${resultados.tir > 12 ? '<span style="color: #059669;">parece superar el costo de capital</span>' : '<span style="color: #dc2626;">podría estar por debajo del costo de capital</span>'}). Considera análisis de <strong style="color: #ea580c;">sensibilidad</strong> para evaluar riesgos y evalúa el período de recuperación en conjunto con la <strong style="color: #7c3aed;">TIR</strong>.</p>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Quieres que profundicemos en algún aspecto específico del análisis?</em></p>
+                </div>`;
+
+            case 'wacc':
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">¡Excelente cálculo de <strong style="color: #dc2626;">WACC</strong>! Tu costo promedio ponderado del capital es del <strong style="color: #dc2626; font-size: 18px;">${resultados.wacc?.toFixed(1) || 'N/A'}%</strong>.</p>
+
+                    <p style="margin-bottom: 16px;">Los componentes son: Costo de <strong style="color: #059669;">deuda</strong> ${resultados.costo_deuda?.toFixed(1) || 'N/A'}% (peso: ${resultados.peso_deuda?.toFixed(1) || 'N/A'}%), costo de <strong style="color: #2563eb;">capital propio</strong> ${resultados.costo_capital?.toFixed(1) || 'N/A'}% (peso: ${resultados.peso_capital?.toFixed(1) || 'N/A'}%), y tasa de <strong style="color: #ea580c;">impuestos</strong> ${resultados.tasa_impuestos?.toFixed(1) || 'N/A'}%.</p>
+
+                    <p style="margin-bottom: 16px;">Este <strong style="color: #dc2626;">WACC</strong> representa el <em style="font-style: italic;">mínimo rendimiento requerido</em> para tus proyectos. ${resultados.wacc < 12 ? '<strong style="color: #059669;">WACC relativamente bajo</strong>, favorable para inversiones' : resultados.wacc < 15 ? '<strong style="color: #0ea5e9;">WACC en rango promedio</strong> del mercado' : '<strong style="color: #dc2626;">WACC elevado</strong>, requiere proyectos con alta rentabilidad'}. Úsalo como tasa de descuento en análisis de <strong style="color: #2563eb;">VAN</strong> y como benchmark para <strong style="color: #7c3aed;">TIR</strong>.</p>
+
+                    <p style="margin-bottom: 16px;">Proyectos con <strong style="color: #7c3aed;">TIR > ${resultados.wacc?.toFixed(1) || 'N/A'}%</strong> son candidatos viables. Revisa periódicamente los componentes del <strong style="color: #dc2626;">WACC</strong> (tasas de interés, beta, etc.) y considera estructura óptima de capital para minimizarlo.</p>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Te gustaría que analicemos cómo usar este WACC en evaluaciones específicas de proyectos?</em></p>
+                </div>`;
+
+            case 'portafolio':
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">¡Excelente optimización de <strong style="color: #059669; font-weight: 700;">portafolio</strong> realizada! Los resultados muestran un retorno esperado del <strong style="color: #059669; font-weight: 700;">${resultados.retorno?.toFixed(1) || 'N/A'}%</strong> con un riesgo (desviación estándar) del <strong style="color: #ea580c; font-weight: 700;">${resultados.riesgo?.toFixed(1) || 'N/A'}%</strong>.</p>
+
+                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 16px 0;">
+                        <strong style="color: #92400e; font-weight: 700;">📈 Métricas clave:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li style="margin: 6px 0; color: #78350f;"><strong style="color: #7c3aed;">Ratio Sharpe</strong>: <strong style="color: #7c3aed;">${resultados.sharpe?.toFixed(2) || 'N/A'}</strong> (${resultados.sharpe > 1 ? '<span style="color: #059669;">excelente</span>' : resultados.sharpe > 0.5 ? '<span style="color: #0ea5e9;">bueno</span>' : '<span style="color: #ea580c;">requiere atención</span>'})</li>
+                            <li style="margin: 6px 0; color: #78350f;">Número de activos en portafolio óptimo: <strong style="color: #059669;">${resultados.activos_optimo?.length || 'N/A'} activos</strong></li>
+                        </ul>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; margin: 16px 0;">
+                        <strong style="color: #065f46; font-weight: 700;">⚖️ Análisis de eficiencia:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li style="margin: 6px 0; color: #064e3b;">${resultados.sharpe > 1 ? '<strong style="color: #059669;">Portafolio altamente eficiente</strong> con excelente relación riesgo-retorno' : resultados.sharpe > 0.5 ? '<strong style="color: #0ea5e9;">Buena eficiencia</strong>, equilibrio adecuado entre riesgo y retorno' : '<strong style="color: #ea580c;">Portafolio con eficiencia limitada</strong>, considera rebalanceo'}</li>
+                            <li style="margin: 6px 0; color: #064e3b;">La diversificación actual ${resultados.activos_optimo?.length > 5 ? '<strong style="color: #059669;">proporciona buena diversificación</strong>' : '<strong style="color: #ea580c;">podría beneficiarse de más diversificación</strong>'}</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin: 16px 0;">
+                        <strong style="color: #0c4a6e; font-weight: 700;">🎯 Recomendaciones estratégicas:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li style="margin: 6px 0; color: #075985;">Revisa periódicamente la asignación (al menos <strong style="color: #059669;">trimestralmente</strong>)</li>
+                            <li style="margin: 6px 0; color: #075985;">Considera restricciones adicionales (límites sectoriales, éticos, etc.)</li>
+                            <li style="margin: 6px 0; color: #075985;">Evalúa impacto de cambios en condiciones de mercado</li>
+                            <li style="margin: 6px 0; color: #075985;">Mantén horizonte de inversión adecuado para tu perfil de riesgo</li>
+                        </ul>
+                    </div>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Quieres que analicemos asignaciones alternativas o que evaluemos escenarios de mercado específicos?</em></p>
+                </div>`;
+
+            case 'ml':
+                if (context.resultados.tipo_analisis === 'predicciones') {
+                    return `<div style="line-height: 1.7;">
+                        <p style="margin-bottom: 16px;">¡Excelente trabajo con las <strong style="color: #7c3aed; font-weight: 700;">predicciones financieras</strong> usando <strong style="color: #059669; font-weight: 700;">Machine Learning</strong>! Los resultados muestran tendencias para <strong style="color: #ea580c; font-weight: 700;">${resultados.periodos_prediccion || 'N/A'} períodos futuros</strong>.</p>
+
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 16px 0;">
+                            <strong style="color: #92400e; font-weight: 700;">🤖 Análisis de las predicciones:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #78350f;">Modelo utilizado: <strong style="color: #059669;">${resultados.modelo || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">Precisión del modelo: <strong style="color: ${resultados.precision > 85 ? '#059669' : resultados.precision > 70 ? '#0ea5e9' : '#ea580c'};">${resultados.precision?.toFixed(1) || 'N/A'}%</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">Tendencia principal identificada: <em style="font-style: italic; color: #7c3aed;">${resultados.tendencia_principal || 'tendencias mixtas'}</em></li>
+                            </ul>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; margin: 16px 0;">
+                            <strong style="color: #065f46; font-weight: 700;">🎯 Interpretación financiera:</strong>
+                            <p style="margin: 8px 0; color: #064e3b;">• ${resultados.precision > 85 ? '<strong style="color: #059669;">Alta precisión</strong> en las predicciones, muy confiables para toma de decisiones' : resultados.precision > 70 ? '<strong style="color: #0ea5e9;">Buena precisión</strong>, útiles como referencia' : '<strong style="color: #ea580c;">Precisión limitada</strong>, usar con precaución'}</p>
+                            <p style="margin: 8px 0; color: #064e3b;">• Las tendencias identificadas pueden ayudar a <em style="font-style: italic;">anticipar cambios en el mercado</em></p>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin: 16px 0;">
+                            <strong style="color: #0c4a6e; font-weight: 700;">💡 Recomendaciones prácticas:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #075985;">Usa estas predicciones para ajustar estrategias de inversión</li>
+                                <li style="margin: 6px 0; color: #075985;">Combina con análisis fundamental para decisiones más robustas</li>
+                                <li style="margin: 6px 0; color: #075985;">Reentrena el modelo periódicamente con nuevos datos</li>
+                                <li style="margin: 6px 0; color: #075985;">Considera escenarios alternativos basados en las predicciones</li>
+                            </ul>
+                        </div>
+
+                        <p style="margin-top: 16px; color: #4b5563;"><em>¿Te gustaría que analicemos cómo implementar estas predicciones en tu estrategia financiera?</em></p>
+                    </div>`;
+                }
+
+                if (context.resultados.tipo_analisis === 'tornado') {
+                    return `<div style="line-height: 1.7;">
+                        <p style="margin-bottom: 16px;">¡Perfecto análisis <strong style="color: #ea580c; font-weight: 700;">tornado</strong> completado! Este análisis de sensibilidad identifica las variables más críticas que afectan el <strong style="color: #2563eb;">VAN</strong> de tu proyecto.</p>
+
+                        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #dc2626; margin: 16px 0;">
+                            <strong style="color: #991b1b; font-weight: 700;">🌪️ Resultados clave:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #7f1d1d;">Variable más sensible: <strong style="color: #dc2626;">"${resultados.variable_mas_sensible || 'N/A'}"</strong></li>
+                                <li style="margin: 6px 0; color: #7f1d1d;">Impacto máximo en VAN: <strong style="color: #ea580c;">${resultados.impacto_maximo?.toFixed(1) || 'N/A'}%</strong></li>
+                                <li style="margin: 6px 0; color: #7f1d1d;">Rango de variación analizado: <strong style="color: #0ea5e9;">${resultados.rango_variacion || 'N/A'}%</strong></li>
+                            </ul>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 16px 0;">
+                            <strong style="color: #92400e; font-weight: 700;">⚠️ Interpretación del riesgo:</strong>
+                            <p style="margin: 8px 0; color: #78350f;">• ${resultados.impacto_maximo > 50 ? '<strong style="color: #dc2626;">Alto riesgo identificado</strong> - esta variable puede hacer inviable el proyecto' : resultados.impacto_maximo > 25 ? '<strong style="color: #ea580c;">Riesgo moderado</strong> - monitorear de cerca esta variable' : '<strong style="color: #059669;">Riesgo controlable</strong> - variable tiene impacto limitado'}</p>
+                            <p style="margin: 8px 0; color: #78350f;">• El análisis tornado ayuda a priorizar qué factores requieren mayor atención</p>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin: 16px 0;">
+                            <strong style="color: #0c4a6e; font-weight: 700;">🛡️ Estrategias de mitigación:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #075985;">Desarrolla planes contingentes para variables críticas</li>
+                                <li style="margin: 6px 0; color: #075985;">Considera contratos de cobertura para riesgos identificados</li>
+                                <li style="margin: 6px 0; color: #075985;">Implementa sistemas de monitoreo en tiempo real</li>
+                                <li style="margin: 6px 0; color: #075985;">Diversifica fuentes para reducir dependencia de variables críticas</li>
+                            </ul>
+                        </div>
+
+                        <p style="margin-top: 16px; color: #4b5563;"><em>¿Quieres que analicemos estrategias específicas para mitigar los riesgos identificados?</em></p>
+                    </div>`;
+                }
+
+                if (context.resultados.tipo_analisis === 'montecarlo') {
+                    return `<div style="line-height: 1.7;">
+                        <p style="margin-bottom: 16px;">¡Excelente simulación <strong style="color: #7c3aed; font-weight: 700;">Monte Carlo</strong> realizada! Esta técnica avanzada proporciona una distribución probabilística de resultados.</p>
+
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 16px 0;">
+                            <strong style="color: #92400e; font-weight: 700;">📊 Resultados estadísticos:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #78350f;">Número de simulaciones: <strong style="color: #059669;">${resultados.num_simulaciones?.toLocaleString() || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">VAN promedio: <strong style="color: #059669;">S/ ${resultados.van_promedio?.toLocaleString() || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">Desviación estándar: <strong style="color: #ea580c;">S/ ${resultados.desviacion_van?.toLocaleString() || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">Intervalo de confianza ${resultados.nivel_confianza || 'N/A'}%: <strong style="color: #0ea5e9;">S/ ${resultados.van_minimo?.toLocaleString() || 'N/A'} - S/ ${resultados.van_maximo?.toLocaleString() || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #78350f;">Probabilidad de VAN positivo: <strong style="color: ${resultados.probabilidad_positivo > 70 ? '#059669' : resultados.probabilidad_positivo > 50 ? '#0ea5e9' : '#ea580c'};">${resultados.probabilidad_positivo?.toFixed(1) || 'N/A'}%</strong></li>
+                            </ul>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; margin: 16px 0;">
+                            <strong style="color: #065f46; font-weight: 700;">🎲 Análisis de probabilidades:</strong>
+                            <p style="margin: 8px 0; color: #064e3b;">• ${resultados.probabilidad_positivo > 80 ? '<strong style="color: #059669;">Alta probabilidad de éxito financiero</strong>' : resultados.probabilidad_positivo > 60 ? '<strong style="color: #0ea5e9;">Probabilidad aceptable</strong>, requiere gestión de riesgos' : '<strong style="color: #dc2626;">Baja probabilidad</strong>, reconsiderar viabilidad'}</p>
+                            <p style="margin: 8px 0; color: #064e3b;">• La desviación estándar indica <em style="font-style: italic;">${resultados.desviacion_van / resultados.van_promedio < 0.5 ? 'baja volatilidad' : resultados.desviacion_van / resultados.van_promedio < 1 ? 'volatilidad moderada' : 'alta volatilidad'}</em></p>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin: 16px 0;">
+                            <strong style="color: #0c4a6e; font-weight: 700;">🎯 Implicaciones para la toma de decisiones:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #075985;">El intervalo de confianza ayuda a entender el rango realista de resultados</li>
+                                <li style="margin: 6px 0; color: #075985;">Considera el "peor caso" y "mejor caso" en tu planificación</li>
+                                <li style="margin: 6px 0; color: #075985;">Usa estos resultados para determinar requerimientos de capital adicional</li>
+                            </ul>
+                        </div>
+
+                        <p style="margin-top: 16px; color: #4b5563;"><em>¿Te gustaría que analicemos cómo estos resultados probabilísticos afectan tu estrategia de inversión?</em></p>
+                    </div>`;
+                }
+
+                if (context.resultados.tipo_analisis === 'sensibilidad') {
+                    return `<div style="line-height: 1.7;">
+                        <p style="margin-bottom: 16px;">¡Análisis de <strong style="color: #ea580c; font-weight: 700;">sensibilidad</strong> completado exitosamente! Este estudio evalúa cómo cambian los resultados ante variaciones en las variables clave.</p>
+
+                        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #dc2626; margin: 16px 0;">
+                            <strong style="color: #991b1b; font-weight: 700;">📈 Resultados principales:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #7f1d1d;">Punto de equilibrio identificado: <strong style="color: #059669;">${resultados.punto_equilibrio || 'N/A'} unidades</strong></li>
+                                <li style="margin: 6px 0; color: #7f1d1d;">Flujo de caja en punto de equilibrio: <strong style="color: #059669;">S/ ${resultados.flujo_equilibrio?.toLocaleString() || 'N/A'}</strong></li>
+                                <li style="margin: 6px 0; color: #7f1d1d;">Variable con mayor impacto: <strong style="color: #dc2626;">"${resultados.variable_critica || 'N/A'}"</strong></li>
+                                <li style="margin: 6px 0; color: #7f1d1d;">Elasticidad crítica: <strong style="color: #7c3aed;">${resultados.elasticidad_critica?.toFixed(2) || 'N/A'}</strong></li>
+                            </ul>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 16px 0;">
+                            <strong style="color: #92400e; font-weight: 700;">🔍 Análisis de sensibilidad:</strong>
+                            <p style="margin: 8px 0; color: #78350f;">• ${Math.abs(resultados.elasticidad_critica) > 2 ? '<strong style="color: #dc2626;">Alta sensibilidad</strong> - pequeños cambios tienen gran impacto' : Math.abs(resultados.elasticidad_critica) > 1 ? '<strong style="color: #ea580c;">Sensibilidad moderada</strong>' : '<strong style="color: #059669;">Baja sensibilidad</strong> - cambios tienen poco impacto'}</p>
+                            <p style="margin: 8px 0; color: #78350f;">• El punto de equilibrio indica el volumen mínimo necesario para cubrir costos</p>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin: 16px 0;">
+                            <strong style="color: #0c4a6e; font-weight: 700;">🎯 Recomendaciones estratégicas:</strong>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li style="margin: 6px 0; color: #075985;">Enfócate en gestionar las variables más sensibles</li>
+                                <li style="margin: 6px 0; color: #075985;">Usa el punto de equilibrio como benchmark operativo</li>
+                                <li style="margin: 6px 0; color: #075985;">Desarrolla escenarios "qué pasaría si" basados en este análisis</li>
+                                <li style="margin: 6px 0; color: #075985;">Implementa controles para variables críticas</li>
+                            </ul>
+                        </div>
+
+                        <p style="margin-top: 16px; color: #4b5563;"><em>¿Quieres que profundicemos en algún escenario específico o que analicemos estrategias para optimizar el punto de equilibrio?</em></p>
+                    </div>`;
+                }
+
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">¡Análisis avanzado de <strong style="color: #059669; font-weight: 700;">Machine Learning</strong> completado! Los resultados proporcionan insights valiosos para la toma de decisiones financieras.</p>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Podrías especificar qué aspectos del análisis te gustaría explorar más profundamente?</em></p>
+                </div>`;
+
+            default:
+                return `<div style="line-height: 1.7;">
+                    <p style="margin-bottom: 16px;">Veo que realizaste un análisis financiero interesante. Basándome en los resultados obtenidos, puedo ayudarte a interpretarlos y sugerir próximos pasos.</p>
+
+                    <p style="margin-top: 16px; color: #4b5563;"><em>¿Hay algún aspecto específico en el que te gustaría profundizar o alguna pregunta particular sobre los resultados?</em></p>
+                </div>`;
+        }
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    console.log('✅ Chatbot inicializado correctamente');
 });
 </script>
 {% endblock %}

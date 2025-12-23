@@ -1,5 +1,7 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import current_app, render_template_string
-from flask_mail import Mail, Message
 import os
 
 class EmailService:
@@ -7,27 +9,87 @@ class EmailService:
 
     def __init__(self, app=None):
         self.mail = None
+        self.smtp_server = None
+        self.smtp_port = None
+        self.username = None
+        self.password = None
+        self.sender = None
+        self.use_mock = False
+
         if app:
             self.init_app(app)
 
     def init_app(self, app):
-        """Inicializar Flask-Mail con la aplicación"""
-        app.config['MAIL_SERVER'] = app.config.get('SMTP_SERVER', 'smtp.gmail.com')
-        app.config['MAIL_PORT'] = app.config.get('SMTP_PORT', 587)
-        app.config['MAIL_USE_TLS'] = True
-        app.config['MAIL_USE_SSL'] = False
-        app.config['MAIL_USERNAME'] = app.config.get('SMTP_USERNAME', '')
-        app.config['MAIL_PASSWORD'] = app.config.get('SMTP_PASSWORD', '')
-        app.config['MAIL_DEFAULT_SENDER'] = app.config.get('SMTP_USERNAME', 'noreply@econova.com')
+        """Inicializar servicio de email"""
+        self.smtp_server = app.config.get('SMTP_SERVER', 'smtp.gmail.com')
+        self.smtp_port = app.config.get('SMTP_PORT', 587)
+        self.username = app.config.get('SMTP_USERNAME', '')
+        self.password = app.config.get('SMTP_PASSWORD', '')
+        self.sender = app.config.get('SMTP_USERNAME', 'jean20francisco06@gmail.com')
 
-        self.mail = Mail(app)
+        # Check if we should use mock mode (for testing)
+        self.use_mock = app.config.get('EMAIL_MOCK', False)
+
+        print(f"📧 Email service initialized:")
+        print(f"   Server: {self.smtp_server}")
+        print(f"   Port: {self.smtp_port}")
+        print(f"   Username: {self.username}")
+        print(f"   Sender: {self.sender}")
+        print(f"   Mock mode: {self.use_mock}")
+
+    def _send_email(self, to_email, subject, html_content):
+        """Enviar email usando SMTP directo"""
+        if self.use_mock:
+            print(f"📧 [MOCK] Email enviado a {to_email}")
+            print(f"   Asunto: {subject}")
+            return True
+
+        try:
+            # Crear mensaje con codificación UTF-8
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = self.sender
+            msg['To'] = to_email
+            msg['Content-Type'] = 'text/html; charset=UTF-8'
+
+            # Adjuntar contenido HTML con codificación UTF-8
+            html_part = MIMEText(html_content, 'html', 'utf-8')
+            msg.attach(html_part)
+
+            # Conectar al servidor SMTP
+            print(f"🔌 Conectando a {self.smtp_server}:{self.smtp_port}")
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            server.starttls()  # Usar TLS
+
+            # Autenticar
+            print(f"🔐 Autenticando como {self.username}")
+            server.login(self.username, self.password)
+
+            # Enviar email con codificación UTF-8
+            print(f"📤 Enviando email a {to_email}")
+            server.sendmail(self.sender, to_email, msg.as_string().encode('utf-8'))
+            server.quit()
+
+            print(f"✅ Email enviado exitosamente a {to_email}")
+            return True
+
+        except Exception as e:
+            print(f"❌ Error enviando email: {e}")
+            import traceback
+            print(f"📋 Traceback: {traceback.format_exc()}")
+            return False
 
     def enviar_email_confirmacion(self, email, nombre_usuario, token_confirmacion=None):
         """Enviar email de confirmación de registro"""
         try:
+            print(f"🔄 ENVIANDO EMAIL DE CONFIRMACIÓN a {email}")
             subject = "¡Bienvenido a Econova! Confirma tu cuenta"
 
-            # Template HTML del email (versión formal)
+            # URL de confirmación
+            url_confirmacion = f"http://localhost:5000/api/v1/confirmar/{token_confirmacion or 'placeholder'}"
+            print(f"🔗 URL de confirmación: {url_confirmacion}")
+
+            # Template HTML del email
             html_template = """
             <!DOCTYPE html>
             <html lang="es">
@@ -91,37 +153,22 @@ class EmailService:
             </html>
             """
 
-            # URL de confirmación (con el prefijo correcto de la API)
-            url_confirmacion = f"http://localhost:5000/api/v1/confirmar/{token_confirmacion or 'placeholder'}"
-
             # Renderizar template
             html_body = render_template_string(html_template,
                                              nombre_usuario=nombre_usuario,
                                              url_confirmacion=url_confirmacion)
 
-            # Crear mensaje
-            msg = Message(
-                subject=subject,
-                recipients=[email],
-                html=html_body
-            )
-
             # Enviar email
-            if self.mail:
-                self.mail.send(msg)
-                print(f"Email de confirmación enviado a {email}")
-                return True
-            else:
-                print("Error: Servicio de email no inicializado")
-                return False
+            return self._send_email(email, subject, html_body)
 
         except Exception as e:
-            print(f"Error enviando email de confirmación: {e}")
+            print(f"❌ Error en enviar_email_confirmacion: {e}")
             return False
 
     def enviar_email_bienvenida(self, email, nombre_usuario):
         """Enviar email de bienvenida después de confirmación"""
         try:
+            print(f"🔄 ENVIANDO EMAIL DE BIENVENIDA a {email}")
             subject = "¡Tu cuenta ha sido confirmada! - Econova"
 
             html_template = """
@@ -167,7 +214,7 @@ class EmailService:
                         </ul>
 
                         <p style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin: 30px 0;">
-                            <strong>💡 Tip del día:</strong> Comienza con una simulación simple de VAN para familiarizarte con la plataforma. ¡Es más fácil de lo que piensas!
+                            <strong>💡 Tip del día:</strong> Comienza con una simulación simple de VAN para familiarizarte con la plataforma. ¡Es más de lo que piensas!
                         </p>
 
                         <p>Si tienes alguna pregunta, no dudes en contactarnos. ¡Estamos aquí para ayudarte!</p>
@@ -187,28 +234,16 @@ class EmailService:
             """
 
             html_body = render_template_string(html_template, nombre_usuario=nombre_usuario)
-
-            msg = Message(
-                subject=subject,
-                recipients=[email],
-                html=html_body
-            )
-
-            if self.mail:
-                self.mail.send(msg)
-                print(f"Email de bienvenida enviado a {email}")
-                return True
-            else:
-                print("Error: Servicio de email no inicializado")
-                return False
+            return self._send_email(email, subject, html_body)
 
         except Exception as e:
-            print(f"Error enviando email de bienvenida: {e}")
+            print(f"❌ Error en enviar_email_bienvenida: {e}")
             return False
 
     def enviar_email_recuperacion(self, email, nombre_usuario, token_recuperacion):
         """Enviar email de recuperación de contraseña"""
         try:
+            print(f"🔄 ENVIANDO EMAIL DE RECUPERACIÓN a {email}")
             subject = "Recupera tu contraseña - Econova"
 
             html_template = """
@@ -269,22 +304,10 @@ class EmailService:
                                              nombre_usuario=nombre_usuario,
                                              url_recuperacion=url_recuperacion)
 
-            msg = Message(
-                subject=subject,
-                recipients=[email],
-                html=html_body
-            )
-
-            if self.mail:
-                self.mail.send(msg)
-                print(f"Email de recuperación enviado a {email}")
-                return True
-            else:
-                print("Error: Servicio de email no inicializado")
-                return False
+            return self._send_email(email, subject, html_body)
 
         except Exception as e:
-            print(f"Error enviando email de recuperación: {e}")
+            print(f"❌ Error en enviar_email_recuperacion: {e}")
             return False
 
 # Instancia global del servicio

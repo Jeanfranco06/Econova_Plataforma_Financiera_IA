@@ -50,33 +50,40 @@
         <div class="mb-8">
           <div class="flex items-center justify-center space-x-4">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+              <div id="step-1-circle" class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-300">
                 1
               </div>
-              <span class="ml-2 text-gray-700 font-medium">Cuenta</span>
+              <span id="step-1-label" class="ml-2 text-gray-700 font-medium transition-colors duration-300">Cuenta</span>
             </div>
-            <div class="w-12 h-0.5 bg-gray-300"></div>
+            <div id="step-1-line" class="w-12 h-0.5 bg-gray-300 transition-colors duration-300"></div>
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+              <div id="step-2-circle" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-300">
                 2
               </div>
-              <span class="ml-2 text-gray-400">Perfil</span>
+              <span id="step-2-label" class="ml-2 text-gray-400 transition-colors duration-300">Perfil</span>
             </div>
-            <div class="w-12 h-0.5 bg-gray-300"></div>
+            <div id="step-2-line" class="w-12 h-0.5 bg-gray-300 transition-colors duration-300"></div>
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+              <div id="step-3-circle" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-300">
                 3
               </div>
-              <span class="ml-2 text-gray-400">Empresa</span>
+              <span id="step-3-label" class="ml-2 text-gray-400 transition-colors duration-300">Empresa</span>
+            </div>
+            <div id="step-3-line" class="w-12 h-0.5 bg-gray-300 transition-colors duration-300"></div>
+            <div class="flex items-center">
+              <div id="step-4-circle" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-300">
+                4
+              </div>
+              <span id="step-4-label" class="ml-2 text-gray-400 transition-colors duration-300">Términos</span>
             </div>
           </div>
         </div>
 
         <!-- Form -->
-        <form id="registration-form" method="POST" action="/api/v1/registro" class="space-y-6">
+        <form id="registration-form" method="POST" class="space-y-6">
 
-          <!-- Personal Information -->
-          <div>
+          <!-- Step 1: Personal Information -->
+          <div id="step-1" class="form-step">
             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <i class="fas fa-user mr-2 text-blue-600"></i>
               Información Personal
@@ -140,8 +147,8 @@
             </div>
           </div>
 
-          <!-- Account Information -->
-          <div class="pt-6 border-t border-gray-200">
+          <!-- Step 2: Account Information -->
+          <div id="step-2" class="form-step hidden">
             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <i class="fas fa-lock mr-2 text-blue-600"></i>
               Información de Cuenta
@@ -212,8 +219,8 @@
             </div>
           </div>
 
-          <!-- Business Information -->
-          <div class="pt-6 border-t border-gray-200">
+          <!-- Step 3: Business Information -->
+          <div id="step-3" class="form-step hidden">
             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <i class="fas fa-building mr-2 text-blue-600"></i>
               Información Empresarial
@@ -275,8 +282,13 @@
             </div>
           </div>
 
-          <!-- Terms and Conditions -->
-          <div class="pt-6 border-t border-gray-200">
+          <!-- Step 4: Terms and Conditions -->
+          <div id="step-4" class="form-step hidden">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-file-contract mr-2 text-blue-600"></i>
+              Términos y Condiciones
+            </h3>
+
             <div class="flex items-start">
               <input
                 type="checkbox"
@@ -304,12 +316,30 @@
             </div>
           </div>
 
-          <!-- Submit Button -->
-          <div class="pt-6">
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between pt-6">
+            <button
+              type="button"
+              id="prev-btn"
+              class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:ring-4 focus:ring-gray-300 transition duration-300 hidden"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>
+              Anterior
+            </button>
+
+            <button
+              type="button"
+              id="next-btn"
+              class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300"
+            >
+              Siguiente
+              <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+
             <button
               type="submit"
               id="submit-btn"
-              class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition duration-300 hidden"
             >
               <i class="fas fa-user-plus mr-2"></i>
               Crear Mi Cuenta Gratuita
@@ -454,35 +484,304 @@ document.getElementById('password').addEventListener('input', function() {
   }
 });
 
-// Form validation
-document.getElementById('registration-form').addEventListener('submit', function(e) {
+// Multi-step form wizard
+let currentStep = 1;
+const totalSteps = 4;
+
+function showStep(step) {
+  // Hide all steps
+  document.querySelectorAll('.form-step').forEach(stepDiv => {
+    stepDiv.classList.add('hidden');
+  });
+
+  // Show current step
+  document.getElementById(`step-${step}`).classList.remove('hidden');
+
+  // Update progress indicator
+  updateProgressIndicator(step);
+
+  // Update navigation buttons
+  updateNavigationButtons(step);
+}
+
+function updateProgressIndicator(step) {
+  // Reset all circles and labels
+  for (let i = 1; i <= totalSteps; i++) {
+    const circle = document.getElementById(`step-${i}-circle`);
+    const label = document.getElementById(`step-${i}-label`);
+    const line = document.getElementById(`step-${i}-line`);
+
+    if (i <= step) {
+      // Active/completed steps
+      circle.classList.remove('bg-gray-300', 'text-gray-600');
+      circle.classList.add('bg-blue-600', 'text-white');
+      label.classList.remove('text-gray-400');
+      label.classList.add('text-gray-700', 'font-medium');
+      if (line) {
+        line.classList.remove('bg-gray-300');
+        line.classList.add('bg-blue-600');
+      }
+    } else {
+      // Inactive steps
+      circle.classList.remove('bg-blue-600', 'text-white');
+      circle.classList.add('bg-gray-300', 'text-gray-600');
+      label.classList.remove('text-gray-700', 'font-medium');
+      label.classList.add('text-gray-400');
+      if (line) {
+        line.classList.remove('bg-blue-600');
+        line.classList.add('bg-gray-300');
+      }
+    }
+  }
+}
+
+function updateNavigationButtons(step) {
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
   const submitBtn = document.getElementById('submit-btn');
+
+  // Previous button
+  if (step === 1) {
+    prevBtn.classList.add('hidden');
+  } else {
+    prevBtn.classList.remove('hidden');
+  }
+
+  // Next/Submit buttons
+  if (step === totalSteps) {
+    nextBtn.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+  } else {
+    nextBtn.classList.remove('hidden');
+    submitBtn.classList.add('hidden');
+  }
+}
+
+async function validateStep(step) {
+  let isValid = true;
+  const errors = [];
+
+  switch (step) {
+    case 1: // Personal Information
+      const nombres = document.getElementById('nombres').value.trim();
+      const apellidos = document.getElementById('apellidos').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!nombres) {
+        errors.push('Los nombres son obligatorios');
+        isValid = false;
+      }
+      if (!apellidos) {
+        errors.push('Los apellidos son obligatorios');
+        isValid = false;
+      }
+      if (!email) {
+        errors.push('El correo electrónico es obligatorio');
+        isValid = false;
+      } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+        errors.push('El correo electrónico no es válido');
+        isValid = false;
+      } else {
+        // Check if email already exists
+        try {
+          const emailCheckResponse = await fetch(`/api/v1/check-email?email=${encodeURIComponent(email)}`);
+          const emailCheckData = await emailCheckResponse.json();
+          if (!emailCheckData.available) {
+            errors.push('Ya existe una cuenta con este correo electrónico');
+            isValid = false;
+          }
+        } catch (error) {
+          console.error('Error checking email:', error);
+          // Continue validation even if check fails
+        }
+      }
+      break;
+
+    case 2: // Account Information
+      const nombreUsuario = document.getElementById('nombre_usuario').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+
+      if (!nombreUsuario) {
+        errors.push('El nombre de usuario es obligatorio');
+        isValid = false;
+      } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(nombreUsuario)) {
+        errors.push('El nombre de usuario debe tener entre 3-20 caracteres y solo letras, números y guiones bajos');
+        isValid = false;
+      } else {
+        // Check if username already exists
+        try {
+          const usernameCheckResponse = await fetch(`/api/v1/check-username?username=${encodeURIComponent(nombreUsuario)}`);
+          const usernameCheckData = await usernameCheckResponse.json();
+          if (!usernameCheckData.available) {
+            errors.push('Este nombre de usuario ya está en uso');
+            isValid = false;
+          }
+        } catch (error) {
+          console.error('Error checking username:', error);
+          // Continue validation even if check fails
+        }
+      }
+      if (!password) {
+        errors.push('La contraseña es obligatoria');
+        isValid = false;
+      } else if (password.length < 8) {
+        errors.push('La contraseña debe tener al menos 8 caracteres');
+        isValid = false;
+      } else if (!/\d/.test(password)) {
+        errors.push('La contraseña debe contener al menos un número');
+        isValid = false;
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.push('La contraseña debe contener al menos un carácter especial');
+        isValid = false;
+      }
+      if (password !== confirmPassword) {
+        errors.push('Las contraseñas no coinciden');
+        isValid = false;
+      }
+      break;
+
+    case 3: // Business Information (optional)
+      // No validation required for optional fields
+      break;
+
+    case 4: // Terms and Conditions
+      const terminos = document.getElementById('terminos').checked;
+      if (!terminos) {
+        errors.push('Debes aceptar los términos y condiciones');
+        isValid = false;
+      }
+      break;
+  }
+
+  if (!isValid) {
+    showErrorMessage(errors.join('<br>'));
+  } else {
+    // Clear any previous error messages when validation passes
+    clearErrorMessage();
+  }
+
+  return isValid;
+}
+
+function showErrorMessage(message) {
   const messageDiv = document.getElementById('message');
   const messageContent = document.getElementById('message-content');
 
-  // Basic validation
-  const password = document.getElementById('password').value;
-  const confirmPassword = document.getElementById('confirm_password').value;
+  messageDiv.className = 'mt-6';
+  messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
+  messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>' + message;
 
-  if (password !== confirmPassword) {
-    e.preventDefault();
-    messageDiv.className = 'mt-6';
-    messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
-    messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Las contraseñas no coinciden.';
-    return;
+  // Scroll to message
+  messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function clearErrorMessage() {
+  const messageDiv = document.getElementById('message');
+  messageDiv.className = 'mt-6 hidden';
+}
+
+// Initialize wizard
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🎯 Initializing registration wizard...');
+  showStep(currentStep);
+
+  // Next button
+  const nextBtn = document.getElementById('next-btn');
+  if (nextBtn) {
+    console.log('🎯 Next button found, adding event listener');
+    nextBtn.addEventListener('click', async function(e) {
+      console.log('🎯 Next button clicked, current step:', currentStep);
+      e.preventDefault();
+      if (await validateStep(currentStep)) {
+        console.log('🎯 Validation passed, moving to step:', currentStep + 1);
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        console.log('🎯 Validation failed for step:', currentStep);
+      }
+    });
+  } else {
+    console.error('🎯 Next button not found!');
   }
 
-  if (password.length < 8) {
-    e.preventDefault();
-    messageDiv.className = 'mt-6';
-    messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
-    messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>La contraseña debe tener al menos 8 caracteres.';
-    return;
+  // Previous button
+  const prevBtn = document.getElementById('prev-btn');
+  if (prevBtn) {
+    console.log('🎯 Previous button found, adding event listener');
+    prevBtn.addEventListener('click', function(e) {
+      console.log('🎯 Previous button clicked');
+      e.preventDefault();
+      currentStep--;
+      showStep(currentStep);
+    });
+  } else {
+    console.log('🎯 Previous button not found (this is normal for step 1)');
+  }
+});
+
+// Form validation and submission
+document.getElementById('registration-form').addEventListener('submit', async function(e) {
+  e.preventDefault(); // Always prevent default form submission
+
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Final validation for all steps
+  for (let step = 1; step <= totalSteps; step++) {
+    if (!(await validateStep(step))) {
+      currentStep = step;
+      showStep(currentStep);
+      return;
+    }
   }
 
   // Disable button and show loading
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando cuenta...';
+
+  // Submit form programmatically
+  const formData = new FormData(this);
+
+  fetch('/api/v1/registrar', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Success - redirect to login page
+      window.location.href = '/login?message=registration_success';
+    } else {
+      // Error - show error message and re-enable button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-user-plus mr-2"></i>Crear Mi Cuenta Gratuita';
+
+      // Show error message
+      const messageDiv = document.getElementById('message');
+      const messageContent = document.getElementById('message-content');
+      messageDiv.className = 'mt-6';
+      messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
+      messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>' + (data.error || 'Error al crear la cuenta');
+
+      // Scroll to message
+      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  })
+  .catch(error => {
+    console.error('Error submitting form:', error);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-user-plus mr-2"></i>Crear Mi Cuenta Gratuita';
+
+    // Show generic error message
+    const messageDiv = document.getElementById('message');
+    const messageContent = document.getElementById('message-content');
+    messageDiv.className = 'mt-6';
+    messageContent.className = 'p-4 rounded-lg bg-red-50 text-red-800 border border-red-200';
+    messageContent.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Error interno del servidor. Inténtalo de nuevo.';
+  });
 });
 </script>
 {% endblock %}

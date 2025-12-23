@@ -519,11 +519,8 @@ class PortfolioCalculator {
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.guardarAnalisis()">
                 <i class="fas fa-save mr-2"></i>Guardar Portafolio
               </button>
-              <button class="border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-lg hover:bg-orange-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.compartirAnalisis()">
-                <i class="fas fa-share mr-2"></i>Compartir Análisis
-              </button>
-              <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.imprimirAnalisis()">
-                <i class="fas fa-print mr-2"></i>Imprimir Reporte
+              <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.portfolioCalculator.consultarConIA()">
+                <i class="fas fa-robot mr-2"></i>Consultar con IA
               </button>
             </div>
         `;
@@ -716,6 +713,24 @@ class PortfolioCalculator {
      */
     actualizarSimulacionTiempoReal(input) {
         UIUtils.actualizarSimulacionTiempoReal(input);
+    }
+
+    /**
+     * Obtiene los datos actuales de la simulación de portafolio
+     */
+    obtenerDatosActuales() {
+        const simulacion = UIUtils.obtenerSimulacion('portafolio');
+        if (!simulacion) return null;
+
+        return {
+            tipo: 'portafolio',
+            retorno: simulacion.resultado?.portafolioOptimo?.retorno || 0,
+            riesgo: simulacion.resultado?.portafolioOptimo?.riesgo || 0,
+            sharpe: simulacion.resultado?.sharpeRatio || 0,
+            activos_actual: simulacion.datos?.activos?.length || 0,
+            activos_optimo: simulacion.resultado?.portafolioOptimo ? simulacion.resultado.portafolioOptimo.pesos.filter(p => p > 0.01).length : 0,
+            nombre_proyecto: simulacion.datos?.nombrePortafolio || 'Portafolio'
+        };
     }
 }
 

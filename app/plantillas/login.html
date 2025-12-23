@@ -30,13 +30,13 @@
         <form id="login-form" method="POST" action="/api/v1/login" class="space-y-6">
 
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="email_username" class="block text-sm font-medium text-gray-700 mb-2">
               Correo Electrónico o Nombre de Usuario
             </label>
             <input
               type="text"
-              id="email"
-              name="email"
+              id="email_username"
+              name="email_username"
               required
               value="{{ email_value or '' }}"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
@@ -133,6 +133,14 @@
             {% endfor %}
           {% endif %}
         {% endwith %}
+
+        <!-- URL Parameter Messages -->
+        <div id="url-message" class="mt-6 hidden">
+          <div class="p-4 rounded-lg bg-green-50 text-green-800 border border-green-200">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="url-message-text"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -155,13 +163,92 @@ document.getElementById('toggle-password').addEventListener('click', function() 
   }
 });
 
+// Handle URL parameters for messages
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const message = urlParams.get('message');
+
+  if (message === 'registration_success') {
+    const messageDiv = document.getElementById('url-message');
+    const messageText = document.getElementById('url-message-text');
+
+    messageText.textContent = '¡Registro exitoso! Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.';
+    messageDiv.classList.remove('hidden');
+
+    // Scroll to message
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
 // Form submission
 document.getElementById('login-form').addEventListener('submit', function(e) {
+  e.preventDefault(); // Prevent default form submission
+
   const submitBtn = document.getElementById('submit-btn');
+  const formData = new FormData(this);
 
   // Disable button and show loading
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...';
+
+  // Send AJAX request
+  fetch('/api/v1/login', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Login successful - redirect to dashboard
+      window.location.href = '/dashboard';
+    } else {
+      // Login failed - show error
+      showMessage(data.error || 'Error al iniciar sesión', 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showMessage('Error interno del servidor', 'error');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+  });
 });
+
+// Function to show messages
+function showMessage(message, type) {
+  // Remove existing messages
+  const existingMessages = document.querySelectorAll('.message-alert');
+  existingMessages.forEach(msg => msg.remove());
+
+  // Create new message element
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message-alert mt-6 p-4 rounded-lg border ${
+    type === 'error'
+      ? 'bg-red-50 text-red-800 border-red-200'
+      : 'bg-green-50 text-green-800 border-green-200'
+  }`;
+  messageDiv.innerHTML = `
+    <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-2"></i>
+    ${message}
+  `;
+
+  // Insert after form
+  const form = document.getElementById('login-form');
+  form.parentNode.insertBefore(messageDiv, form.nextSibling);
+
+  // Scroll to message
+  messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Auto-remove success messages after 5 seconds
+  if (type === 'success') {
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 5000);
+  }
+}
 </script>
 {% endblock %}

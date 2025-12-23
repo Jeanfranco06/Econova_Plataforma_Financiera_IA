@@ -434,11 +434,8 @@ class WACCCalculator {
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.waccCalculator.guardarAnalisis()">
                 <i class="fas fa-save mr-2"></i>Guardar Análisis
               </button>
-              <button class="border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.waccCalculator.compartirAnalisis()">
-                <i class="fas fa-share mr-2"></i>Compartir Resultados
-              </button>
-              <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.waccCalculator.imprimirAnalisis()">
-                <i class="fas fa-print mr-2"></i>Imprimir Reporte
+              <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.waccCalculator.consultarConIA()">
+                <i class="fas fa-robot mr-2"></i>Consultar con IA
               </button>
             </div>
         `;
@@ -538,6 +535,26 @@ class WACCCalculator {
      */
     actualizarSimulacionTiempoReal(input) {
         UIUtils.actualizarSimulacionTiempoReal(input);
+    }
+
+    /**
+     * Obtiene los datos actuales de la simulación WACC
+     */
+    obtenerDatosActuales() {
+        const simulacion = UIUtils.obtenerSimulacion('wacc');
+        if (!simulacion) return null;
+
+        return {
+            tipo: 'wacc',
+            wacc: simulacion.resultado?.wacc || 0,
+            costo_deuda: simulacion.datos?.costoDeuda || 0,
+            costo_capital: simulacion.datos?.costoCapital || 0,
+            peso_deuda: simulacion.datos?.proporcionDeuda || 0,
+            peso_capital: simulacion.datos?.proporcionCapital || 0,
+            tasa_impuestos: simulacion.datos?.tasaImpuestos || 0,
+            evaluacion: simulacion.resultado?.evaluacion || 'moderado',
+            nombre_proyecto: simulacion.datos?.empresa || 'Empresa WACC'
+        };
     }
 }
 

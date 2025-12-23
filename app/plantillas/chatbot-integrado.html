@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Chatbot Asesor Financiero - Econova{% endblock %}
+
+{% block content %}
+<!-- Chatbot Hero -->
+<section class="bg-slate-900 text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Chatbot Asesor Financiero
+    </h1>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Tu compañero inteligente para decisiones financieras empresariales
+    </p>
+  </div>
+</section>
+
+<!-- Chatbot Interface -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Chatbot Container -->
+      <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+
+        <!-- Full Width Chatbot Interface - Main Element -->
+        <div class="chatbot-container max-w-full w-full">
+          <!-- Chatbot Header -->
+          <div class="chatbot-header">
+            <div class="chatbot-avatar">
+              <i class="fas fa-robot text-2xl"></i>
+            </div>
+            <div>
+              <div class="chatbot-title">Econova AI Assistant</div>
+              <div class="chatbot-status">Conectado • Inteligencia Artificial</div>
+            </div>
+          </div>
+
+          <!-- Chatbot Messages Area -->
+          <div class="chatbot-messages" id="chat-messages">
+            <!-- Mensaje de bienvenida -->
+            <div class="message message-bot">
+              <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="message-content">
+                ¡Hola! Soy tu asistente financiero inteligente.
+                <br><br>
+                Puedo ayudarte con:
+                <ul class="mt-2 space-y-1">
+                  <li>• Simulaciones de VAN, TIR y WACC</li>
+                  <li>• Análisis de portafolios de inversión</li>
+                  <li>• Benchmarking del mercado</li>
+                  <li>• Asesoramiento financiero personalizado</li>
+                </ul>
+                <br>
+                ¿En qué puedo ayudarte hoy?
+              </div>
+            </div>
+          </div>
+
+          <!-- Chatbot Input Area -->
+          <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chat-input" placeholder="Escribe tu consulta financiera..."
+              autocomplete="off">
+            <button class="chatbot-send-btn" id="send-btn" disabled>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Information -->
+        <div class="text-center lg:text-left">
+          <h1 class="text-h1 mb-6">Chatbot Asesor Financiero</h1>
+          <p class="text-body-lg mb-8 text-blue-100">
+            Tu compañero inteligente para decisiones financieras empresariales
+          </p>
+
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-white/10 rounded-lg p-4 text-center">
+              <i class="fas fa-clock text-2xl mb-2"></i>
+              <div class="text-sm">24/7 Disponible</div>
+            </div>
+            <div class="bg-white/10 rounded-lg p-4 text-center">
+              <i class="fas fa-brain text-2xl mb-2"></i>
+              <div class="text-sm">IA Avanzada</div>
+            </div>
+            <div class="bg-white/10 rounded-lg p-4 text-center">
+              <i class="fas fa-chart-line text-2xl mb-2"></i>
+              <div class="text-sm">Análisis Predictivo</div>
+            </div>
+            <div class="bg-white/10 rounded-lg p-4 text-center">
+              <i class="fas fa-comments text-2xl mb-2"></i>
+              <div class="text-sm">Conversación Natural</div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <a href="/simulacion" class="btn-primary inline-flex items-center">
+              <i class="fas fa-play-circle mr-2"></i>Comenzar Simulación
+            </a>
+            <a href="/benchmarking"
+              class="bg-white/10 border border-white/30 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition duration-300 inline-block">
+              <i class="fas fa-chart-bar mr-2"></i>Ver Benchmarking
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 bg-white">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-h2 mb-4">Características del Chatbot</h2>
+      <p class="text-body-lg text-gray-600 max-w-2xl mx-auto">
+        Tecnología avanzada para asesorarte en cada paso de tu análisis financiero
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-comments text-blue-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Conversación Natural</h3>
+        <p class="text-body text-gray-600 text-center">
+          Interactúa como si hablaras con un experto financiero.
+          Entiende tu contexto y responde en lenguaje claro.
+        </p>
+      </div>
+
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Análisis Inteligente</h3>
+        <p class="text-body text-gray-600 text-center">
+          Interpreta resultados complejos y te explica qué significan
+          para tu negocio en términos prácticos.
+        </p>
+      </div>
+
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-lightbulb text-purple-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Recomendaciones Personalizadas</h3>
+        <p class="text-body text-gray-600 text-center">
+          Propuestas de acción basadas en tu perfil empresarial
+          y en datos del mercado real.
+        </p>
+      </div>
+
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-question-circle text-orange-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Explicaciones Claras</h3>
+        <p class="text-body text-gray-600 text-center">
+          Define términos financieros complejos con ejemplos
+          prácticos y fáciles de entender.
+        </p>
+      </div>
+
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-sync-alt text-yellow-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Escenarios Alternativos</h3>
+        <p class="text-body text-gray-600 text-center">
+          Explora "qué pasaría si..." con diferentes variables
+          para entender el impacto de tus decisiones.
+        </p>
+      </div>
+
+      <div class="card-elevated p-8">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+          <i class="fas fa-bell text-red-600 text-2xl"></i>
+        </div>
+        <h3 class="text-h4 mb-4 text-center">Alertas Inteligentes</h3>
+        <p class="text-body text-gray-600 text-center">
+          Notificaciones sobre oportunidades de inversión,
+          riesgos detectados y mejores momentos para actuar.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Integration Section -->
+<section class="py-20 bg-gray-50">
+  <div class="container mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <h2 class="text-h2 mb-6">Integración Perfecta</h2>
+        <p class="text-body-lg text-gray-600 mb-8">
+          El chatbot se integra naturalmente en tu flujo de trabajo financiero
+        </p>
+
+        <div class="space-y-6">
+          <div class="flex items-start space-x-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-content-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-blue-600"></i>
+            </div>
+            <div>
+              <h4 class="text-h4 mb-2">Guía Paso a Paso</h4>
+              <p class="text-body text-gray-600">Te acompaña en cada simulación financiera, explicando cada paso y
+                ayudándote a interpretar resultados.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-content-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-green-600"></i>
+            </div>
+            <div>
+              <h4 class="text-h4 mb-2">Contexto Empresarial</h4>
+              <p class="text-body text-gray-600">Adapta sus respuestas a tu tipo de negocio, sector y nivel de
+                conocimiento financiero.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-content-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="text-h4 mb-2">Datos en Tiempo Real</h4>
+              <p class="text-body text-gray-600">Utiliza información actualizada del mercado para brindar
+                recomendaciones precisas y relevantes.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-content-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-orange-600"></i>
+            </div>
+            <div>
+              <h4 class="text-h4 mb-2">Aprendizaje Continuo</h4>
+              <p class="text-body text-gray-600">Mejora sus respuestas basándose en tus interacciones y preferencias.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-8 shadow-lg">
+        <div class="text-center mb-6">
+          <h3 class="text-h4 mb-2">Ejemplo de Conversación</h3>
+          <p class="text-body text-gray-600">Así es como el chatbot te ayudaría</p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">Tú</div>
+              <div>
+                <div class="text-sm font-semibold text-gray-800 mb-1">Usuario</div>
+                <div class="text-sm text-gray-600">"¿Qué significa un VAN negativo en mi proyecto?"</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">🤖</div>
+              <div>
+                <div class="text-sm font-semibold text-blue-800 mb-1">Chatbot</div>
+                <div class="text-sm text-blue-700">"Un VAN negativo indica que tu proyecto no generará suficientes
+                  ingresos para cubrir su inversión. Es como si invirtieras S/ 100,000 y solo recuperaras S/ 80,000. Te
+                  recomiendo analizar: 1) Reducir costos operativos, 2) Aumentar precios, o 3) Buscar financiamiento con
+                  mejores condiciones."</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">Tú</div>
+              <div>
+                <div class="text-sm font-semibold text-gray-800 mb-1">Usuario</div>
+                <div class="text-sm text-gray-600">"¿Y si aumento mi inversión inicial?"</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">🤖</div>
+              <div>
+                <div class="text-sm font-semibold text-blue-800 mb-1">Chatbot</div>
+                <div class="text-sm text-blue-700">"Vamos a simularlo. Si aumentas tu inversión a S/ 120,000, el VAN
+                  pasaría a -S/ 40,000. No es recomendable. Mejor exploremos opciones de financiamiento con tasas más
+                  bajas o un plan de expansión gradual."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-h2 mb-6">¿Listo para Transformar tu Análisis Financiero?</h2>
+    <p class="text-body-lg mb-8 max-w-2xl mx-auto">
+      Comienza ahora una conversación con tu asistente financiero inteligente
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/simulacion"
+        class="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition duration-300 inline-flex items-center">
+        <i class="fas fa-play-circle mr-2"></i>Comenzar Simulación
+      </a>
+      <a href="/registro"
+        class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-flex items-center">
+        <i class="fas fa-user-plus mr-2"></i>Crear Cuenta Gratis
+      </a>
+    </div>
+
+    <div class="mt-8 text-blue-200 text-sm">
+      No necesitas descargas ni configuraciones complejas. Todo está en tu navegador.
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Chatbot functionality
+  document.addEventListener('DOMContentLoaded', function () {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Enable send button when input has text
+    chatInput.addEventListener('input', function () {
+      sendBtn.disabled = this.value.trim() === '';
+    });
+
+    // Send message on Enter key
+    chatInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter' && !sendBtn.disabled) {
+        sendMessage();
+      }
+    });
+
+    // Send message on button click
+    sendBtn.addEventListener('click', sendMessage);
+
+    function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, 'user');
+      chatInput.value = '';
+      sendBtn.disabled = true;
+
+      // Simulate bot response
+      setTimeout(() => {
+        const botResponse = getBotResponse(message);
+        addMessage(botResponse, 'bot');
+      }, 1000);
+    }
+
+    function addMessage(text, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message message-${type}`;
+
+      if (type === 'user') {
+        messageDiv.innerHTML = `
+                <div class="message-content">${escapeHtml(text)}</div>
+                <div class="message-avatar">
+                    ${getUserAvatar()}
+                </div>
+            `;
+      } else {
+        messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">${text}</div>
+            `;
+      }
+
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function getUserAvatar() {
+      // Si hay foto de perfil, usarla, sino usar inicial
+      const userPhoto = '{{ session.usuario_foto_perfil }}';
+      if (userPhoto) {
+        return `<img src="/static/uploads/profile_pictures/{{ session.usuario_foto_perfil }}" alt="Avatar" class="w-full h-full rounded-full object-cover">`;
+      } else {
+        const userName = '{{ session.usuario_nombre }}';
+        const initial = userName ? userName.charAt(0).toUpperCase() : 'U';
+        return `<div class="w-full h-full rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">${initial}</div>`;
+      }
+    }
+
+    function getBotResponse(userMessage) {
+      const msg = userMessage.toLowerCase();
+
+      if (msg.includes('van') || msg.includes('valor actual')) {
+        return "El Valor Actual Neto (VAN) mide la rentabilidad de tu inversión. Un VAN positivo indica que el proyecto generará más dinero del que cuesta. ¿Te gustaría simular un proyecto específico?";
+      } else if (msg.includes('tir') || msg.includes('tasa interna')) {
+        return "La Tasa Interna de Retorno (TIR) es la tasa de descuento que hace que el VAN sea cero. Si tu TIR es mayor que tu costo de capital, el proyecto es rentable. ¿Quieres calcular la TIR de algún proyecto?";
+      } else if (msg.includes('wacc') || msg.includes('costo promedio')) {
+        return "El WACC (Costo Promedio Ponderado de Capital) representa el costo promedio de financiamiento de tu empresa. Es crucial para evaluar proyectos. ¿Necesitas calcular tu WACC?";
+      } else if (msg.includes('portafolio') || msg.includes('inversión')) {
+        return "Para optimizar tu portafolio de inversiones, necesito conocer: 1) Tus activos actuales, 2) Montos invertidos, 3) Rendimientos esperados, 4) Nivel de riesgo deseado. ¿Quieres comenzar el análisis?";
+      } else if (msg.includes('hola') || msg.includes('buen') || msg.includes('salud')) {
+        return "¡Hola! Soy tu asistente financiero. Puedo ayudarte con simulaciones de VAN, TIR, WACC, análisis de portafolios y más. ¿En qué necesitas ayuda hoy?";
+      } else if (msg.includes('gracias') || msg.includes('adiós') || msg.includes('chao')) {
+        return "¡Ha sido un placer ayudarte! Recuerda que estoy disponible 24/7 para tus consultas financieras. ¿Hay algo más en lo que pueda asistirte?";
+      } else {
+        return "Entendido. Para brindarte la mejor asesoría, ¿podrías especificar si necesitas ayuda con: VAN, TIR, WACC, análisis de portafolios, o alguna otra consulta financiera específica?";
+      }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/"/g, '"')
+        .replace(/'/g, "&#039;");
+    }
+  });
+</script>
+{% endblock %}

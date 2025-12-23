@@ -10,152 +10,435 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot_message_robot.css') }}">
     <style>
+        /* Sistema de tipografía profesional */
         :root {
-            --color-primary: #00ffff;
-            --color-secondary: #ff6b6b;
-            --color-accent: #4ecdc4;
-            --color-background: #ffffff;
-            --color-surface: #f8f9fa;
-            --color-text: #333333;
-            --color-text-secondary: #666666;
-            --color-border: #e0e0e0;
-            --color-shadow: rgba(0, 0, 0, 0.1);
-            --color-success: #4caf50;
-            --color-error: #f44336;
-            --color-warning: #ff9800;
-            --color-info: #2196f3;
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            
+        /* Sistema de colores pasteles (finanzas/empresarial) */
+        --color-primary: #93c5fd;      /* Azul pastel */
+        --color-secondary: #cbd5e1;    /* Gris pastel */
+        --color-success: #86efac;      /* Verde pastel */
+        --color-danger: #fca5a5;       /* Rojo pastel */
+        --color-warning: #fde68a;      /* Amarillo pastel */
+        --color-background: #ffffff;
+        --color-surface: #f8fafc;      /* Gris claro fondo */
+        --color-text-primary: #1e293b; /* Texto principal */
+        --color-text-secondary: #64748b; /* Texto secundario */
+        --color-border: #e2e8f0;       /* Bordes sutiles */
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        
+        /* Modo oscuro - colores pasteles oscuros */
+        --dark-color-primary: #60a5fa;      /* Azul pastel oscuro */
+        --dark-color-secondary: #94a3b8;    /* Gris pastel oscuro */
+        --dark-color-success: #4ade80;      /* Verde pastel oscuro */
+        --dark-color-danger: #f87171;       /* Rojo pastel oscuro */
+        --dark-color-warning: #facc15;      /* Amarillo pastel oscuro */
+        --dark-color-background: #0f172a;
+        --dark-color-surface: #1e293b;      /* Gris oscuro fondo */
+        --dark-color-text-primary: #f1f5f9; /* Texto principal oscuro */
+        --dark-color-text-secondary: #94a3b8; /* Texto secundario oscuro */
+        --dark-color-border: #334155;       /* Bordes oscuros */
+        --dark-color-shadow: rgba(0, 0, 0, 0.3);
         }
 
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Tipografía jerárquica */
+        .text-h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.2; }
+        .text-h2 { font-size: 2rem; font-weight: 600; line-height: 1.3; }
+        .text-h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
+        .text-h4 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+        .text-body-lg { font-size: 1.125rem; line-height: 1.6; }
+        .text-body { font-size: 1rem; line-height: 1.6; }
+        .text-sm { font-size: 0.875rem; line-height: 1.5; }
+        .text-xs { font-size: 0.75rem; line-height: 1.4; }
+        
+        /* Énfasis en datos financieros */
+        .text-data { font-family: var(--font-mono); font-weight: 600; font-size: 1.125rem; }
+        .text-metric { font-family: var(--font-mono); font-weight: 700; font-size: 1.5rem; }
+        
+        /* Componentes UI profesionales */
+        .card-elevated {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--color-shadow);
+            transition: all 0.2s ease;
+        }
+        
+        .card-elevated:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px var(--color-shadow);
+            border-color: #cbd5e1;
         }
 
-        .hero-pattern {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--color-surface);
+            border-color: #cbd5e1;
         }
 
-        .card-hover {
+        /* Formularios profesionales */
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-primary);
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Tablas financieras */
+        .table-financial {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table-financial th {
+            background-color: var(--color-surface);
+            color: var(--color-text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--color-border);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .table-financial td {
+            padding: 16px;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 1rem;
+            color: var(--color-text-primary);
+        }
+        
+        .table-financial tr:hover {
+            background-color: var(--color-surface);
+        }
+        
+        .table-financial .metric-positive { color: var(--color-success); font-weight: 600; }
+        .table-financial .metric-negative { color: var(--color-danger); font-weight: 600; }
+
+        /* Métricas de resultados */
+        .metric-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Chatbot integrado en página */
+        .chatbot-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px var(--color-shadow);
+            overflow: hidden;
             transition: all 0.3s ease;
         }
-
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px var(--color-shadow);
+        
+        .chatbot-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chatbot-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .chatbot-status {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-left: auto;
+        }
+        
+        .chatbot-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: white;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .message-user {
+            text-align: right;
+        }
+        
+        .message-content {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+        
+        .message-bot .message-content {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-top-left-radius: 4px;
+        }
+        
+        .message-user .message-content {
+            background: var(--color-primary);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        
+        .message-user .message-avatar {
+            background: var(--color-primary);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message-bot .message-avatar {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--color-primary);
+            margin-right: 8px;
+        }
+        
+        .chatbot-input-area {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .chatbot-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .chatbot-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .chatbot-send-btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .chatbot-send-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+        
+        .chatbot-send-btn:disabled {
+            background: var(--color-border);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Floating economic elements */
-        .floating-element {
-            position: absolute;
-            animation: float 6s ease-in-out infinite;
-            opacity: 0.1;
-            z-index: 1;
+        /* Navegación profesional */
+        .nav-item {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            color: var(--color-primary);
+            background-color: var(--color-surface);
+        }
+        
+        .nav-item.active {
+            color: var(--color-primary);
+            background-color: rgba(37, 99, 235, 0.1);
+            font-weight: 600;
         }
 
-        .floating-element:nth-child(1) {
-            animation-delay: 0s;
+        /* Sistema de alertas */
+        .alert-success {
+            background-color: rgba(22, 163, 74, 0.1);
+            border: 1px solid rgba(22, 163, 74, 0.3);
+            color: #166534;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .alert-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #92400e;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .alert-error {
+            background-color: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #991b1b;
+            border-radius: 8px;
+            padding: 16px;
         }
 
-        .floating-element:nth-child(2) {
-            animation-delay: 1s;
-        }
-
-        .floating-element:nth-child(3) {
-            animation-delay: 2s;
-        }
-
-        .floating-element:nth-child(4) {
-            animation-delay: 3s;
-        }
-
-        .floating-element:nth-child(5) {
-            animation-delay: 4s;
-        }
-
-        .floating-element:nth-child(6) {
-            animation-delay: 5s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            25% {
-                transform: translateY(-20px) rotate(5deg);
-            }
-
-            50% {
-                transform: translateY(-10px) rotate(-5deg);
-            }
-
-            75% {
-                transform: translateY(-30px) rotate(3deg);
-            }
-        }
-
-        .economic-icon {
-            font-size: 2rem;
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .chart-line {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            animation: draw 3s ease-in-out forwards;
-        }
-
-        @keyframes draw {
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse-glow {
+        /* Animaciones sutiles */
+        @keyframes fadeInUp {
             from {
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+                opacity: 0;
+                transform: translateY(20px);
             }
-
             to {
-                box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+                opacity: 1;
+                transform: translateY(0);
             }
         }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out;
+        }
 
-        /* Theme-aware classes */
-        .theme-bg-primary { background-color: var(--color-primary); }
-        .theme-bg-secondary { background-color: var(--color-secondary); }
-        .theme-bg-accent { background-color: var(--color-accent); }
-        .theme-bg-background { background-color: var(--color-background); }
-        .theme-bg-surface { background-color: var(--color-surface); }
-
-        .theme-text-primary { color: var(--color-text); }
-        .theme-text-secondary { color: var(--color-text-secondary); }
-        .theme-text-accent { color: var(--color-accent); }
-
-        .theme-border { border-color: var(--color-border); }
-        .theme-shadow { box-shadow: 0 4px 6px var(--color-shadow); }
-
-        /* Override hardcoded Tailwind classes with theme-aware versions */
-        .bg-slate-900 { background-color: #0f172a !important; } /* Keep dark for hero sections */
-        .text-white { color: #ffffff !important; } /* Keep white for hero sections */
-        .bg-gray-50 { background-color: var(--color-surface) !important; }
-        .text-gray-800 { color: var(--color-text) !important; }
-        .text-gray-600 { color: var(--color-text-secondary) !important; }
-        .bg-white { background-color: var(--color-surface) !important; }
-        .border-gray-200 { border-color: var(--color-border) !important; }
-        .text-gray-700 { color: var(--color-text) !important; }
-        .bg-gray-100 { background-color: var(--color-surface) !important; }
-        .text-gray-500 { color: var(--color-text-secondary) !important; }
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .chatbot-sidebar {
+                width: 100%;
+                height: 50vh;
+                right: 0;
+                bottom: 0;
+                border-radius: 16px 16px 0 0;
+            }
+            
+            .chatbot-trigger {
+                right: 16px;
+                bottom: 16px;
+                width: 56px;
+                height: 56px;
+            }
+        }
     </style>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -164,7 +447,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 </head>
 
-<body class="font-['Source Sans Pro'] antialiased" data-usuario-id="{{ session.get('usuario_id', '') }}">
+<body class="font-primary antialiased bg-background text-text-primary" data-usuario-id="{{ session.get('usuario_id', '') }}">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg fixed w-full z-50">
         <div class="container mx-auto px-6 py-4">
@@ -206,8 +489,8 @@
                     <div class="relative">
                         <button id="user-menu-button"
                             class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition duration-300">
-                            {% if current_user and current_user.foto_perfil %}
-                            <img src="{{ url_for('static', filename='uploads/profile_pictures/' + current_user.foto_perfil) }}"
+                            {% if session.usuario_foto_perfil %}
+                            <img src="{{ url_for('static', filename='uploads/profile_pictures/' + session.usuario_foto_perfil) }}"
                                  alt="Foto de perfil"
                                  class="w-8 h-8 rounded-full object-cover">
                             {% else %}
@@ -596,11 +879,20 @@
 
     <!-- Scripts de elementos visuales - cargados condicionalmente -->
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
-    {% if request.path in ['/simulacion', '/chatbot', '/benchmarking'] %}
+    {% if request.path in ['/simulacion', '/benchmarking'] %}
     <script src="{{ url_for('static', filename='js/contextual_message.js') }}"></script>
     {% endif %}
     {% if request.path == '/chatbot' %}
+    <!-- Chatbot System - Versión Mejorada 2.0 -->
+    <script src="{{ url_for('static', filename='js/chatbot_utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot/chatbot-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot/chatbot-voice.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot/chatbot-integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot/chatbot-init.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot_main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chatbot_avatar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot_messaging.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot_welcome.js') }}"></script>
     <script src="{{ url_for('static', filename='js/econova_robot_3d.js') }}"></script>
     {% endif %}
 
@@ -689,6 +981,9 @@
         // Initialize immediately
         initThemeToggle();
     </script>
+
+    <!-- Extra scripts block for page-specific scripts -->
+    {% block extra_scripts %}{% endblock %}
 </body>
 
 </html>

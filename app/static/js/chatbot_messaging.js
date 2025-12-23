@@ -40,13 +40,58 @@
       // Add analysis context if available (from simulations)
       let analysisContext = window.getCurrentAnalysisContext();
 
-      // If no analysis context from window, try to extract from URL parameters (legacy support)
+      // Check if we have stored analysis context from previous messages
+      console.log('🔍 Checking for stored analysis context...');
+      console.log('📊 window.storedAnalysisContext:', window.storedAnalysisContext);
+      console.log('📊 current analysisContext:', analysisContext);
+
+      if (!analysisContext && window.storedAnalysisContext) {
+        analysisContext = window.storedAnalysisContext;
+        console.log('✅ Using stored analysis context:', analysisContext);
+      } else if (!analysisContext) {
+        console.log('❌ No analysis context available');
+      }
+
+      // If no analysis context from window or storage, try to extract from URL parameters (legacy support)
       if (!analysisContext) {
         const urlParams = new URLSearchParams(window.location.search);
         const contextType = urlParams.get('context');
         const dataParam = urlParams.get('data');
+        const contextoParam = urlParams.get('contexto');
 
-        if (contextType) {
+        // Check for calculator consultation context first
+        console.log('🔍 Checking contextoParam:', contextoParam);
+        if (contextoParam) {
+          try {
+            console.log('🔄 Decoding contextoParam...');
+            const decodedParam = decodeURIComponent(contextoParam);
+            console.log('📄 Decoded contextoParam:', decodedParam.substring(0, 200) + '...');
+
+            console.log('🔄 Parsing JSON...');
+            const contextoData = JSON.parse(decodedParam);
+            console.log('📊 Parsed contextoData:', contextoData);
+
+            if (contextoData.tipo_simulacion && contextoData.datos_simulacion) {
+              analysisContext = {
+                tipo_analisis: contextoData.tipo_simulacion,
+                resultados: contextoData.datos_simulacion
+              };
+              // Store for future messages
+              window.storedAnalysisContext = analysisContext;
+              console.log('✅ Calculator consultation context extracted and stored:', analysisContext);
+            } else {
+              console.log('❌ contextoData missing required fields');
+            }
+          } catch (e) {
+            console.error('❌ Error parsing calculator context:', e);
+            console.error('❌ contextoParam was:', contextoParam);
+          }
+        } else {
+          console.log('❌ No contextoParam found in URL');
+        }
+
+        // Fallback to legacy context extraction
+        if (!analysisContext && contextType) {
           // Handle ML contexts with JSON data parameter
           if (contextType.startsWith('ml_') && dataParam) {
             try {
@@ -237,81 +282,29 @@
         });
     }
 
-    // Handle concise mode response with automatic summary
+    // Handle concise mode response - now shows complete responses
     function handleConciseModeResponse(response, elements) {
       try {
-        const main = window.chatbotMain;
-        const responseText = String(response || '');
-        const lengthThreshold = 200; // Character threshold for truncation
-        const isConcise = main ? main.chatPreferences().concise : true;
+        console.log('📏 Concise mode disabled - showing complete responses');
 
-        console.log('📏 Checking concise mode:', {
-          responseLength: responseText.length,
-          threshold: lengthThreshold,
-          isConcise: isConcise,
-          shouldTrigger: isConcise && responseText.length > lengthThreshold
-        });
+        // The concise mode logic has been disabled to show complete responses
+        // All messages will now be displayed in full without truncation
 
-        if (isConcise && responseText.length > lengthThreshold) {
-          // Find the last message bubble just added
-          const chatMessagesEl = document.getElementById('chat-messages');
-          const lastBubble = chatMessagesEl ? chatMessagesEl.lastElementChild : null;
+        // Find the last message bubble just added
+        const chatMessagesEl = document.getElementById('chat-messages');
+        const lastBubble = chatMessagesEl ? chatMessagesEl.lastElementChild : null;
 
-          if (lastBubble) {
-            // Store full text on bubble for later
-            lastBubble.setAttribute('data-fulltext', encodeURIComponent(responseText));
+        if (lastBubble) {
+          // Find the content div
+          const contentDiv = lastBubble.querySelector('div > div[style*="background: white"]') ||
+                            lastBubble.querySelector('div > div[style*="background:white"]') ||
+                            lastBubble.querySelector('.message-bot div div');
 
-            // Create truncated version (first 150 characters + ...)
-            const truncatedText = responseText.length > 150
-              ? responseText.substring(0, 150) + '...'
-              : responseText;
+          if (contentDiv && window.chatbotUtils && window.chatbotUtils.renderMarkdown) {
+            // Render the complete response with markdown support
+            contentDiv.innerHTML = window.chatbotUtils.renderMarkdown(response);
 
-            // Find the content div
-            const contentDiv = lastBubble.querySelector('div > div[style*="background: white"]') ||
-                              lastBubble.querySelector('div > div[style*="background:white"]') ||
-                              lastBubble.querySelector('.message-bot div div');
-
-            if (contentDiv && window.chatbotUtils && window.chatbotUtils.renderMarkdown) {
-              // Check if this is a contextual message to use specific suggestions
-              let suggestionsToUse = [
-                '¿Puedes explicarme mejor?',
-                '¿Tienes un ejemplo práctico?',
-                '¿Cuáles son las limitaciones?',
-                '¿Cómo se aplica esto en Perú?'
-              ];
-
-              // If this is a contextual message, try to get the specific suggestions
-              if (lastBubble.classList.contains('message-bot')) {
-                // This is a bot message, check if it has contextual data
-                // We can't easily access the original contextual data here,
-                // so we'll use the default suggestions for truncated messages
-              }
-
-              const suggestionsText = '\n\n**Preguntas sugeridas:**\n' +
-                suggestionsToUse.map(s => `[${s}]()`).join('\n');
-              const truncatedWithSuggestions = truncatedText + suggestionsText;
-
-              contentDiv.innerHTML = window.chatbotUtils.renderMarkdown(truncatedWithSuggestions);
-
-              // Add expand button
-              const buttonContainer = document.createElement('div');
-              buttonContainer.style.marginTop = '8px';
-              buttonContainer.style.textAlign = 'left';
-              buttonContainer.innerHTML = `<button type="button" class="expand-btn" onclick="toggleExpand(this)" style="display: inline-block; background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Ver más</button>`;
-
-              // Remove existing button if present
-              const existingButton = contentDiv.querySelector('.expand-btn');
-              if (existingButton) {
-                existingButton.remove();
-              }
-
-              contentDiv.appendChild(buttonContainer);
-
-              // Set initial state as collapsed
-              lastBubble.setAttribute('data-expanded', 'false');
-
-              console.log('✅ Expand button added to long message');
-            }
+            console.log('✅ Complete response rendered with markdown support');
           }
         }
       } catch (e) {
@@ -397,28 +390,34 @@
 
           contentHTML = `<div class="whitespace-pre-line contextual-message">${window.chatbotUtils ? window.chatbotUtils.renderMarkdown(finalContent) : finalContent}</div>`;
         } else {
-          // Regular bot message - add default suggestions at the end only if not already present
+          // Regular bot message - use backend-generated questions if available, otherwise add defaults
           let finalContent = data;
 
-          // Check if the message already contains suggested questions
-          const hasSuggestions = /preguntas sugeridas/i.test(data) ||
-            data.includes('¿Puedes explicarme mejor?') ||
-            data.includes('¿Tienes un ejemplo práctico?') ||
-            data.includes('¿Cuáles son las limitaciones?') ||
-            data.includes('¿Cómo se aplica esto en Perú?');
+          // Check if the message already contains suggested questions from backend
+          // Backend generates questions in format: [¿Question 1?|¿Question 2?|¿Question 3?]
+          const hasBackendSuggestions = /\[([¿\?][^\[\]]*[|][^\[\]]*(?:[|][^\[\]]*)*)\]/g.test(data);
 
-          if (!hasSuggestions) {
-            const defaultSuggestions = [
-              '¿Puedes explicarme mejor?',
-              '¿Tienes un ejemplo práctico?',
-              '¿Cuáles son las limitaciones?',
-              '¿Cómo se aplica esto en Perú?'
-            ];
+          if (!hasBackendSuggestions) {
+            // Check if message already has any suggested questions (legacy check)
+            const hasSuggestions = /preguntas sugeridas/i.test(data) ||
+              data.includes('¿Puedes explicarme mejor?') ||
+              data.includes('¿Tienes un ejemplo práctico?') ||
+              data.includes('¿Cuáles son las limitaciones?') ||
+              data.includes('¿Cómo se aplica esto en Perú?');
 
-            const suggestionsText = '\n\n**Preguntas sugeridas:**\n' +
-              defaultSuggestions.map(s => `[${s}]()`).join('\n');
+            if (!hasSuggestions) {
+              const defaultSuggestions = [
+                '¿Puedes explicarme mejor?',
+                '¿Tienes un ejemplo práctico?',
+                '¿Cuáles son las limitaciones?',
+                '¿Cómo se aplica esto en Perú?'
+              ];
 
-            finalContent = data + suggestionsText;
+              const suggestionsText = '\n\n**Preguntas sugeridas:**\n' +
+                defaultSuggestions.map(s => `[${s}]()`).join('\n');
+
+              finalContent = data + suggestionsText;
+            }
           }
 
           contentHTML = `<div class="whitespace-pre-line">${window.chatbotUtils ? window.chatbotUtils.renderMarkdown(finalContent) : finalContent}</div>`;

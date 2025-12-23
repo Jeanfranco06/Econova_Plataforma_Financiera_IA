@@ -11,7 +11,8 @@ def adapt_query(query):
 class Usuario:
     def __init__(self, usuario_id=None, nombre_usuario=None, nombres=None, apellidos=None,
                  email=None, telefono=None, password_hash=None, empresa=None, sector=None,
-                 tamano_empresa=None, newsletter=None, nivel=None, foto_perfil=None, fecha_creacion=None):
+                 tamano_empresa=None, newsletter=None, nivel=None, foto_perfil=None,
+                 email_confirmado=None, confirmation_token=None, fecha_creacion=None):
         self.usuario_id = usuario_id
         self.nombre_usuario = nombre_usuario
         self.nombres = nombres
@@ -25,6 +26,8 @@ class Usuario:
         self.newsletter = newsletter
         self.nivel = nivel
         self.foto_perfil = foto_perfil
+        self.email_confirmado = email_confirmado
+        self.confirmation_token = confirmation_token
         self.fecha_creacion = fecha_creacion
 
     @staticmethod
@@ -52,17 +55,29 @@ class Usuario:
     @staticmethod
     def obtener_usuario_por_id(usuario_id):
         """Obtener usuario por ID"""
+        print(f"🔍 DEBUG obtener_usuario_por_id: Looking for user ID {usuario_id}")
         db = get_db_connection()
         query = adapt_query("SELECT * FROM Usuarios WHERE usuario_id = %s")
+        print(f"🔍 DEBUG Query: {query}")
         try:
             db.connect()
             result = db.execute_query(query, (usuario_id,), fetch=True)
+            print(f"🔍 DEBUG Query result: {result}")
             if result:
                 data = result[0]
+                print(f"🔍 DEBUG User data found: {data}")
+                # Convertir valores booleanos de SQLite (0/1) a booleanos Python
+                if 'email_confirmado' in data:
+                    data['email_confirmado'] = bool(data['email_confirmado'])
+                if 'newsletter' in data:
+                    data['newsletter'] = bool(data['newsletter'])
                 return Usuario(**data)
+            print(f"🔍 DEBUG No user found with ID {usuario_id}")
             return None
         except Exception as e:
             print(f"Error obteniendo usuario: {e}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
             return None
         finally:
             db.disconnect()
@@ -77,6 +92,11 @@ class Usuario:
             result = db.execute_query(query, (email,), fetch=True)
             if result:
                 data = result[0]
+                # Convertir valores booleanos de SQLite (0/1) a booleanos Python
+                if 'email_confirmado' in data:
+                    data['email_confirmado'] = bool(data['email_confirmado'])
+                if 'newsletter' in data:
+                    data['newsletter'] = bool(data['newsletter'])
                 return Usuario(**data)
             return None
         except Exception as e:
@@ -95,6 +115,11 @@ class Usuario:
             result = db.execute_query(query, (nombre_usuario,), fetch=True)
             if result:
                 data = result[0]
+                # Convertir valores booleanos de SQLite (0/1) a booleanos Python
+                if 'email_confirmado' in data:
+                    data['email_confirmado'] = bool(data['email_confirmado'])
+                if 'newsletter' in data:
+                    data['newsletter'] = bool(data['newsletter'])
                 return Usuario(**data)
             return None
         except Exception as e:
@@ -108,6 +133,7 @@ class Usuario:
               empresa=None, sector=None, tamano_empresa=None, newsletter=False):
         """Crear un nuevo usuario con todos los campos"""
         from werkzeug.security import generate_password_hash
+        import secrets
 
         db = get_db_connection()
 
@@ -124,9 +150,12 @@ class Usuario:
         # Convertir newsletter a entero para SQLite
         newsletter_int = 1 if newsletter else 0
 
+        # Generar token de confirmación
+        confirmation_token = secrets.token_urlsafe(32)
+
         params = (nombres, apellidos, email, telefono, nombre_usuario,
                  hashed_password, empresa, sector, tamano_empresa,
-                 newsletter_int, 'basico')
+                 newsletter_int, 'basico', confirmation_token)
 
         print(f"🔍 Parámetros para crear usuario: {params}")
 
@@ -136,8 +165,9 @@ class Usuario:
             if USE_POSTGRESQL:
                 query = """
                 INSERT INTO Usuarios (nombres, apellidos, email, telefono, nombre_usuario,
-                                    password_hash, empresa, sector, tamano_empresa, newsletter, nivel)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                    password_hash, empresa, sector, tamano_empresa, newsletter,
+                                    nivel, confirmation_token)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING usuario_id
                 """
                 result = db.execute_query(query, params, fetch=True)
@@ -150,8 +180,9 @@ class Usuario:
                 # SQLite
                 query = """
                 INSERT INTO Usuarios (nombres, apellidos, email, telefono, nombre_usuario,
-                                    password_hash, empresa, sector, tamano_empresa, newsletter, nivel)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    password_hash, empresa, sector, tamano_empresa, newsletter,
+                                    nivel, confirmation_token)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
 
                 db.execute_query(query, params)
@@ -173,7 +204,14 @@ class Usuario:
                 'nombres': nombres,
                 'apellidos': apellidos,
                 'email': email,
-                'nivel': 'basico'
+                'telefono': telefono,
+                'empresa': empresa,
+                'sector': sector,
+                'tamano_empresa': tamano_empresa,
+                'newsletter': newsletter_int,
+                'nivel': 'basico',
+                'email_confirmado': False,
+                'confirmation_token': confirmation_token
             }
             return Usuario(**usuario_data)
 
@@ -231,6 +269,11 @@ class Usuario:
             usuarios = []
             if result:
                 for data in result:
+                    # Convertir valores booleanos de SQLite (0/1) a booleanos Python
+                    if 'email_confirmado' in data:
+                        data['email_confirmado'] = bool(data['email_confirmado'])
+                    if 'newsletter' in data:
+                        data['newsletter'] = bool(data['newsletter'])
                     usuarios.append(Usuario(**data))
             return usuarios
         except Exception as e:

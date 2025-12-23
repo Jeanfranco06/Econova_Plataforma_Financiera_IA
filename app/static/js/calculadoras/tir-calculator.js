@@ -94,7 +94,7 @@ class TIRCalculator {
         // Calcular VAN a la TIR encontrada (verificación)
         let vanATir = null;
         if (tir !== null) {
-            vanATir = FinancialUtils.calcularVAN(flujos, tir);
+            vanATir = FinancialUtils.calcularVAN(flujos, tir / 100); // Convertir porcentaje a decimal
         }
 
         // Calcular VAN con tasa de descuento estándar para comparación
@@ -460,11 +460,8 @@ class TIRCalculator {
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.tirCalculator.guardarAnalisis()">
                 <i class="fas fa-save mr-2"></i>Guardar Análisis
               </button>
-              <button class="border-2 border-green-600 text-green-600 px-6 py-3 rounded-lg hover:bg-green-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.tirCalculator.compartirAnalisis()">
-                <i class="fas fa-share mr-2"></i>Compartir Resultados
-              </button>
-              <button class="border-2 border-gray-600 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 hover:text-white transition duration-300 font-semibold flex items-center justify-center" onclick="window.tirCalculator.imprimirAnalisis()">
-                <i class="fas fa-print mr-2"></i>Imprimir Reporte
+              <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.tirCalculator.consultarConIA()">
+                <i class="fas fa-robot mr-2"></i>Consultar con IA
               </button>
             </div>
         `;
@@ -640,6 +637,101 @@ class TIRCalculator {
      */
     actualizarSimulacionTiempoReal(input) {
         UIUtils.actualizarSimulacionTiempoReal(input);
+    }
+
+    /**
+     * Obtiene los datos actuales de la simulación TIR
+     */
+    obtenerDatosActuales() {
+        const simulacion = UIUtils.obtenerSimulacion('tir');
+        if (!simulacion) return null;
+
+        return {
+            tipo: 'tir',
+            tir: simulacion.resultado?.tir || 0,
+            van_tir: simulacion.resultado?.vanATir || 0,
+            inversion: simulacion.datos?.inversion || 0,
+            flujos: simulacion.datos?.flujos || [],
+            metodo: simulacion.datos?.metodo || 'newton',
+            evaluacion: simulacion.resultado?.evaluacion || 'no_calculable',
+            nombre_proyecto: simulacion.datos?.nombreProyecto || 'Proyecto TIR'
+        };
+    }
+
+    /**
+     * Consulta con IA sobre los resultados de TIR
+     */
+    consultarConIA() {
+        console.log('🤖 Consultando con IA sobre resultados TIR');
+
+        // Obtener datos de la simulación actual
+        const datosSimulacion = this.obtenerDatosActuales();
+        console.log('Datos de simulación TIR obtenidos:', datosSimulacion);
+
+        if (!datosSimulacion) {
+            console.error('❌ No se encontraron datos de simulación TIR para consultar con IA');
+            UIUtils.mostrarError('No se encontraron datos de simulación TIR para consultar con IA');
+            return;
+        }
+
+        // Crear mensaje contextual para el chatbot
+        const mensajeContextual = this.crearMensajeContextualTIR(datosSimulacion);
+        console.log('Mensaje contextual TIR creado:', mensajeContextual);
+
+        // Redirigir al chatbot con los datos contextuales
+        this.redirigirAlChatbotTIR(mensajeContextual, datosSimulacion);
+    }
+
+    /**
+     * Crea un mensaje contextual específico para TIR
+     */
+    crearMensajeContextualTIR(datos) {
+        let mensaje = `Hola, acabo de calcular la TIR (Tasa Interna de Retorno) y me gustaría analizar los resultados más profundamente. `;
+
+        if (datos.tir !== null && datos.tir !== 0) {
+            mensaje += `Los resultados son: TIR = ${datos.tir.toFixed(1)}%, VAN a la TIR = S/ ${datos.van_tir?.toLocaleString() || 'N/A'}. `;
+        } else {
+            mensaje += `No se pudo calcular la TIR con los datos proporcionados. `;
+        }
+
+        mensaje += `Los parámetros fueron: Inversión inicial = S/ ${datos.inversion?.toLocaleString() || 'N/A'}, `;
+        mensaje += `Flujos de caja: ${datos.flujos ? datos.flujos.map((f, i) => `Año ${i+1}: S/ ${f.toLocaleString()}`).join(', ') : 'No disponibles'}. `;
+        mensaje += `Método de cálculo utilizado: ${datos.metodo === 'newton' ? 'Newton-Raphson' : datos.metodo === 'biseccion' ? 'Bisección' : 'Aproximación'}. `;
+
+        if (datos.evaluacion && datos.evaluacion !== 'no_calculable') {
+            mensaje += `La evaluación de la TIR es: ${datos.evaluacion === 'excelente' ? 'Excelente' : datos.evaluacion === 'muy_buena' ? 'Muy Buena' : datos.evaluacion === 'buena' ? 'Buena' : datos.evaluacion === 'aceptable' ? 'Aceptable' : 'Baja'}. `;
+        }
+
+        mensaje += '¿Qué opinas sobre la rentabilidad de este proyecto? ¿Debería compararlo con el WACC? ¿Qué factores podrían afectar la TIR calculada?';
+
+        return mensaje;
+    }
+
+    /**
+     * Redirige al chatbot con datos contextuales de TIR
+     */
+    redirigirAlChatbotTIR(mensaje, datos) {
+        // Store analysis context in sessionStorage for chatbot
+        const analysisContext = {
+          tipo_analisis: 'tir',
+          resultados: {
+            tir: datos.tir,
+            van: datos.van_tir,
+            metodo: datos.metodo,
+            evaluacion: datos.evaluacion,
+            inversion: datos.inversion,
+            flujos: datos.flujos
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        sessionStorage.setItem('currentAnalysisContext', JSON.stringify(analysisContext));
+        console.log('📊 Analysis context stored in sessionStorage for TIR:', analysisContext);
+
+        // Navigate to chatbot
+        const chatbotUrl = `/chatbot`;
+        console.log('🔗 Navigating to chatbot:', chatbotUrl);
+        window.location.href = chatbotUrl;
     }
 }
 

@@ -487,7 +487,7 @@ function createContextualMessage(content, questions) {
         </div>
       </div>
       <div style="background: white; color: #212529; padding: 12px 16px; border-radius: 16px; border-bottom-left-radius: 4px; border: 1px solid #e9ecef; max-width: 100%; word-wrap: break-word;">
-        <div class="whitespace-pre-line">${finalContent}</div>
+        <div class="whitespace-pre-line">${window.chatbotUtils ? window.chatbotUtils.renderMarkdown(finalContent) : finalContent}</div>
         <div style="font-size: 10px; opacity: 0.7; margin-top: 4px; text-align: left;">${timestamp}</div>
       </div>
     </div>
