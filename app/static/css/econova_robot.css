@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface) 50%, var(--color-border) 100%);
     overflow: hidden;
 }
 
@@ -89,7 +89,7 @@
 
 .robot-info .subtitle {
     font-size: 1.25rem;
-    color: #b8c5d1;
+    color: var(--color-text-secondary);
     margin-bottom: 2rem;
     line-height: 1.6;
 }
@@ -130,14 +130,14 @@
 }
 
 .robot-feature h3 {
-    color: #ffffff;
+    color: var(--color-text-primary);
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
 .robot-feature p {
-    color: #b8c5d1;
+    color: var(--color-text-secondary);
     font-size: 0.875rem;
     line-height: 1.5;
 }

@@ -4,12 +4,19 @@
 
 {% block content %}
 <!-- Login Hero -->
-<section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
-  <div class="container mx-auto px-6 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+<section class="bg-white text-gray-900 py-24 relative overflow-hidden">
+  <!-- Elementos decorativos sutiles -->
+  <div class="absolute inset-0 opacity-3">
+    <div class="absolute top-20 left-10 w-32 h-32 border-2 border-blue-200 rounded-full"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 border border-blue-300 rounded-lg rotate-45"></div>
+    <div class="absolute bottom-32 left-1/4 w-16 h-16 bg-blue-100 rounded-full"></div>
+  </div>
+
+  <div class="container mx-auto px-6 text-center relative">
+    <h1 class="text-h1 mb-6 font-heading animate-hero-title">
       Inicia Sesión
     </h1>
-    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+    <p class="text-body-lg text-gray-600 mb-8 max-w-2xl mx-auto font-primary">
       Accede a tu cuenta y continúa con tus simulaciones financieras
     </p>
   </div>

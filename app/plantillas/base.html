@@ -14,45 +14,80 @@
     <style>
         /* Sistema de tipografía profesional */
         :root {
-            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-primary: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-accent: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-            
-        /* Sistema de colores pasteles (finanzas/empresarial) */
-        --color-primary: #93c5fd;      /* Azul pastel */
-        --color-secondary: #cbd5e1;    /* Gris pastel */
-        --color-success: #86efac;      /* Verde pastel */
-        --color-danger: #fca5a5;       /* Rojo pastel */
-        --color-warning: #fde68a;      /* Amarillo pastel */
-        --color-background: #ffffff;
-        --color-surface: #f8fafc;      /* Gris claro fondo */
-        --color-text-primary: #1e293b; /* Texto principal */
-        --color-text-secondary: #64748b; /* Texto secundario */
-        --color-border: #e2e8f0;       /* Bordes sutiles */
-        --color-shadow: rgba(0, 0, 0, 0.08);
-        
-        /* Modo oscuro - colores pasteles oscuros */
-        --dark-color-primary: #60a5fa;      /* Azul pastel oscuro */
-        --dark-color-secondary: #94a3b8;    /* Gris pastel oscuro */
-        --dark-color-success: #4ade80;      /* Verde pastel oscuro */
-        --dark-color-danger: #f87171;       /* Rojo pastel oscuro */
-        --dark-color-warning: #facc15;      /* Amarillo pastel oscuro */
-        --dark-color-background: #0f172a;
-        --dark-color-surface: #1e293b;      /* Gris oscuro fondo */
-        --dark-color-text-primary: #f1f5f9; /* Texto principal oscuro */
-        --dark-color-text-secondary: #94a3b8; /* Texto secundario oscuro */
-        --dark-color-border: #334155;       /* Bordes oscuros */
-        --dark-color-shadow: rgba(0, 0, 0, 0.3);
+
+            /* Sistema de colores - serán definidos dinámicamente por JavaScript */
+            --color-primary: #3b82f6;
+            --color-secondary: #6b7280;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+            --color-background: #ffffff;
+            --color-surface: #f9fafb;
+            --color-text-primary: #111827;
+            --color-text-secondary: #6b7280;
+            --color-border: #d1d5db;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-card-bg: #ffffff;
+            --color-input-bg: #ffffff;
         }
 
         /* Tipografía jerárquica */
-        .text-h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.2; }
-        .text-h2 { font-size: 2rem; font-weight: 600; line-height: 1.3; }
-        .text-h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
-        .text-h4 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-        .text-body-lg { font-size: 1.125rem; line-height: 1.6; }
-        .text-body { font-size: 1rem; line-height: 1.6; }
-        .text-sm { font-size: 0.875rem; line-height: 1.5; }
-        .text-xs { font-size: 0.75rem; line-height: 1.4; }
+        .text-h1 {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+        }
+        .text-h2 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.025em;
+        }
+        .text-h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.4;
+            letter-spacing: -0.025em;
+        }
+        .text-h4 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+            letter-spacing: -0.025em;
+        }
+        .text-body-lg {
+            font-family: var(--font-primary);
+            font-size: 1.125rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        .text-body {
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        .text-sm {
+            font-family: var(--font-primary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .text-xs {
+            font-family: var(--font-primary);
+            font-size: 0.75rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
         
         /* Énfasis en datos financieros */
         .text-data { font-family: var(--font-mono); font-weight: 600; font-size: 1.125rem; }
@@ -60,17 +95,17 @@
         
         /* Componentes UI profesionales */
         .card-elevated {
-            background: white;
+            background: var(--color-card-bg);
             border: 1px solid var(--color-border);
             border-radius: 12px;
             box-shadow: 0 4px 6px var(--color-shadow);
             transition: all 0.2s ease;
         }
-        
+
         .card-elevated:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 15px var(--color-shadow);
-            border-color: #cbd5e1;
+            border-color: var(--color-primary);
         }
 
         .btn-primary {
@@ -178,7 +213,7 @@
 
         /* Métricas de resultados */
         .metric-card {
-            background: white;
+            background: var(--color-card-bg);
             border: 1px solid var(--color-border);
             border-radius: 12px;
             padding: 24px;
@@ -358,23 +393,167 @@
         }
 
         /* Navegación profesional */
-        .nav-item {
+        .nav-bg {
+            background-color: var(--color-card-bg);
+            box-shadow: 0 4px 6px var(--color-shadow);
+        }
+
+        .nav-brand {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-link {
             color: var(--color-text-secondary);
             font-weight: 500;
             padding: 8px 16px;
             border-radius: 8px;
             transition: all 0.2s ease;
         }
-        
-        .nav-item:hover {
+
+        .nav-link:hover {
             color: var(--color-primary);
             background-color: var(--color-surface);
         }
-        
-        .nav-item.active {
+
+        .nav-link.active {
             color: var(--color-primary);
-            background-color: rgba(37, 99, 235, 0.1);
+            background-color: rgba(59, 130, 246, 0.1);
             font-weight: 600;
+        }
+
+        .nav-user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-text-secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-user-btn:hover {
+            color: var(--color-primary);
+            background-color: var(--color-surface);
+        }
+
+        .nav-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            width: 192px;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px var(--color-shadow);
+            padding: 8px 0;
+            z-index: 99999;
+            display: none;
+        }
+
+        .nav-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .nav-dropdown-header p:first-child {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+
+        .nav-dropdown-header p:last-child {
+            color: var(--color-text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .nav-dropdown-item {
+            display: block;
+            padding: 8px 16px;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-dropdown-item:hover {
+            color: var(--color-text-primary);
+            background-color: var(--color-surface);
+        }
+
+        .nav-dropdown-danger:hover {
+            color: var(--color-danger);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .nav-dropdown-divider {
+            border-top: 1px solid var(--color-border);
+            margin: 4px 0;
+        }
+
+        .nav-theme-btn {
+            margin-left: 16px;
+            padding: 8px;
+            background-color: var(--color-surface);
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s ease;
+            color: var(--color-warning);
+        }
+
+        .nav-theme-btn:hover {
+            background-color: var(--color-border);
+        }
+
+        .nav-login-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-login-btn:hover {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .nav-register-btn {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-register-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .nav-mobile-btn {
+            color: var(--color-text-secondary);
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-mobile-btn:hover {
+            color: var(--color-primary);
+            background-color: var(--color-surface);
         }
 
         /* Sistema de alertas */
@@ -402,20 +581,287 @@
             padding: 16px;
         }
 
-        /* Animaciones sutiles */
+        /* Animaciones sofisticadas de entrada */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .animate-fade-in-up {
-            animation: fadeInUp 0.4s ease-out;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .animate-fade-in-up.animate-scroll-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .animate-fade-in-left {
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .animate-fade-in-left.animate-scroll-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .animate-fade-in-right {
+            opacity: 0;
+            transform: translateX(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .animate-fade-in-right.animate-scroll-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .animate-scale-in {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease-out;
+        }
+
+        .animate-scale-in.animate-scroll-in {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .animate-slide-in-up {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.7s ease-out;
+        }
+
+        .animate-slide-in-up.animate-scroll-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Animaciones con delay para secuencia */
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        .animate-delay-500 { animation-delay: 0.5s; }
+        .animate-delay-600 { animation-delay: 0.6s; }
+        .animate-delay-700 { animation-delay: 0.7s; }
+
+        /* Mobile menu styles */
+        .nav-mobile-menu {
+            display: none;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            margin-top: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 6px var(--color-shadow);
+        }
+
+        .nav-mobile-item {
+            display: block;
+            padding: 8px 0;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .nav-mobile-item:hover {
+            color: var(--color-primary);
+            background-color: var(--color-surface);
+        }
+
+        .nav-mobile-item.active {
+            color: var(--color-primary);
+            background-color: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+
+        .nav-mobile-divider {
+            border-top: 1px solid var(--color-border);
+            margin: 16px 0;
+            padding-top: 16px;
+        }
+
+        .nav-mobile-user {
+            background-color: var(--color-surface);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .nav-mobile-user p:first-child {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+
+        .nav-mobile-user p:last-child {
+            color: var(--color-text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .nav-mobile-danger {
+            color: var(--color-danger) !important;
+        }
+
+        .nav-mobile-danger:hover {
+            background-color: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        /* Hero Card Styles - Theme Compatible */
+        .hero-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px var(--color-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--color-shadow);
+        }
+
+        .hero-card-icon-bg {
+            background: var(--color-primary);
+            opacity: 0.1;
+        }
+
+        .hero-card-icon {
+            color: var(--color-primary);
+        }
+
+        .hero-card-title {
+            color: var(--color-text-primary);
+        }
+
+        .hero-card-text {
+            color: var(--color-text-secondary);
+        }
+
+        /* Animaciones del Hero Section */
+        .animate-hero-title {
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: heroFadeInUp 0.8s ease-out 0.2s forwards;
+        }
+
+        .animate-hero-line {
+            opacity: 0;
+            transform: scaleX(0);
+            animation: heroLineGrow 0.6s ease-out 0.6s forwards;
+        }
+
+        .animate-hero-subtitle {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroFadeInUp 0.8s ease-out 0.8s forwards;
+        }
+
+        .animate-hero-description {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroFadeInUp 0.8s ease-out 1.0s forwards;
+        }
+
+        .animate-hero-button-1 {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroFadeInUp 0.6s ease-out 1.2s forwards;
+        }
+
+        .animate-hero-button-2 {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroFadeInUp 0.6s ease-out 1.4s forwards;
+        }
+
+        .animate-hero-metrics {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: heroFadeInUp 0.8s ease-out 1.6s forwards;
+        }
+
+        @keyframes heroFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heroLineGrow {
+            from {
+                opacity: 0;
+                transform: scaleX(0);
+            }
+            to {
+                opacity: 1;
+                transform: scaleX(1);
+            }
         }
 
         /* Responsive mejorado */
@@ -427,18 +873,39 @@
                 bottom: 0;
                 border-radius: 16px 16px 0 0;
             }
-            
+
             .chatbot-trigger {
                 right: 16px;
                 bottom: 16px;
                 width: 56px;
                 height: 56px;
             }
+
+            .hero-card {
+                padding: 1.5rem;
+            }
+
+            .animate-hero-title,
+            .animate-hero-subtitle,
+            .animate-hero-description {
+                transform: translateY(0);
+                animation: heroFadeIn 0.8s ease-out forwards;
+            }
+
+            .animate-hero-line {
+                transform: scaleX(0);
+                animation: heroLineGrow 0.6s ease-out 0.4s forwards;
+            }
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Fuentes profesionales -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -447,184 +914,181 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 </head>
 
-<body class="font-primary antialiased bg-background text-text-primary" data-usuario-id="{{ session.get('usuario_id', '') }}">
+<body class="font-primary antialiased" style="background-color: var(--color-background); color: var(--color-text-primary);" data-usuario-id="{{ session.get('usuario_id', '') }}">
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg fixed w-full z-50">
+    <nav class="nav-bg fixed w-full z-50">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center">
-                    <a href="/" class="text-2xl font-bold text-blue-600">Econova</a>
+                    <a href="/" class="nav-brand">Econova</a>
                 </div>
 
-                <div class="hidden lg:flex items-center space-x-8">
+                <div class="hidden lg:flex items-center">
                     {% set current_path = request.path %}
-                    {% if current_path == '/' %}
-                    <a href="#caracteristicas"
-                        class="text-gray-700 hover:text-blue-600 transition duration-300">Características</a>
-                    <a href="#simulacion"
-                        class="text-gray-700 hover:text-blue-600 transition duration-300">Simulaciones</a>
-                    {% endif %}
 
-                    <!-- Páginas principales siempre visibles -->
-                    <a href="/simulacion"
-                        class="{% if current_path == '/simulacion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Simulación</a>
-                    <a href="/chatbot"
-                        class="{% if current_path == '/chatbot' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Chatbot</a>
-                    <a href="/benchmarking"
-                        class="{% if current_path == '/benchmarking' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300">Benchmarking</a>
-                    <a href="/gamification"
-                        class="{% if current_path == '/gamification' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300"><i
-                            class="fas fa-trophy mr-1"></i>Gamificación</a>
-                    <a href="/prestamo"
-                        class="{% if current_path == '/prestamo' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300"><i
-                            class="fas fa-file-invoice-dollar mr-1"></i>Préstamos</a>
-                    <a href="/ahorro-inversion"
-                        class="{% if current_path == '/ahorro-inversion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %} transition duration-300"><i
-                            class="fas fa-piggy-bank mr-1"></i>Ahorro</a>
+                    <!-- Navegación Principal -->
+                    <div class="flex items-center space-x-1 mr-6">
+                        {% if current_path == '/' %}
+                        <a href="#caracteristicas" class="nav-link">Características</a>
+                        <a href="#simulacion" class="nav-link">Simulaciones</a>
+                        {% endif %}
 
-                    {% if current_path not in ['/', '/chatbot', '/benchmarking', '/gamification', '/simulacion', '/prestamo',
-                    '/ahorro-inversion'] %}
-                    <a href="/" class="text-gray-700 hover:text-blue-600 transition duration-300">Inicio</a>
-                    {% endif %}
+                        {% if current_path not in ['/', '/chatbot', '/benchmarking', '/gamification', '/simulacion', '/prestamo', '/ahorro-inversion'] %}
+                        <a href="/" class="nav-link">Inicio</a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Herramientas Financieras - Dropdown -->
+                    <div class="relative mr-6">
+                        <button id="herramientas-menu-button" class="nav-link flex items-center">
+                            <i class="fas fa-tools mr-1"></i>Herramientas
+                            <i class="fas fa-chevron-down text-xs ml-1"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="herramientas-dropdown" class="nav-dropdown">
+                            <div class="nav-dropdown-header">
+                                <p class="text-sm font-medium">Herramientas Financieras</p>
+                                <p class="text-xs">Accede a nuestras calculadoras y asistentes</p>
+                            </div>
+                            <a href="/simulacion" class="nav-dropdown-item {% if current_path == '/simulacion' %}active{% endif %}">
+                                <i class="fas fa-calculator mr-2"></i>Simulación Financiera
+                                <span class="text-xs text-gray-400 ml-auto">VAN, TIR, WACC</span>
+                            </a>
+                            <a href="/chatbot" class="nav-dropdown-item {% if current_path == '/chatbot' %}active{% endif %}">
+                                <i class="fas fa-robot mr-2"></i>Chatbot IA
+                                <span class="text-xs text-gray-400 ml-auto">Asistente inteligente</span>
+                            </a>
+                            <a href="/benchmarking" class="nav-dropdown-item {% if current_path == '/benchmarking' %}active{% endif %}">
+                                <i class="fas fa-chart-bar mr-2"></i>Benchmarking
+                                <span class="text-xs text-gray-400 ml-auto">Comparativas</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Servicios Avanzados -->
+                    <div class="flex items-center space-x-1 mr-6">
+                        <a href="/gamification" class="nav-link {% if current_path == '/gamification' %}active{% endif %}" title="Sistema de Recompensas">
+                            <i class="fas fa-trophy mr-1"></i>Gamificación
+                        </a>
+                        <a href="/prestamo" class="nav-link {% if current_path == '/prestamo' %}active{% endif %}" title="Análisis de Préstamos">
+                            <i class="fas fa-file-invoice-dollar mr-1"></i>Préstamos
+                        </a>
+                        <a href="/ahorro-inversion" class="nav-link {% if current_path == '/ahorro-inversion' %}active{% endif %}" title="Planificación de Ahorro">
+                            <i class="fas fa-piggy-bank mr-1"></i>Ahorro
+                        </a>
+                    </div>
 
                     {% if session.usuario_id %}
                     <!-- User Menu -->
                     <div class="relative">
-                        <button id="user-menu-button"
-                            class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition duration-300">
+                        <button id="user-menu-button" class="nav-user-btn">
                             {% if session.usuario_foto_perfil %}
-                            <img src="{{ url_for('static', filename='uploads/profile_pictures/' + session.usuario_foto_perfil) }}"
-                                 alt="Foto de perfil"
-                                 class="w-8 h-8 rounded-full object-cover">
+                            <img src="{{ url_for('static', filename='uploads/profile_pictures/' + session.usuario_foto_perfil) }}" alt="Foto de perfil" class="w-8 h-8 rounded-full object-cover">
                             {% else %}
-                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                <span class="text-white text-sm font-semibold">
-                                    {{ session.usuario_nombre[0] if session.usuario_nombre else 'U' }}
-                                </span>
+                            <div class="nav-user-avatar">
+                                <span class="text-white text-sm font-semibold">{{ session.usuario_nombre[0] if session.usuario_nombre else 'U' }}</span>
                             </div>
                             {% endif %}
-                            <span class="font-medium">{{ session.usuario_nombre.split(' ')[0] if session.usuario_nombre
-                                else 'Usuario' }}</span>
+                            <span class="font-medium">{{ session.usuario_nombre.split(' ')[0] if session.usuario_nombre else 'Usuario' }}</span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div id="user-dropdown"
-                            class="dropdown-menu absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2"
-                            style="z-index: 99999 !important; position: absolute !important; display: none !important;">
-                            <div class="px-4 py-2 border-b border-gray-200">
-                                <p class="text-sm font-medium text-gray-800">{{ session.usuario_nombre }}</p>
-                                <p class="text-xs text-gray-600">{{ session.usuario_email }}</p>
+                        <div id="user-dropdown" class="nav-dropdown">
+                            <div class="nav-dropdown-header">
+                                <p class="text-sm font-medium">{{ session.usuario_nombre }}</p>
+                                <p class="text-xs">{{ session.usuario_email }}</p>
                             </div>
-                            <a href="/dashboard"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                            <a href="/dashboard" class="nav-dropdown-item">
                                 <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                             </a>
-                            <a href="/perfil"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                            <a href="/perfil" class="nav-dropdown-item">
                                 <i class="fas fa-user mr-2"></i>Mi Perfil
                             </a>
-                            <a href="/resultados"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                            <a href="/resultados" class="nav-dropdown-item">
                                 <i class="fas fa-chart-line mr-2"></i>Mis Resultados
                             </a>
-                            <a href="/simulacion"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                            <a href="/simulacion" class="nav-dropdown-item">
                                 <i class="fas fa-plus-circle mr-2"></i>Nueva Simulación
                             </a>
-                            <div class="border-t border-gray-200 my-1"></div>
-                            <a href="/logout"
-                                class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">
+                            <div class="nav-dropdown-divider"></div>
+                            <a href="/logout" class="nav-dropdown-item nav-dropdown-danger">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
                             </a>
                         </div>
                     </div>
 
                     <!-- Theme Toggle Button (Sun/Moon) -->
-                    <button id="theme-toggle-btn" class="ml-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-300" title="Cambiar tema">
-                        <i id="theme-icon" class="fas fa-sun text-yellow-500"></i>
+                    <button id="theme-toggle-btn" class="nav-theme-btn" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-sun"></i>
                     </button>
                     {% else %}
                     <!-- Guest Menu -->
-                    <a href="/login"
-                        class="border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300">
+                    <a href="/login" class="nav-login-btn">
                         <i class="fas fa-sign-in-alt mr-1"></i>Iniciar Sesión
                     </a>
-                    <a href="/registro"
-                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Registrarse</a>
+                    <a href="/registro" class="nav-register-btn">Registrarse</a>
                     {% endif %}
                 </div>
 
                 <!-- Mobile menu button -->
                 <div class="lg:hidden">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600">
+                    <button id="mobile-menu-button" class="nav-mobile-btn">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile menu -->
-            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+            <div id="mobile-menu" class="nav-mobile-menu">
                 {% set current_path = request.path %}
                 {% if current_path == '/' %}
-                <a href="#caracteristicas" class="block py-2 text-gray-700 hover:text-blue-600">Características</a>
-                <a href="#simulacion" class="block py-2 text-gray-700 hover:text-blue-600">Simulaciones</a>
+                <a href="#caracteristicas" class="nav-mobile-item">Características</a>
+                <a href="#simulacion" class="nav-mobile-item">Simulaciones</a>
                 {% endif %}
 
                 <!-- Páginas principales siempre visibles en móvil -->
-                <a href="/simulacion"
-                    class="block py-2 {% if current_path == '/simulacion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Simulación</a>
-                <a href="/chatbot"
-                    class="block py-2 {% if current_path == '/chatbot' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Chatbot</a>
-                <a href="/benchmarking"
-                    class="block py-2 {% if current_path == '/benchmarking' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}">Benchmarking</a>
-                <a href="/gamification"
-                    class="block py-2 {% if current_path == '/gamification' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}"><i
-                        class="fas fa-trophy mr-1"></i>Gamificación</a>
-                <a href="/prestamo"
-                    class="block py-2 {% if current_path == '/prestamo' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}"><i
-                        class="fas fa-file-invoice-dollar mr-1"></i>Préstamos</a>
-                <a href="/ahorro-inversion"
-                    class="block py-2 {% if current_path == '/ahorro-inversion' %}text-blue-600 font-semibold{% else %}text-gray-700 hover:text-blue-600{% endif %}"><i
-                        class="fas fa-piggy-bank mr-1"></i>Ahorro</a>
+                <a href="/simulacion" class="nav-mobile-item {% if current_path == '/simulacion' %}active{% endif %}">Simulación</a>
+                <a href="/chatbot" class="nav-mobile-item {% if current_path == '/chatbot' %}active{% endif %}">Chatbot</a>
+                <a href="/benchmarking" class="nav-mobile-item {% if current_path == '/benchmarking' %}active{% endif %}">Benchmarking</a>
+                <a href="/gamification" class="nav-mobile-item {% if current_path == '/gamification' %}active{% endif %}"><i class="fas fa-trophy mr-1"></i>Gamificación</a>
+                <a href="/prestamo" class="nav-mobile-item {% if current_path == '/prestamo' %}active{% endif %}"><i class="fas fa-file-invoice-dollar mr-1"></i>Préstamos</a>
+                <a href="/ahorro-inversion" class="nav-mobile-item {% if current_path == '/ahorro-inversion' %}active{% endif %}"><i class="fas fa-piggy-bank mr-1"></i>Ahorro</a>
 
-                {% if current_path not in ['/', '/chatbot', '/benchmarking', '/gamification', '/simulacion', '/prestamo',
-                '/ahorro-inversion'] %}
-                <a href="/" class="block py-2 text-gray-700 hover:text-blue-600">Inicio</a>
+                {% if current_path not in ['/', '/chatbot', '/benchmarking', '/gamification', '/simulacion', '/prestamo', '/ahorro-inversion'] %}
+                <a href="/" class="nav-mobile-item">Inicio</a>
                 {% endif %}
 
                 {% if session.usuario_id %}
                 <!-- User Mobile Menu -->
-                <div class="border-t border-gray-200 mt-4 pt-4">
-                    <div class="px-2 py-2 bg-gray-50 rounded-lg mb-3">
-                        <p class="text-sm font-medium text-gray-800">{{ session.usuario_nombre.split(' ')[0] if
-                            session.usuario_nombre else 'Usuario' }}</p>
-                        <p class="text-xs text-gray-600">{{ session.usuario_email }}</p>
+                <div class="nav-mobile-divider">
+                    <div class="nav-mobile-user">
+                        <p class="text-sm font-medium">{{ session.usuario_nombre.split(' ')[0] if session.usuario_nombre else 'Usuario' }}</p>
+                        <p class="text-xs">{{ session.usuario_email }}</p>
                     </div>
-                    <a href="/dashboard" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/dashboard" class="nav-mobile-item">
                         <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                     </a>
-                    <a href="/perfil" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/perfil" class="nav-mobile-item">
                         <i class="fas fa-user mr-2"></i>Mi Perfil
                     </a>
-                    <a href="/resultados" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/resultados" class="nav-mobile-item">
                         <i class="fas fa-chart-line mr-2"></i>Mis Resultados
                     </a>
-                    <a href="/simulacion" class="block py-2 text-gray-700 hover:text-blue-600">
+                    <a href="/simulacion" class="nav-mobile-item">
                         <i class="fas fa-plus-circle mr-2"></i>Nueva Simulación
                     </a>
-                    <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 mt-2">
+                    <a href="/logout" class="nav-mobile-item nav-mobile-danger">
                         <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
                     </a>
                 </div>
                 {% else %}
                 <!-- Guest Mobile Menu -->
-                <a href="/login"
-                    class="block py-2 border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg mt-4 text-center">
+                <a href="/login" class="nav-login-btn">
                     <i class="fas fa-sign-in-alt mr-1"></i>Iniciar Sesión
                 </a>
-                <a href="/registro"
-                    class="block py-2 bg-blue-600 text-white px-4 py-2 rounded-lg mt-2 text-center">Registrarse</a>
+                <a href="/registro" class="nav-register-btn">Registrarse</a>
                 {% endif %}
             </div>
         </div>
@@ -735,9 +1199,52 @@
             }
         }
 
-        // Simple dropdown functionality
+        // Dropdown functionality
         function initDropdowns() {
             console.log('🔽 Initializing dropdowns...');
+
+            // Herramientas dropdown
+            const herramientasBtn = document.getElementById('herramientas-menu-button');
+            const herramientasMenu = document.getElementById('herramientas-dropdown');
+
+            console.log('🔧 Herramientas button found:', !!herramientasBtn);
+            console.log('🔧 Herramientas menu found:', !!herramientasMenu);
+
+            if (herramientasBtn && herramientasMenu) {
+                // Ensure dropdown starts hidden
+                herramientasMenu.classList.add('hidden');
+                console.log('🔧 Herramientas menu forced hidden on init');
+
+                herramientasBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🔧 Herramientas button clicked!');
+
+                    // Toggle menu
+                    if (herramientasMenu.classList.contains('hidden')) {
+                        herramientasMenu.classList.remove('hidden');
+                        herramientasMenu.style.display = 'block';
+                        console.log('🔧 Herramientas menu shown');
+                    } else {
+                        herramientasMenu.classList.add('hidden');
+                        herramientasMenu.style.display = 'none';
+                        console.log('🔧 Herramientas menu hidden');
+                    }
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!herramientasBtn.contains(e.target) && !herramientasMenu.contains(e.target)) {
+                        herramientasMenu.classList.add('hidden');
+                        herramientasMenu.style.display = 'none';
+                        console.log('🔧 Herramientas menu closed by outside click');
+                    }
+                });
+
+                console.log('🔧 Herramientas dropdown initialized successfully');
+            } else {
+                console.log('🔧 Herramientas dropdown elements not found');
+            }
 
             // User dropdown
             const userBtn = document.getElementById('user-menu-button');
@@ -751,63 +1258,54 @@
                 userMenu.classList.add('hidden');
                 console.log('👤 User menu forced hidden on init');
 
-                // Add multiple event listeners to ensure it works
                 userBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('👤 User button clicked - event fired!');
-                    console.log('👤 Event target:', e.target);
-                    console.log('👤 Current userMenu display:', userMenu.style.display);
 
-                    // Force toggle using display style
-                    if (userMenu.style.display === 'none' || userMenu.style.display === '') {
+                    // Toggle menu
+                    if (userMenu.classList.contains('hidden')) {
+                        userMenu.classList.remove('hidden');
                         userMenu.style.display = 'block';
                         console.log('👤 User menu shown');
                     } else {
+                        userMenu.classList.add('hidden');
                         userMenu.style.display = 'none';
                         console.log('👤 User menu hidden');
                     }
-
-                    console.log('👤 Final userMenu display:', userMenu.style.display);
-                });
-
-                // Also try mousedown for debugging
-                userBtn.addEventListener('mousedown', function(e) {
-                    console.log('👤 User button mousedown detected');
                 });
 
                 // Close when clicking outside
                 document.addEventListener('click', function(e) {
                     if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
-                        const wasVisible = !userMenu.classList.contains('hidden');
                         userMenu.classList.add('hidden');
-                        if (wasVisible) {
-                            console.log('👤 User menu closed by outside click');
-                        }
+                        userMenu.style.display = 'none';
+                        console.log('👤 User menu closed by outside click');
                     }
                 });
 
                 console.log('👤 User dropdown initialized successfully');
-                console.log('👤 User button element:', userBtn);
-                console.log('👤 User menu element:', userMenu);
             } else {
-                console.error('👤 User dropdown elements not found');
-                console.error('👤 userBtn:', userBtn);
-                console.error('👤 userMenu:', userMenu);
+                console.log('👤 User dropdown elements not found');
             }
-
-            // Theme dropdown removed - now using simple sun/moon toggle
 
             // Close all dropdowns on Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    document.querySelectorAll('.dropdown-menu, #theme-menu').forEach(menu => {
-                        menu.classList.add('hidden');
-                    });
+                    // Close herramientas dropdown
+                    if (herramientasMenu) {
+                        herramientasMenu.classList.add('hidden');
+                        herramientasMenu.style.display = 'none';
+                    }
+                    // Close user dropdown
+                    if (userMenu) {
+                        userMenu.classList.add('hidden');
+                        userMenu.style.display = 'none';
+                    }
                 }
             });
 
-            console.log('🔽 Dropdowns initialization complete');
+            console.log('🔽 All dropdowns initialization complete');
         }
 
         // Initialize dropdowns after a short delay to ensure DOM is ready
@@ -884,9 +1382,9 @@
     <div id="contextual-messages-container" class="contextual-messages-container top-right"></div>
 
     <!-- Scripts de elementos visuales - cargados condicionalmente -->
-    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sistema/theme.js') }}"></script>
     {% if request.path in ['/simulacion', '/benchmarking'] %}
-    <script src="{{ url_for('static', filename='js/contextual_message.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sistema/contextual_message.js') }}"></script>
     {% endif %}
     {% if request.path == '/chatbot' %}
     <!-- Chatbot System - Versión Mejorada 2.0 -->

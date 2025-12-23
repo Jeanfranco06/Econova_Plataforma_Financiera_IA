@@ -14,27 +14,34 @@
 
 {% block content %}
 <!-- Registration Hero -->
-<section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
-  <div class="container mx-auto px-6 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+<section class="bg-white text-gray-900 py-24 relative overflow-hidden">
+  <!-- Elementos decorativos sutiles -->
+  <div class="absolute inset-0 opacity-3">
+    <div class="absolute top-20 left-10 w-32 h-32 border-2 border-blue-200 rounded-full"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 border border-blue-300 rounded-lg rotate-45"></div>
+    <div class="absolute bottom-32 left-1/4 w-16 h-16 bg-blue-100 rounded-full"></div>
+  </div>
+
+  <div class="container mx-auto px-6 text-center relative">
+    <h1 class="text-h1 mb-6 font-heading animate-hero-title">
       Únete a Econova
     </h1>
-    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+    <p class="text-body-lg text-gray-600 mb-8 max-w-2xl mx-auto font-primary">
       Crea tu cuenta gratuita y comienza a optimizar tus decisiones financieras
       con herramientas de IA avanzadas
     </p>
-    <div class="flex items-center justify-center space-x-8 text-sm">
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-green-300 mr-2"></i>
-        <span>100% Gratuito</span>
+    <div class="flex items-center justify-center space-x-8 text-sm animate-hero-metrics">
+      <div class="flex items-center text-green-600">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span class="font-primary font-medium">100% Gratuito</span>
       </div>
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-green-300 mr-2"></i>
-        <span>Sin compromiso</span>
+      <div class="flex items-center text-blue-600">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span class="font-primary font-medium">Sin compromiso</span>
       </div>
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-green-300 mr-2"></i>
-        <span>Configuración rápida</span>
+      <div class="flex items-center text-purple-600">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span class="font-primary font-medium">Configuración rápida</span>
       </div>
     </div>
   </div>
