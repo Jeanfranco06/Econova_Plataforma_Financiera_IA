@@ -327,30 +327,24 @@ def registrar_usuario():
             # Set default level to 'basico'
             Usuario.actualizar_nivel(usuario.usuario_id, 'basico')
 
-            # Send confirmation email asynchronously to avoid blocking the response
+            # Send confirmation email synchronously to ensure user knows if registration was successful
             from app import crear_app
-
-            def send_confirmation_email_async(app):
-                try:
-                    with app.app_context():
-                        # Crear un request context mínimo para render_template_string
-                        with app.test_request_context():
-                            email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
-                            if email_result:
-                                print(f"✅ Email de confirmación enviado exitosamente a {email}")
-                            else:
-                                print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
-                except Exception as e:
-                    print(f"⚠️ Excepción enviando email de confirmación: {e}")
-                    import traceback
-                    print(f"📋 Traceback: {traceback.format_exc()}")
-
-            # Create app instance for the thread
             app_instance = crear_app('production')
+            email_sent = False
 
-            # Start email sending in a separate thread with app context
-            email_thread = threading.Thread(target=send_confirmation_email_async, args=(app_instance,), daemon=True)
-            email_thread.start()
+            try:
+                with app_instance.app_context():
+                    with app_instance.test_request_context():
+                        email_result = email_service.enviar_email_confirmacion(email, nombre_usuario, usuario.confirmation_token)
+                        if email_result:
+                            print(f"✅ Email de confirmación enviado exitosamente a {email}")
+                            email_sent = True
+                        else:
+                            print(f"❌ Error enviando email de confirmación a {email} - email service returned False")
+            except Exception as e:
+                print(f"⚠️ Excepción enviando email de confirmación: {e}")
+                import traceback
+                print(f"📋 Traceback: {traceback.format_exc()}")
 
             # Check if this is an AJAX request (has X-Requested-With header)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -358,12 +352,16 @@ def registrar_usuario():
                 return jsonify({
                     'success': True,
                     'message': 'Usuario registrado exitosamente',
+                    'email_sent': email_sent,
                     'usuario': usuario.to_dict()
                 }), 201
             else:
-                # For regular form submissions, redirect to login page with success message
+                # For regular form submissions, redirect to login page with appropriate message
                 from flask import flash, redirect, url_for
-                flash('¡Registro exitoso! Te hemos enviado un email de confirmación a tu bandeja de entrada. Si no lo recibes en unos minutos, puedes hacer clic en "Reenviar confirmación" en la página de login.', 'info')
+                if email_sent:
+                    flash('¡Registro exitoso! Te hemos enviado un email de confirmación a tu bandeja de entrada. Revisa tu email y haz clic en el enlace para activar tu cuenta.', 'success')
+                else:
+                    flash('¡Registro exitoso! Sin embargo, hubo un problema enviando el email de confirmación. Puedes hacer clic en "Reenviar confirmación" en la página de login para intentarlo de nuevo.', 'warning')
                 return redirect(url_for('login'))
         else:
             if not request.is_json:
