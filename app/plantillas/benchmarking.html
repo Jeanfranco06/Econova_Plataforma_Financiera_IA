@@ -6,368 +6,352 @@
 <!-- Chart.js for visualizations -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Benchmarking functionality -->
-<script src="{{ url_for('static', filename='js/benchmarking.js') }}"></script>
+<!-- Benchmarking functionality (modular) -->
+<script src="{{ url_for('static', filename='js/benchmarking/modules/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/benchmarking/modules/ui.js') }}"></script>
+<script src="{{ url_for('static', filename='js/benchmarking/benchmarking.js') }}"></script>
+
+<!-- Custom notification system for benchmarking -->
+<script>
+class BenchmarkingNotifications {
+    constructor() {
+        this.container = null;
+        this.init();
+    }
+
+    init() {
+        // Create notification container
+        this.container = document.createElement('div');
+        this.container.id = 'benchmarking-notifications';
+        this.container.className = 'fixed top-4 right-4 z-50 space-y-2';
+        document.body.appendChild(this.container);
+    }
+
+    success(message, title = 'Éxito') {
+        this.show(message, title, 'success');
+    }
+
+    error(message, title = 'Error') {
+        this.show(message, title, 'error');
+    }
+
+    warning(message, title = 'Advertencia') {
+        this.show(message, title, 'warning');
+    }
+
+    info(message, title = 'Información') {
+        this.show(message, title, 'info');
+    }
+
+    show(message, title, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type} max-w-sm w-full bg-white shadow-lg rounded-lg border-l-4 transform translate-x-full transition-all duration-300 ease-out`;
+
+        // Set border and icon colors based on type
+        const colors = {
+            success: 'border-green-500',
+            error: 'border-red-500',
+            warning: 'border-yellow-500',
+            info: 'border-blue-500'
+        };
+
+        const icons = {
+            success: 'fas fa-check-circle text-green-500',
+            error: 'fas fa-exclamation-circle text-red-500',
+            warning: 'fas fa-exclamation-triangle text-yellow-500',
+            info: 'fas fa-info-circle text-blue-500'
+        };
+
+        notification.classList.add(colors[type]);
+
+        notification.innerHTML = `
+            <div class="flex items-start p-4">
+                <div class="flex-shrink-0">
+                    <i class="${icons[type]} text-lg"></i>
+                </div>
+                <div class="ml-3 w-0 flex-1 min-w-0">
+                    <p class="notification-title text-sm font-medium text-gray-900">${title}</p>
+                    <p class="notification-content mt-1 text-sm text-gray-600 break-words">${message}</p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md p-1">
+                        <span class="sr-only">Cerrar</span>
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Add to container
+        this.container.appendChild(notification);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            notification.classList.remove('translate-x-full');
+            notification.classList.add('translate-x-0');
+        });
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            this.remove(notification);
+        }, 5000);
+
+        // Manual close
+        const closeBtn = notification.querySelector('button');
+        closeBtn.addEventListener('click', () => {
+            this.remove(notification);
+        });
+    }
+
+    remove(notification) {
+        notification.classList.remove('translate-x-0');
+        notification.classList.add('translate-x-full');
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
+
+// Initialize notifications
+document.addEventListener('DOMContentLoaded', function() {
+    window.benchmarkingNotifications = new BenchmarkingNotifications();
+});
+</script>
+
+<style>
+.notification {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: 400px;
+    min-width: 300px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.notification .notification-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: none;
+    -webkit-box-orient: vertical;
+}
+
+.notification .notification-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.notification-success {
+    border-left-color: #10b981;
+}
+
+.notification-error {
+    border-left-color: #ef4444;
+}
+
+.notification-warning {
+    border-left-color: #f59e0b;
+}
+
+.notification-info {
+    border-left-color: #3b82f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .notification {
+        max-width: 90vw;
+        min-width: 280px;
+    }
+}
+
+/* Animation keyframes */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Benchmarking Hero -->
-<section class="bg-slate-900 text-white py-16">
-  <div class="container mx-auto px-6 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">
-      Benchmarking Anónimo
-    </h1>
-    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-      Compara tus resultados con otros empresarios de manera anónima y confidencial
-    </p>
-  </div>
-</section>
+<!-- User ID for JavaScript access -->
+{% if session.get('usuario_id') %}
+<div id="user-info" data-user-id="{{ session.usuario_id }}" style="display: none;"></div>
+{% endif %}
 
-<!-- Benchmarking Navigation -->
-<section class="py-8 bg-white border-b">
-  <div class="container mx-auto px-6">
-    <div class="flex flex-wrap justify-center space-x-4">
-      <button id="btn-grupos" class="benchmarking-tab active bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
-        <i class="fas fa-users mr-2"></i>Grupos de Benchmarking
-      </button>
-      <button id="btn-sectorial" class="benchmarking-tab bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
-        <i class="fas fa-industry mr-2"></i>Benchmarking Sectorial
-      </button>
-      <button id="btn-personalizado" class="benchmarking-tab bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
-        <i class="fas fa-balance-scale mr-2"></i>Comparación Personalizada
-      </button>
-      <button id="btn-resultados" class="benchmarking-tab bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
-        <i class="fas fa-chart-bar mr-2"></i>Mis Resultados
-      </button>
+<div class="min-h-screen bg-gray-50">
+  <!-- Benchmarking Hero -->
+  <section class="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-16">
+    <div class="container mx-auto px-6 text-center">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          Benchmarking Anónimo
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
+          Compara tus resultados con otros empresarios de manera <span class="font-semibold">100% anónima</span> y confidencial
+        </p>
+
+        <!-- Trust Indicators -->
+        <div class="flex flex-wrap justify-center gap-6 mb-8">
+          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <i class="fas fa-shield-alt text-green-400 mr-2"></i>
+            <span class="text-sm font-medium">Anonimización Avanzada</span>
+          </div>
+          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <i class="fas fa-chart-line text-blue-400 mr-2"></i>
+            <span class="text-sm font-medium">Análisis Inteligente</span>
+          </div>
+          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <i class="fas fa-users text-purple-400 mr-2"></i>
+            <span class="text-sm font-medium">Comparaciones Seguras</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Benchmarking Content -->
-<section class="py-16 bg-gray-50">
-  <div class="container mx-auto px-6">
-    <div class="max-w-6xl mx-auto">
+  <!-- Calculator Selection -->
+  <section class="py-12 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">Elige tu Tipo de Benchmarking</h2>
+          <p class="text-gray-600 text-lg">Selecciona la herramienta que mejor se adapte a tus necesidades de comparación</p>
+        </div>
 
-      <!-- Grupos de Benchmarking Tab -->
-      <div id="tab-grupos" class="benchmarking-content">
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Grupos de Benchmarking</h2>
-            <button id="btn-crear-grupo" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
-              <i class="fas fa-plus mr-2"></i>Crear Grupo
+        <!-- Calculator Cards -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <!-- Grupos de Benchmarking -->
+          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="grupos">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-blue-600 text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Grupos</h3>
+              <p class="text-sm text-gray-600">Únete a comunidades especializadas y compara con pares similares</p>
+            </div>
+          </div>
+
+          <!-- Benchmarking Sectorial -->
+          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-green-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="sectorial">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-industry text-green-600 text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Sectorial</h3>
+              <p class="text-sm text-gray-600">Analiza tu desempeño contra estándares sectoriales</p>
+            </div>
+          </div>
+
+          <!-- Comparación Personalizada -->
+          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-purple-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="personalizado">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-balance-scale text-purple-600 text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Personalizada</h3>
+              <p class="text-sm text-gray-600">Compara contra empresas específicas que elijas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="text-center">
+          <div class="inline-flex items-center space-x-4 bg-gray-50 rounded-full px-6 py-3">
+            <span class="text-sm text-gray-600">¿Nuevo aquí?</span>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition duration-300">
+              Ver Guía Rápida
             </button>
           </div>
-
-          <div class="grid md:grid-cols-2 gap-6" id="grupos-container">
-            <!-- Grupos se cargarán aquí dinámicamente -->
-          </div>
         </div>
-      </div>
-
-      <!-- Benchmarking Sectorial Tab -->
-      <div id="tab-sectorial" class="benchmarking-content hidden">
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-          <h2 class="text-2xl font-bold text-gray-800 mb-6">Benchmarking Sectorial</h2>
-
-          <form id="form-benchmarking-sectorial" class="space-y-6">
-            <div class="grid md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Sector de tu Empresa</label>
-                <select name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  <option value="">Seleccionar sector...</option>
-                  <option value="Tecnología">Tecnología</option>
-                  <option value="Manufactura">Manufactura</option>
-                  <option value="Comercio">Comercio</option>
-                  <option value="Servicios Financieros">Servicios Financieros</option>
-                  <option value="Construcción">Construcción</option>
-                  <option value="Salud">Salud</option>
-                  <option value="Educación">Educación</option>
-                  <option value="Turismo">Turismo</option>
-                  <option value="Agricultura">Agricultura</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tamaño de Empresa</label>
-                <select name="tamano_empresa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  <option value="todos">Todos los tamaños</option>
-                  <option value="micro">Microempresa (1-10 empleados)</option>
-                  <option value="pequena">Pequeña (11-50 empleados)</option>
-                  <option value="mediana">Mediana (51-200 empleados)</option>
-                  <option value="grande">Grande (201+ empleados)</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Período de Análisis</label>
-              <select name="periodo" class="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                <option value="ultimo_anio">Último año</option>
-                <option value="ultimos_6_meses">Últimos 6 meses</option>
-                <option value="ultimos_3_meses">Últimos 3 meses</option>
-                <option value="ultimo_trimestre">Último trimestre</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-4">Indicadores Financieros</label>
-              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="ingresos" class="mr-2">
-                    <span>Ingresos Totales (S/)</span>
-                  </label>
-                  <input type="number" name="ingresos" placeholder="Ej: 500000" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="margen_beneficio" class="mr-2">
-                    <span>Margen de Beneficio (%)</span>
-                  </label>
-                  <input type="number" step="0.01" name="margen_beneficio" placeholder="Ej: 15.5" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="roi" class="mr-2">
-                    <span>ROI (%)</span>
-                  </label>
-                  <input type="number" step="0.01" name="roi" placeholder="Ej: 22.3" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="empleados" class="mr-2">
-                    <span>Número de Empleados</span>
-                  </label>
-                  <input type="number" name="empleados" placeholder="Ej: 25" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="crecimiento" class="mr-2">
-                    <span>Crecimiento Anual (%)</span>
-                  </label>
-                  <input type="number" step="0.01" name="crecimiento" placeholder="Ej: 18.5" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-
-                <div class="metric-input">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="metricas[]" value="endeudamiento" class="mr-2">
-                    <span>Nivel de Endeudamiento (%)</span>
-                  </label>
-                  <input type="number" step="0.01" name="endeudamiento" placeholder="Ej: 45.2" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent metric-value" disabled>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-center">
-              <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
-                <i class="fas fa-chart-bar mr-2"></i>Generar Análisis Sectorial
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Comparación Personalizada Tab -->
-      <div id="tab-personalizado" class="benchmarking-content hidden">
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-          <h2 class="text-2xl font-bold text-gray-800 mb-6">Comparación Personalizada</h2>
-
-          <form id="form-comparacion-personalizada" class="space-y-6">
-            <div class="bg-blue-50 p-4 rounded-lg mb-6">
-              <h3 class="text-lg font-semibold text-blue-800 mb-2">Información de tu Empresa</h3>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de tu Empresa</label>
-                  <input type="text" name="empresa_base_nombre" placeholder="Mi Empresa S.A." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                </div>
-              </div>
-
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Indicadores Financieros</label>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label class="block text-sm text-gray-600 mb-1">Ingresos (S/)</label>
-                    <input type="number" name="empresa_base_ingresos" placeholder="500000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-gray-600 mb-1">Margen Beneficio (%)</label>
-                    <input type="number" step="0.01" name="empresa_base_margen_beneficio" placeholder="15.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-gray-600 mb-1">ROI (%)</label>
-                    <input type="number" step="0.01" name="empresa_base_roi" placeholder="22.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-gray-600 mb-1">Empleados</label>
-                    <input type="number" name="empresa_base_empleados" placeholder="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-gray-600 mb-1">Crecimiento (%)</label>
-                    <input type="number" step="0.01" name="empresa_base_crecimiento" placeholder="18.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Empresas para Comparar</h3>
-              <div id="empresas-comparacion-container">
-                <div class="empresa-comparacion bg-gray-50 p-4 rounded-lg mb-4">
-                  <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-medium text-gray-700">Empresa 1</h4>
-                    <button type="button" class="remover-empresa text-red-600 hover:text-red-800">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                  <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm text-gray-600 mb-1">Nombre</label>
-                      <input type="text" name="empresa_1_nombre" placeholder="Empresa Competidora S.A." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                      <div>
-                        <label class="block text-sm text-gray-600 mb-1">Ingresos (S/)</label>
-                        <input type="number" name="empresa_1_ingresos" placeholder="450000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                      </div>
-                      <div>
-                        <label class="block text-sm text-gray-600 mb-1">Margen (%)</label>
-                        <input type="number" step="0.01" name="empresa_1_margen_beneficio" placeholder="12.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                      </div>
-                      <div>
-                        <label class="block text-sm text-gray-600 mb-1">ROI (%)</label>
-                        <input type="number" step="0.01" name="empresa_1_roi" placeholder="18.7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                      </div>
-                      <div>
-                        <label class="block text-sm text-gray-600 mb-1">Empleados</label>
-                        <input type="number" name="empresa_1_empleados" placeholder="22" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                      </div>
-                      <div>
-                        <label class="block text-sm text-gray-600 mb-1">Crecimiento (%)</label>
-                        <input type="number" step="0.01" name="empresa_1_crecimiento" placeholder="15.2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" id="btn-agregar-empresa" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300">
-                <i class="fas fa-plus mr-2"></i>Agregar Empresa
-              </button>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Criterios de Comparación</label>
-              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <label class="flex items-center">
-                  <input type="checkbox" name="criterios_comparacion[]" value="ingresos" class="mr-2" checked>
-                  <span>Ingresos</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="criterios_comparacion[]" value="margen_beneficio" class="mr-2" checked>
-                  <span>Margen de Beneficio</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="criterios_comparacion[]" value="roi" class="mr-2" checked>
-                  <span>ROI</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="criterios_comparacion[]" value="empleados" class="mr-2">
-                  <span>Número de Empleados</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="criterios_comparacion[]" value="crecimiento" class="mr-2">
-                  <span>Crecimiento</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="flex justify-center">
-              <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-300">
-                <i class="fas fa-balance-scale mr-2"></i>Generar Comparación
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Resultados Tab -->
-      <div id="tab-resultados" class="benchmarking-content hidden">
-        <div class="space-y-6">
-          <div class="bg-white rounded-2xl shadow-xl p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Análisis de Benchmarking</h2>
-            <div id="historial-resultados">
-              <!-- Resultados se cargarán aquí -->
-              <div class="text-center text-gray-500 py-8">
-                <i class="fas fa-chart-bar text-4xl mb-4"></i>
-                <p>No tienes análisis guardados aún. Realiza un benchmarking para ver tus resultados aquí.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Resultados Dinámicos -->
-      <div id="resultado-benchmarking" class="mt-8 hidden"></div>
-      <div id="resultado-comparacion" class="mt-8 hidden"></div>
-
-      <!-- Gráficos -->
-      <div class="mt-8 hidden" id="graficos-container">
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">Visualización de Resultados</h3>
-          <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <canvas id="grafico-benchmarking-percentiles"></canvas>
-            </div>
-            <div>
-              <canvas id="grafico-comparacion-radar"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Back to Dashboard -->
-      <div class="text-center mt-8">
-        <a href="/api/v1/dashboard" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 inline-flex items-center">
-          <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
-        </a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Modal para Crear Grupo -->
-<div id="modal-crear-grupo" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-  <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-800">Crear Grupo de Benchmarking</h3>
-        <button id="cerrar-modal" class="text-gray-400 hover:text-gray-600">
-          <i class="fas fa-times"></i>
-        </button>
+  <!-- Calculator Content Area -->
+  <section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-6">
+      <div class="max-w-6xl mx-auto">
+        <!-- Grupos de Benchmarking Calculator -->
+        {% include 'benchmarking_groups.html' %}
+
+        <!-- Benchmarking Sectorial Calculator -->
+        {% include 'benchmarking_sectorial.html' %}
+
+        <!-- Comparación Personalizada Calculator -->
+        {% include 'benchmarking_personalizado.html' %}
+
+        <!-- Back to Dashboard -->
+        <div class="text-center mt-12">
+          <a href="/dashboard" class="inline-flex items-center bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+          </a>
+        </div>
       </div>
-
-      <form id="form-crear-grupo">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Grupo</label>
-          <input type="text" name="nombre_grupo" placeholder="Ej: Emprendedores Tecnológicos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-        </div>
-
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-          <textarea name="descripcion" placeholder="Describe el propósito del grupo..." rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-        </div>
-
-        <div class="flex justify-end space-x-3">
-          <button type="button" id="cancelar-crear-grupo" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Crear Grupo</button>
-        </div>
-      </form>
     </div>
-  </div>
+  </section>
+
+  <!-- Educational Footer -->
+  <section class="py-12 bg-white border-t">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">¿Por qué usar Benchmarking Anónimo?</h3>
+
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-lock text-blue-600"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-2">Confidencialidad Total</h4>
+            <p class="text-gray-600 text-sm">Tus datos nunca se identifican. Utilizamos técnicas avanzadas de anonimización.</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-lightbulb text-green-600"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-2">Insights Accionables</h4>
+            <p class="text-gray-600 text-sm">Recomendaciones específicas basadas en mejores prácticas del sector.</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-rocket text-purple-600"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-2">Mejora Continua</h4>
+            <p class="text-gray-600 text-sm">Identifica oportunidades de mejora y establece metas realistas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 {% endblock %}

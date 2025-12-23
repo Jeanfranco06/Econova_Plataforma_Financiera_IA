@@ -146,16 +146,24 @@ class UIUtils {
      * Funciones de acción para análisis
      */
     static async guardarAnalisis(tipo) {
+        console.log('🔍 Iniciando guardado de análisis:', tipo);
+
         const simulacion = UIUtils.obtenerSimulacion(tipo);
+        console.log('📊 Simulación obtenida:', simulacion);
+
         if (!simulacion) {
-            UIUtils.mostrarModal('Error', 'No hay análisis para guardar. Realice un cálculo primero.', 'error');
+            console.error('❌ No hay análisis para guardar');
+            UIUtils.mostrarNotificacion('No hay análisis para guardar. Realice un cálculo primero.', 'error');
             return;
         }
 
-        // Obtener usuario_id de la sesión (debería estar disponible en el contexto)
+        // Obtener usuario_id de la sesión
         const usuarioId = this.getUsuarioId();
+        console.log('👤 Usuario ID:', usuarioId);
+
         if (!usuarioId) {
-            UIUtils.mostrarModal('Error', 'Debe iniciar sesión para guardar análisis', 'error');
+            console.error('❌ Usuario no autenticado');
+            UIUtils.mostrarNotificacion('Debe iniciar sesión para guardar análisis', 'error');
             return;
         }
 
@@ -166,11 +174,11 @@ class UIUtils {
             ...this.prepararDatosParaBackend(tipo, simulacion)
         };
 
-        try {
-            // Mostrar modal de carga
-            UIUtils.mostrarModalCarga('Guardando análisis...', 'Estamos guardando su análisis en la base de datos.');
+        console.log('📤 Datos a enviar:', datosEnvio);
 
-            // Hacer la petición al backend
+        try {
+            // Hacer la petición al backend (sin modal)
+            console.log('🌐 Enviando petición a API...');
             const response = await fetch(`/api/v1/financiero/${tipo.toLowerCase()}`, {
                 method: 'POST',
                 headers: {
@@ -179,22 +187,27 @@ class UIUtils {
                 body: JSON.stringify(datosEnvio)
             });
 
+            console.log('📡 Respuesta del servidor:', response.status);
+
             const result = await response.json();
+            console.log('📄 Resultado:', result);
 
             if (response.ok && result.success) {
                 // Actualizar localStorage con el ID de simulación
                 simulacion.simulacion_id = result.data.simulacion_id;
                 UIUtils.guardarSimulacion(tipo, simulacion);
 
-                // Mostrar mensaje de éxito (estilo notificación como subir foto de perfil)
+                // Mostrar mensaje de éxito
+                console.log('✅ Análisis guardado exitosamente');
                 UIUtils.mostrarNotificacion('Análisis guardado exitosamente en su cuenta.');
             } else {
+                console.error('❌ Error en respuesta del servidor:', result.error);
                 throw new Error(result.error || 'Error al guardar el análisis');
             }
 
         } catch (error) {
-            console.error('Error guardando análisis:', error);
-            UIUtils.mostrarModal('Error', `Error al guardar: ${error.message}`, 'error');
+            console.error('💥 Error guardando análisis:', error);
+            UIUtils.mostrarNotificacion(`Error al guardar: ${error.message}`, 'error');
         }
     }
 
@@ -418,35 +431,11 @@ class UIUtils {
     }
 
     /**
-     * Mostrar modal de carga
+     * Mostrar modal de carga (completamente deshabilitado)
      */
     static mostrarModalCarga(titulo, mensaje) {
-        // Remover modales anteriores
-        this.cerrarModal();
-
-        // Crear modal de carga
-        const modal = document.createElement('div');
-        modal.id = 'modal-carga';
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        modal.innerHTML = `
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="flex-shrink-0">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-lg font-medium text-gray-900">${titulo}</h3>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <p class="text-sm text-gray-600">${mensaje}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
+        // Función completamente deshabilitada - no hace nada
+        return;
     }
 
     /**

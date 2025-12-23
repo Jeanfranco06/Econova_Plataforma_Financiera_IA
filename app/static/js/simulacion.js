@@ -2174,8 +2174,47 @@ class SimulacionFinanciera {
             return;
         }
 
-        // Aquí iría la lógica para guardar en base de datos
-        alert('Análisis guardado exitosamente (funcionalidad en desarrollo)');
+        // Usar la función de UIUtils para guardar en base de datos
+        if (window.UIUtils && UIUtils.guardarAnalisis) {
+            UIUtils.guardarAnalisis(tipo);
+        } else {
+            // Fallback: guardar solo en localStorage
+            this.guardarSimulacion(tipo, simulacion);
+            this.mostrarExito('Análisis guardado exitosamente');
+        }
+    }
+
+    /**
+     * Mostrar modal de guardado (deshabilitado)
+     */
+    mostrarModalGuardado() {
+        // No mostrar modal - funcionalidad deshabilitada
+        console.log('Modal de guardado deshabilitado');
+    }
+
+    /**
+     * Ocultar modal de guardado (deshabilitado)
+     */
+    ocultarModalGuardado() {
+        // No hacer nada - funcionalidad deshabilitada
+        console.log('Ocultar modal de guardado deshabilitado');
+    }
+
+    /**
+     * Mostrar mensaje de éxito
+     */
+    mostrarExito(mensaje) {
+        // Usar sistema de notificaciones si está disponible
+        if (window.benchmarkingNotifications) {
+            window.benchmarkingNotifications.success(mensaje, '¡Guardado!');
+        } else if (window.contextualMessages) {
+            window.contextualMessages.success({
+                title: '¡Guardado!',
+                body: mensaje
+            });
+        } else {
+            alert(`¡Guardado! ${mensaje}`);
+        }
     }
 
     compartirAnalisis(tipo) {

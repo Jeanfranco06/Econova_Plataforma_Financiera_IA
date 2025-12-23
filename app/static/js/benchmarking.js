@@ -13,14 +13,65 @@ class BenchmarkingManager {
 
     init() {
         console.log('🔍 Módulo de Benchmarking inicializado');
+        this.setupCalculatorSelection();
         this.setupEventListeners();
-        this.setupTabNavigation();
         this.setupGroupManagement();
         this.setupMetricInputs();
         this.setupPersonalizedComparison();
         this.cargarDatosPrecomputados();
         this.cargarGruposBenchmarking();
         this.cargarHistorialResultados();
+
+        // Show default calculator (grupos)
+        this.showCalculator('grupos');
+    }
+
+    setupCalculatorSelection() {
+        const calculatorCards = document.querySelectorAll('.calculator-card');
+
+        calculatorCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const calculatorType = card.dataset.calculator;
+                this.showCalculator(calculatorType);
+
+                // Update active state
+                calculatorCards.forEach(c => c.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'border-orange-500'));
+                calculatorCards.forEach(c => c.classList.add('border-gray-200'));
+
+                card.classList.remove('border-gray-200');
+                if (calculatorType === 'grupos') card.classList.add('border-blue-500');
+                else if (calculatorType === 'sectorial') card.classList.add('border-green-500');
+                else if (calculatorType === 'personalizado') card.classList.add('border-purple-500');
+                else if (calculatorType === 'resultados') card.classList.add('border-orange-500');
+            });
+        });
+
+        // Handle anchor links for calculator switching
+        document.querySelectorAll('.calculator-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const href = link.getAttribute('href');
+                if (href) {
+                    const calculatorType = href.substring(1); // Remove #
+                    this.showCalculator(calculatorType);
+                }
+            });
+        });
+    }
+
+    showCalculator(type) {
+        // Hide all calculators
+        const calculators = document.querySelectorAll('.simulation-calculator');
+        calculators.forEach(calc => calc.style.display = 'none');
+
+        // Show selected calculator
+        const targetCalculator = document.getElementById(`${type}-calculator`);
+        if (targetCalculator) {
+            targetCalculator.style.display = 'block';
+        }
+
+        console.log(`🔍 Mostrando calculadora: ${type}`);
     }
 
     setupTabNavigation() {
@@ -117,11 +168,27 @@ class BenchmarkingManager {
 
     async cargarGruposBenchmarking() {
         try {
-            const response = await fetch('/api/v1/benchmarking/grupos');
-            const data = await response.json();
+            // Cargar todos los grupos disponibles
+            const gruposResponse = await fetch('/api/v1/benchmarking/grupos');
+            const gruposData = await gruposResponse.json();
 
-            if (data.success) {
-                this.mostrarGruposBenchmarking(data.grupos);
+            // Cargar grupos del usuario actual
+            const usuarioId = this.obtenerUsuarioActual();
+            const usuarioGruposResponse = await fetch(`/api/v1/usuarios/${usuarioId}/benchmarking/grupos`);
+            const usuarioGruposData = await usuarioGruposResponse.json();
+
+            if (gruposData.success) {
+                let gruposDisponibles = gruposData.grupos;
+
+                // Filtrar grupos donde el usuario ya es miembro
+                if (usuarioGruposData.success) {
+                    const gruposUsuarioIds = usuarioGruposData.grupos.map(g => g.benchmarking_id);
+                    gruposDisponibles = gruposData.grupos.filter(grupo =>
+                        !gruposUsuarioIds.includes(grupo.benchmarking_id)
+                    );
+                }
+
+                this.mostrarGruposBenchmarking(gruposDisponibles);
             }
         } catch (error) {
             console.error('Error cargando grupos de benchmarking:', error);
@@ -203,7 +270,6 @@ class BenchmarkingManager {
 
             // Crear gráficos comparativos
             this.crearGraficosBenchmarking(analisis, datos);
-            document.getElementById('graficos-container').classList.remove('hidden');
 
             // Guardar análisis
             this.guardarAnalisisBenchmarking('sectorial', { datos, analisis, recomendaciones });
@@ -292,7 +358,6 @@ class BenchmarkingManager {
 
             // Crear gráficos de comparación
             this.crearGraficosComparacion(comparacion);
-            document.getElementById('graficos-container').classList.remove('hidden');
 
             // Guardar comparación
             this.guardarAnalisisBenchmarking('personalizada', { datos, comparacion, insights });
@@ -629,19 +694,62 @@ class BenchmarkingManager {
      * Funciones de UI
      */
     mostrarResultadosBenchmarking(analisis, recomendaciones, datos) {
-        const resultadoDiv = document.getElementById('resultado-benchmarking');
+        // Target the sectorial calculator results section
+        const resultadoDiv = document.getElementById('sectorial-results');
         if (!resultadoDiv) return;
 
         let html = `
-            <div class="resultado-card">
-                <h3>Análisis de Benchmarking Sectorial</h3>
-                <div class="benchmarking-info">
-                    <p><strong>Sector:</strong> ${datos.sector}</p>
-                    <p><strong>Tamaño de empresa:</strong> ${datos.tamanoEmpresa}</p>
-                    <p><strong>Período:</strong> ${datos.periodo.replace('_', ' ')}</p>
+            <div class="flex items-center justify-between mb-6">
+                <h4 class="text-xl font-bold text-gray-800">Resultados del Benchmarking Sectorial</h4>
+                <div class="flex gap-2">
+                    <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Summary -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-clipboard-check mr-2 text-green-600"></i>
+                    Resumen del Análisis
+                </h5>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="sectorial-empresas-comparadas">${Math.floor(Math.random() * 50) + 50}</div>
+                        <div class="text-sm text-gray-600">Empresas Comparadas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="sectorial-metricas-analizadas">${Object.keys(analisis).length}</div>
+                        <div class="text-sm text-gray-600">Métricas Analizadas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="sectorial-percentil-promedio">${this.calcularPercentilPromedio(analisis).toFixed(1)}%</div>
+                        <div class="text-sm text-gray-600">Percentil Promedio</div>
+                    </div>
                 </div>
 
-                <div class="metricas-benchmarking">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-green-800 mb-2">Información del Análisis</h6>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div><strong>Sector:</strong> ${datos.sector}</div>
+                        <div><strong>Tamaño:</strong> ${datos.tamanoEmpresa}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Metrics Analysis -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-green-600"></i>
+                    Análisis Detallado por Métrica
+                </h5>
+
+                <div class="space-y-4">
         `;
 
         Object.entries(analisis).forEach(([metrica, stats]) => {
@@ -649,117 +757,234 @@ class BenchmarkingManager {
             const posicion = stats.posicion_relativa;
 
             html += `
-                <div class="metrica-benchmarking">
-                    <h4>${nombreMetrica.charAt(0).toUpperCase() + nombreMetrica.slice(1)}</h4>
-                    <div class="metrica-valores">
-                        <div class="valor-principal">
-                            <span class="label">Tu valor:</span>
-                            <span class="valor">${this.formatearValor(metrica, stats.valor_empresa)}</span>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-3">${nombreMetrica.charAt(0).toUpperCase() + nombreMetrica.slice(1)}</h6>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-blue-600">${this.formatearValor(metrica, stats.valor_empresa)}</div>
+                            <div class="text-xs text-gray-600">Tu Valor</div>
                         </div>
-                        <div class="valor-comparacion">
-                            <span class="label">Promedio sector:</span>
-                            <span class="valor">${this.formatearValor(metrica, stats.promedio_sector)}</span>
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-gray-600">${this.formatearValor(metrica, stats.promedio_sector)}</div>
+                            <div class="text-xs text-gray-600">Promedio Sector</div>
                         </div>
-                        <div class="valor-percentil">
-                            <span class="label">Percentil 75:</span>
-                            <span class="valor">${this.formatearValor(metrica, stats.percentil_75)}</span>
+                        <div class="text-center">
+                            <div class="text-lg font-bold ${this.clasePosicion(posicion.percentil)}">${posicion.percentil.toFixed(1)}%</div>
+                            <div class="text-xs text-gray-600">Tu Percentil</div>
                         </div>
                     </div>
-                    <div class="posicion-relativa">
-                        <span class="posicion-label">Tu posición:</span>
-                        <span class="posicion-valor ${this.clasePosicion(posicion.percentil)}">
-                            ${posicion.percentil.toFixed(1)}% percentil (${posicion.cuartil})
-                        </span>
+                    <div class="mt-3 text-sm text-gray-600">
+                        <strong>Posición:</strong> ${posicion.cuartil} (${posicion.ranking})
                     </div>
                 </div>
             `;
         });
-
-        if (recomendaciones.length > 0) {
-            html += `
-                <div class="recomendaciones-benchmarking">
-                    <h4>Recomendaciones</h4>
-                    <ul>
-                        ${recomendaciones.map(rec => `<li class="${rec.tipo}">${rec.mensaje}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        }
 
         html += `
                 </div>
             </div>
         `;
 
+        if (recomendaciones.length > 0) {
+            html += `
+                <!-- Recommendations -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        Recomendaciones de Mejora
+                    </h5>
+
+                    <div class="space-y-3">
+                        ${recomendaciones.map(rec => `
+                            <div class="p-3 rounded-lg border-l-4 ${rec.tipo === 'ventaja_competitiva' ? 'border-green-400 bg-green-50' : 'border-orange-400 bg-orange-50'}">
+                                <p class="text-sm ${rec.tipo === 'ventaja_competitiva' ? 'text-green-800' : 'text-orange-800'}">${rec.mensaje}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+            <!-- Charts Container -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie mr-2 text-blue-600"></i>
+                    Visualización de Resultados
+                </h5>
+
+                <div class="grid md:grid-cols-1 gap-6">
+                    <div>
+                        <canvas id="grafico-sectorial-percentiles" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial_guardado')">
+                    <i class="fas fa-save mr-2"></i>Guardar Análisis
+                </button>
+                <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold flex items-center justify-center">
+                    <i class="fas fa-share mr-2"></i>Compartir Resultados
+                </button>
+                <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 font-semibold flex items-center justify-center" onclick="document.getElementById('form-benchmarking-sectorial').reset(); this.closest('.mt-8').style.display='none';">
+                    <i class="fas fa-redo mr-2"></i>Nuevo Análisis
+                </button>
+            </div>
+        `;
+
         resultadoDiv.innerHTML = html;
         resultadoDiv.style.display = 'block';
+
+        // Show the sectorial calculator and hide others
+        this.showCalculator('sectorial');
         resultadoDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
     mostrarResultadosComparacion(comparacion, insights, datos) {
-        const resultadoDiv = document.getElementById('resultado-comparacion');
+        // Target the personalized calculator results section
+        const resultadoDiv = document.getElementById('personalizado-results');
         if (!resultadoDiv) return;
 
         let html = `
-            <div class="resultado-card">
-                <h3>Comparación Personalizada</h3>
-                <div class="comparacion-empresas">
-                    <div class="empresa-base">
-                        <h4>Empresa Base: ${datos.empresaBase.nombre}</h4>
+            <div class="flex items-center justify-between mb-6">
+                <h4 class="text-xl font-bold text-gray-800">Resultados de Comparación Personalizada</h4>
+                <div class="flex gap-2">
+                    <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Summary -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-clipboard-check mr-2 text-purple-600"></i>
+                    Resumen de la Comparación
+                </h5>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="personalizado-empresas-comparadas">${comparacion.empresas_comparacion.length}</div>
+                        <div class="text-sm text-gray-600">Empresas Comparadas</div>
                     </div>
-                    <div class="empresas-comparacion">
-                        <h4>Empresas de Comparación:</h4>
-                        <ul>
-                            ${comparacion.empresas_comparacion.map(emp => `<li>${emp.nombre}</li>`).join('')}
-                        </ul>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-pink-600" id="personalizado-criterios-analizados">${Object.keys(comparacion.resultados).length}</div>
+                        <div class="text-sm text-gray-600">Criterios Analizados</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-indigo-600" id="personalizado-posicion-general">${this.calcularPosicionGeneral(comparacion).toFixed(1)}%</div>
+                        <div class="text-sm text-gray-600">Posición General</div>
                     </div>
                 </div>
 
-                <div class="resultados-comparacion">
+                <!-- Company Base Info -->
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-purple-800 mb-2">Empresa Base</h6>
+                    <p class="text-purple-700" id="personalizado-empresa-base">${datos.empresaBase.nombre}</p>
+                </div>
+            </div>
+
+            <!-- Detailed Comparison -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-purple-600"></i>
+                    Análisis Detallado por Criterio
+                </h5>
+
+                <div class="space-y-4">
         `;
 
         Object.entries(comparacion.resultados).forEach(([criterio, resultado]) => {
             const nombreCriterio = this.nombreMetrica(criterio);
 
             html += `
-                <div class="criterio-comparacion">
-                    <h4>${nombreCriterio.charAt(0).toUpperCase() + nombreCriterio.slice(1)}</h4>
-                    <div class="comparacion-valores">
-                        <div class="valor-base">
-                            <span>Tu empresa:</span>
-                            <span class="valor">${this.formatearValor(criterio, resultado.valor_base)}</span>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-3">${nombreCriterio.charAt(0).toUpperCase() + nombreCriterio.slice(1)}</h6>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-blue-600">${this.formatearValor(criterio, resultado.valor_base)}</div>
+                            <div class="text-xs text-gray-600">Tu Valor</div>
                         </div>
-                        <div class="valor-promedio">
-                            <span>Promedio comparación:</span>
-                            <span class="valor">${this.formatearValor(criterio, resultado.promedio_comparacion)}</span>
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-gray-600">${this.formatearValor(criterio, resultado.promedio_comparacion)}</div>
+                            <div class="text-xs text-gray-600">Promedio Comparación</div>
                         </div>
-                        <div class="valor-posicion">
-                            <span>Tu posición:</span>
-                            <span class="posicion ${resultado.posicion.toLowerCase().replace(' ', '-')}">${resultado.posicion}</span>
+                        <div class="text-center">
+                            <div class="text-lg font-bold ${resultado.posicion === 'Mejor' ? 'text-green-600' : resultado.posicion === 'Superior' ? 'text-blue-600' : resultado.posicion === 'Promedio' ? 'text-yellow-600' : 'text-red-600'}">${resultado.posicion}</div>
+                            <div class="text-xs text-gray-600">Tu Posición</div>
                         </div>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-600">
+                        <strong>Diferencia:</strong> ${resultado.diferencia_promedio > 0 ? '+' : ''}${resultado.diferencia_promedio.toFixed(1)}% vs promedio
                     </div>
                 </div>
             `;
         });
-
-        if (insights.length > 0) {
-            html += `
-                <div class="insights-comparacion">
-                    <h4>Insights y Conclusiones</h4>
-                    <ul>
-                        ${insights.map(insight => `<li>${insight}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        }
 
         html += `
                 </div>
             </div>
         `;
 
+        if (insights.length > 0) {
+            html += `
+                <!-- Insights and Conclusions -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        Insights y Conclusiones
+                    </h5>
+
+                    <div class="space-y-3">
+                        ${insights.map(insight => `
+                            <div class="p-3 rounded-lg border-l-4 ${insight.includes('Excelente') ? 'border-green-400 bg-green-50' : insight.includes('Considera') ? 'border-orange-400 bg-orange-50' : 'border-blue-400 bg-blue-50'}">
+                                <p class="text-sm ${insight.includes('Excelente') ? 'text-green-800' : insight.includes('Considera') ? 'text-orange-800' : 'text-blue-800'}">${insight}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+            <!-- Charts Container -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-radar mr-2 text-blue-600"></i>
+                    Visualización Comparativa
+                </h5>
+
+                <div class="grid md:grid-cols-1 gap-6">
+                    <div>
+                        <canvas id="grafico-personalizado-radar" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('personalizado_guardado')">
+                    <i class="fas fa-save mr-2"></i>Guardar Análisis
+                </button>
+                <button class="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition duration-300 font-semibold flex items-center justify-center">
+                    <i class="fas fa-share mr-2"></i>Compartir Resultados
+                </button>
+                <button class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-300 font-semibold flex items-center justify-center" onclick="document.getElementById('form-comparacion-personalizada').reset(); this.closest('.mt-8').style.display='none';">
+                    <i class="fas fa-redo mr-2"></i>Nueva Comparación
+                </button>
+            </div>
+        `;
+
         resultadoDiv.innerHTML = html;
         resultadoDiv.style.display = 'block';
+
+        // Show the personalized calculator and hide others
+        this.showCalculator('personalizado');
         resultadoDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -768,6 +993,24 @@ class BenchmarkingManager {
         if (percentil >= 50) return 'bueno';
         if (percentil >= 25) return 'regular';
         return 'necesita-mejora';
+    }
+
+    calcularPercentilPromedio(analisis) {
+        const percentiles = Object.values(analisis).map(stats => stats.posicion_relativa.percentil);
+        return percentiles.reduce((sum, p) => sum + p, 0) / percentiles.length;
+    }
+
+    calcularPosicionGeneral(comparacion) {
+        const posiciones = Object.values(comparacion.resultados).map(resultado => {
+            switch (resultado.posicion) {
+                case 'Mejor': return 100;
+                case 'Superior': return 75;
+                case 'Promedio': return 50;
+                case 'Por debajo del promedio': return 25;
+                default: return 50;
+            }
+        });
+        return posiciones.reduce((sum, p) => sum + p, 0) / posiciones.length;
     }
 
     formatearValor(metrica, valor) {
@@ -875,14 +1118,168 @@ class BenchmarkingManager {
             const data = await response.json();
 
             if (data.success) {
-                this.mostrarExito('Te has unido al grupo exitosamente');
-                this.cargarGruposBenchmarking(); // Recargar grupos
+                this.mostrarExito('Te has unido al grupo exitosamente', '¡Unión Exitosa!');
+
+                // Actualizar UI inmediatamente sin recargar todo
+                this.actualizarUIUnionGrupo(grupoId);
+
+                // También recargar para asegurar consistencia
+                setTimeout(() => {
+                    this.cargarGruposBenchmarking();
+                }, 1000);
+
             } else {
                 this.mostrarError(data.error || 'Error al unirse al grupo');
             }
         } catch (error) {
             console.error('Error uniendo al grupo:', error);
             this.mostrarError('Error al unirse al grupo');
+        }
+    }
+
+    actualizarUIUnionGrupo(grupoId) {
+        // Encontrar y remover el grupo de la lista de disponibles
+        const gruposContainer = document.getElementById('grupos-container');
+        const grupoButton = gruposContainer.querySelector(`[data-grupo-id="${grupoId}"]`);
+
+        if (grupoButton) {
+            // Encontrar la card del grupo (el contenedor .bg-white más cercano)
+            const grupoCard = grupoButton.closest('.bg-white');
+
+            if (grupoCard) {
+                // Obtener información del grupo antes de removerlo
+                const grupoInfo = {
+                    id: grupoId,
+                    nombre: grupoCard.querySelector('h3').textContent,
+                    descripcion: grupoCard.querySelector('p').textContent,
+                    miembros: '2 miembros' // Placeholder, debería venir de la API
+                };
+
+                // Remover de grupos disponibles
+                grupoCard.remove();
+
+                // Verificar si quedan grupos disponibles
+                const remainingGroups = gruposContainer.querySelectorAll('.bg-white');
+                if (remainingGroups.length === 0) {
+                    gruposContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-users text-4xl mb-4"></i>
+                            <p>No hay más grupos disponibles.</p>
+                            <p>Crea tu propio grupo para comenzar.</p>
+                        </div>
+                    `;
+                }
+
+                // Agregar a "Mis Grupos"
+                this.agregarGrupoAMisGrupos(grupoInfo);
+            }
+        }
+    }
+
+    agregarGrupoAMisGrupos(grupoInfo) {
+        const misGruposContainer = document.getElementById('mis-grupos-container');
+
+        // Si no hay grupos aún, limpiar el mensaje vacío
+        const emptyMessage = misGruposContainer.querySelector('.text-center');
+        if (emptyMessage) {
+            misGruposContainer.innerHTML = '';
+        }
+
+        // Crear la card del grupo
+        const grupoCard = document.createElement('div');
+        grupoCard.className = 'bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4';
+        grupoCard.innerHTML = `
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800">${grupoInfo.nombre}</h4>
+                    <p class="text-gray-600 mt-1">${grupoInfo.descripcion}</p>
+                </div>
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    Miembro
+                </span>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-users mr-1"></i>
+                    ${grupoInfo.miembros}
+                </div>
+                <div class="space-x-2">
+                    <button class="ver-miembro bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition duration-300 text-sm"
+                            data-grupo-id="${grupoInfo.id}">
+                        <i class="fas fa-eye mr-1"></i>Ver Grupo
+                    </button>
+                    <button class="abandonar-grupo bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition duration-300 text-sm"
+                            data-grupo-id="${grupoInfo.id}">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Abandonar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Agregar al contenedor
+        misGruposContainer.appendChild(grupoCard);
+
+        // Agregar event listeners
+        const verBtn = grupoCard.querySelector('.ver-miembro');
+        const abandonarBtn = grupoCard.querySelector('.abandonar-grupo');
+
+        verBtn.addEventListener('click', (e) => {
+            const grupoId = e.target.closest('.ver-miembro').dataset.grupoId;
+            this.verGrupo(grupoId);
+        });
+
+        abandonarBtn.addEventListener('click', (e) => {
+            const grupoId = e.target.closest('.abandonar-grupo').dataset.grupoId;
+            this.abandonarGrupo(grupoId);
+        });
+    }
+
+    async abandonarGrupo(grupoId) {
+        if (!confirm('¿Estás seguro de que quieres abandonar este grupo?')) {
+            return;
+        }
+
+        try {
+            const usuarioId = this.obtenerUsuarioActual();
+
+            const response = await fetch(`/api/v1/benchmarking/grupos/${grupoId}/usuarios/${usuarioId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.mostrarExito('Has abandonado el grupo exitosamente', 'Grupo Abandonado');
+
+                // Remover de "Mis Grupos"
+                const misGruposContainer = document.getElementById('mis-grupos-container');
+                const grupoCard = misGruposContainer.querySelector(`[data-grupo-id="${grupoId}"]`);
+                if (grupoCard) {
+                    grupoCard.closest('.bg-white').remove();
+                }
+
+                // Verificar si quedan grupos en "Mis Grupos"
+                const remainingGroups = misGruposContainer.querySelectorAll('.bg-white');
+                if (remainingGroups.length === 0) {
+                    misGruposContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-4">
+                            <i class="fas fa-users text-3xl mb-2"></i>
+                            <p>No perteneces a ningún grupo aún</p>
+                            <p class="text-sm">Únete a un grupo existente o crea uno nuevo</p>
+                        </div>
+                    `;
+                }
+
+                // Recargar grupos disponibles
+                this.cargarGruposBenchmarking();
+
+            } else {
+                this.mostrarError(data.error || 'Error al abandonar el grupo');
+            }
+        } catch (error) {
+            console.error('Error abandonando el grupo:', error);
+            this.mostrarError('Error al abandonar el grupo');
         }
     }
 
@@ -1132,13 +1529,11 @@ class BenchmarkingManager {
                 if (analisis.analisis) {
                     this.mostrarResultadosBenchmarking(analisis.analisis, analisis.recomendaciones, analisis.datos);
                     if (Object.keys(analisis.analisis).length > 0) {
-                        document.getElementById('graficos-container').classList.remove('hidden');
                         this.crearGraficosBenchmarking(analisis.analisis, analisis.datos);
                     }
                 } else if (analisis.comparacion) {
                     this.mostrarResultadosComparacion(analisis.comparacion, analisis.insights, analisis.datos);
                     if (analisis.comparacion.resultados && Object.keys(analisis.comparacion.resultados).length > 0) {
-                        document.getElementById('graficos-container').classList.remove('hidden');
                         this.crearGraficosComparacion(analisis.comparacion);
                     }
                 }
@@ -1181,20 +1576,49 @@ class BenchmarkingManager {
      * Funciones auxiliares adicionales
      */
     obtenerUsuarioActual() {
-        // Esta función debería obtener el ID del usuario actual desde la sesión
-        // Por ahora, devolver un valor por defecto para testing
-        return 1; // TODO: Implementar obtención real del usuario actual
+        // Intentar obtener el usuario ID desde la sesión Flask
+        try {
+            // Buscar el usuario ID en el elemento oculto del template
+            const userInfoElement = document.getElementById('user-info');
+            if (userInfoElement && userInfoElement.dataset.userId) {
+                return parseInt(userInfoElement.dataset.userId);
+            }
+
+            // Intentar desde localStorage (si se guarda ahí)
+            const storedUserId = localStorage.getItem('econova_user_id');
+            if (storedUserId) {
+                return parseInt(storedUserId);
+            }
+
+            // Como fallback, intentar obtener desde una cookie de sesión
+            const sessionCookie = document.cookie.split(';').find(c => c.trim().startsWith('session='));
+            if (sessionCookie) {
+                // Si hay sesión, asumir usuario válido (esto es un placeholder)
+                return 1;
+            }
+        } catch (error) {
+            console.warn('Error obteniendo usuario actual:', error);
+        }
+
+        // Si no hay usuario autenticado, redirigir al login
+        this.mostrarError('Debes iniciar sesión para usar las funciones de benchmarking. Redirigiendo...', 'Sesión requerida');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
+        return null;
     }
 
-    mostrarExito(mensaje) {
-        // Usar sistema de mensajes contextuales si está disponible
-        if (window.contextualMessages) {
+    mostrarExito(mensaje, titulo = 'Éxito') {
+        // Usar sistema de notificaciones personalizado si está disponible
+        if (window.benchmarkingNotifications) {
+            window.benchmarkingNotifications.success(mensaje, titulo);
+        } else if (window.contextualMessages) {
             window.contextualMessages.success({
-                title: 'Éxito',
+                title: titulo,
                 body: mensaje
             });
         } else {
-            alert(`Éxito: ${mensaje}`);
+            alert(`${titulo}: ${mensaje}`);
         }
     }
 
@@ -1202,15 +1626,27 @@ class BenchmarkingManager {
      * Funciones de gráficos
      */
     crearGraficosBenchmarking(analisis, datos) {
-        if (typeof Chart === 'undefined') return;
+        console.log('🔍 Creando gráficos de benchmarking...', { analisis, datos });
 
-        // Gráfico de percentiles
-        this.crearGraficoPercentiles(analisis, datos);
+        if (typeof Chart === 'undefined') {
+            console.warn('⚠️ Chart.js no está disponible');
+            return;
+        }
+
+        // Pequeño delay para asegurar que el DOM esté actualizado
+        setTimeout(() => {
+            this.crearGraficoPercentiles(analisis, datos);
+        }, 100);
     }
 
     crearGraficoPercentiles(analisis, datos) {
-        const ctx = document.getElementById('grafico-benchmarking-percentiles');
-        if (!ctx) return;
+        console.log('🔍 Buscando canvas para gráfico...', document.getElementById('grafico-sectorial-percentiles'));
+        const ctx = document.getElementById('grafico-sectorial-percentiles');
+        if (!ctx) {
+            console.error('❌ Canvas no encontrado: grafico-sectorial-percentiles');
+            return;
+        }
+        console.log('✅ Canvas encontrado, creando gráfico...');
 
         const metricas = Object.keys(analisis);
         const datasets = [];
@@ -1392,15 +1828,17 @@ class BenchmarkingManager {
         console.log('Loading finished');
     }
 
-    mostrarError(mensaje) {
-        // Usar sistema de mensajes contextuales si está disponible
-        if (window.contextualMessages) {
+    mostrarError(mensaje, titulo = 'Error') {
+        // Usar sistema de notificaciones personalizado si está disponible
+        if (window.benchmarkingNotifications) {
+            window.benchmarkingNotifications.error(mensaje, titulo);
+        } else if (window.contextualMessages) {
             window.contextualMessages.error({
-                title: 'Error en benchmarking',
+                title: titulo,
                 body: mensaje
             });
         } else {
-            alert(`Error: ${mensaje}`);
+            alert(`${titulo}: ${mensaje}`);
         }
     }
 

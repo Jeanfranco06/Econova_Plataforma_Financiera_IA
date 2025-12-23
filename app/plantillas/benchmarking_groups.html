@@ -1,0 +1,124 @@
+<!-- Grupos de Benchmarking Calculator -->
+<div id="grupos-calculator" class="simulation-calculator" style="display: none;">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Grupos de Benchmarking</h3>
+          <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-users mr-1"></i>Comunidad
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Únete a grupos especializados y compara con empresarios similares en tu sector</p>
+
+        <!-- Educational Content -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-blue-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-blue-800 mb-1">¿Qué son los Grupos de Benchmarking?</h5>
+              <p class="text-sm text-blue-700">
+                Comunidades especializadas donde empresarios comparten datos anonimizados para benchmarking.
+                Compara tu desempeño con pares similares en tamaño, sector y ubicación geográfica.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Group Section -->
+    <div class="bg-gray-50 p-6 rounded-lg mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="text-lg font-semibold text-gray-800">Crear Nuevo Grupo</h4>
+        <button id="btn-crear-grupo" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+          <i class="fas fa-plus mr-2"></i>Crear Grupo
+        </button>
+      </div>
+      <p class="text-gray-600 text-sm">Crea tu propio grupo de benchmarking para invitar a empresarios similares</p>
+    </div>
+
+    <!-- Available Groups -->
+    <div class="mb-8">
+      <h4 class="text-lg font-semibold text-gray-800 mb-4">Grupos Disponibles</h4>
+      <div class="grid md:grid-cols-2 gap-6" id="grupos-container">
+        <!-- Groups will be loaded here dynamically -->
+        <div class="text-center text-gray-500 py-8 col-span-2">
+          <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+          <p>Cargando grupos disponibles...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Groups -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <h4 class="text-lg font-semibold text-gray-800 mb-4">Mis Grupos</h4>
+      <div id="mis-grupos-container">
+        <div class="text-center text-gray-500 py-4">
+          <i class="fas fa-users text-3xl mb-2"></i>
+          <p>No perteneces a ningún grupo aún</p>
+          <p class="text-sm">Únete a un grupo existente o crea uno nuevo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+      <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold flex items-center justify-center">
+        <i class="fas fa-refresh mr-2"></i>Actualizar Grupos
+      </button>
+      <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+        <i class="fas fa-question-circle mr-2"></i>¿Cómo Funciona?
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear Grupo -->
+<div id="modal-crear-grupo" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">Crear Grupo de Benchmarking</h3>
+        <button id="cerrar-modal" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="form-crear-grupo">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Grupo</label>
+          <input type="text" name="nombre_grupo" placeholder="Ej: Emprendedores Tecnológicos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Sector Principal</label>
+          <select name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+            <option value="">Seleccionar sector...</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Manufactura">Manufactura</option>
+            <option value="Comercio">Comercio</option>
+            <option value="Servicios Financieros">Servicios Financieros</option>
+            <option value="Construcción">Construcción</option>
+            <option value="Salud">Salud</option>
+            <option value="Educación">Educación</option>
+            <option value="Turismo">Turismo</option>
+            <option value="Agricultura">Agricultura</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+          <textarea name="descripcion" placeholder="Describe el propósito del grupo y qué tipo de empresas pueden unirse..." rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button type="button" id="cancelar-crear-grupo" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Crear Grupo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

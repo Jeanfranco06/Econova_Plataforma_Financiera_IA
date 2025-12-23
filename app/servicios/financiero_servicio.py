@@ -5,6 +5,8 @@ Implementa cálculos de:
 - WACC (Costo Promedio Ponderado de Capital)
 - Análisis de Portafolio
 - Reemplazo de Activos
+
+Incluye integración con gamificación
 """
 import numpy as np
 from scipy.optimize import newton
@@ -13,6 +15,7 @@ from app.utils.validadores import (
     validar_flujos_caja, validar_tasa, validar_inversion_inicial,
     validar_numero_positivo, validar_ponderaciones, validar_wacc_params
 )
+from app.servicios.gamification_servicio import GamificationService
 
 class ServicioFinanciero:
     """Servicio para cálculos financieros avanzados"""

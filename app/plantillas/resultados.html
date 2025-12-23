@@ -20,9 +20,19 @@
   <div class="container mx-auto px-6">
     <div class="max-w-6xl mx-auto">
 
-      <!-- Filters and Actions -->
+      <!-- Tabs for different result types -->
       <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex border-b border-gray-200 mb-6">
+          <button class="px-6 py-3 border-b-2 border-blue-500 text-blue-600 font-medium" id="tab-simulaciones">
+            <i class="fas fa-chart-line mr-2"></i>Simulaciones Financieras
+          </button>
+          <button class="px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700" id="tab-benchmarking">
+            <i class="fas fa-balance-scale mr-2"></i>Análisis de Benchmarking
+          </button>
+        </div>
+
+        <!-- Simulation Filters -->
+        <div id="simulaciones-filters" class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 class="text-xl font-semibold text-gray-800 mb-2">Historial de Simulaciones</h2>
             <p class="text-gray-600">Tus análisis financieros realizados</p>
@@ -47,6 +57,19 @@
               <option value="month">Este mes</option>
               <option value="year">Este año</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Benchmarking Header -->
+        <div id="benchmarking-header" class="hidden">
+          <div class="flex justify-between items-start md:items-center gap-4">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">Análisis de Benchmarking</h2>
+              <p class="text-gray-600">Tus comparaciones con otros empresarios</p>
+            </div>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300" id="btn-actualizar-benchmarking">
+              <i class="fas fa-sync-alt mr-2"></i>Actualizar
+            </button>
           </div>
         </div>
       </div>
@@ -160,7 +183,7 @@
           {% endfor %}
         {% else %}
         <!-- No Results State -->
-        <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+        <div id="simulaciones-empty-state" class="bg-white rounded-2xl shadow-xl p-12 text-center">
           <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <i class="fas fa-chart-line text-blue-600 text-3xl"></i>
           </div>
@@ -173,6 +196,23 @@
           </a>
         </div>
         {% endif %}
+
+        <!-- Benchmarking Results Section -->
+        <div id="benchmarking-results" class="hidden">
+          <!-- Benchmarking results will be loaded here via JavaScript -->
+          <div id="benchmarking-empty-state" class="bg-white rounded-2xl shadow-xl p-12 text-center">
+            <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="fas fa-balance-scale text-purple-600 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">No tienes análisis de benchmarking</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+              Realiza tu primer análisis de benchmarking para comparar tu rendimiento con otros empresarios.
+            </p>
+            <a href="/benchmarking" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 inline-flex items-center">
+              <i class="fas fa-balance-scale mr-2"></i>Ir a Benchmarking
+            </a>
+          </div>
+        </div>
 
       </div>
 
@@ -221,6 +261,7 @@
   </div>
 </section>
 
-<!-- Include resultados JavaScript -->
+<!-- Include BenchmarkingUtils and resultados JavaScript -->
+<script src="{{ url_for('static', filename='js/benchmarking/modules/utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/resultados.js') }}"></script>
 {% endblock %}

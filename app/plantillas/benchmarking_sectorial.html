@@ -1,0 +1,272 @@
+<!-- Benchmarking Sectorial Calculator -->
+<div id="sectorial-calculator" class="simulation-calculator" style="display: none;">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Benchmarking Sectorial</h3>
+          <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-industry mr-1"></i>Análisis Sectorial
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Compara tu desempeño contra estándares y mejores prácticas de tu sector</p>
+
+        <!-- Educational Content -->
+        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-green-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-green-800 mb-1">¿Qué es el Benchmarking Sectorial?</h5>
+              <p class="text-sm text-green-700">
+                Análisis comparativo que te permite evaluar tu rendimiento contra empresas similares en tu sector,
+                identificando fortalezas, debilidades y oportunidades de mejora.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="form-benchmarking-sectorial" class="space-y-6">
+      <!-- Company Context -->
+      <div class="bg-gray-50 p-6 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-building mr-2 text-gray-600"></i>
+          Información de tu Empresa
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Sector de tu Empresa</label>
+            <select name="sector" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+              <option value="">Seleccionar sector...</option>
+              <option value="Tecnología">Tecnología</option>
+              <option value="Manufactura">Manufactura</option>
+              <option value="Comercio">Comercio</option>
+              <option value="Servicios Financieros">Servicios Financieros</option>
+              <option value="Construcción">Construcción</option>
+              <option value="Salud">Salud</option>
+              <option value="Educación">Educación</option>
+              <option value="Turismo">Turismo</option>
+              <option value="Agricultura">Agricultura</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tamaño de Empresa</label>
+            <select name="tamano_empresa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+              <option value="todos">Todos los tamaños</option>
+              <option value="micro">Microempresa (1-10 empleados)</option>
+              <option value="pequena">Pequeña (11-50 empleados)</option>
+              <option value="mediana">Mediana (51-200 empleados)</option>
+              <option value="grande">Grande (201+ empleados)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Period -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+          <i class="fas fa-calendar mr-2 text-gray-500"></i>
+          Período de Análisis
+        </label>
+        <select name="periodo" class="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+          <option value="ultimo_anio">Último año completo</option>
+          <option value="ultimos_6_meses">Últimos 6 meses</option>
+          <option value="ultimos_3_meses">Últimos 3 meses</option>
+          <option value="ultimo_trimestre">Último trimestre</option>
+        </select>
+      </div>
+
+      <!-- Financial Metrics -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-4 flex items-center">
+          <i class="fas fa-chart-line mr-2 text-gray-500"></i>
+          Indicadores Financieros a Comparar
+        </label>
+        <p class="text-xs text-gray-600 mb-4">Selecciona los indicadores que deseas analizar. Ingresa tus valores actuales para la comparación.</p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Ingresos -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="ingresos" class="mr-2">
+              <span class="font-medium text-gray-800">Ingresos Totales</span>
+            </label>
+            <input type="number" name="ingresos" placeholder="500000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">S/</p>
+          </div>
+
+          <!-- Margen de Beneficio -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="margen_beneficio" class="mr-2">
+              <span class="font-medium text-gray-800">Margen de Beneficio</span>
+            </label>
+            <input type="number" step="0.01" name="margen_beneficio" placeholder="15.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">%</p>
+          </div>
+
+          <!-- ROI -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="roi" class="mr-2">
+              <span class="font-medium text-gray-800">ROI</span>
+            </label>
+            <input type="number" step="0.01" name="roi" placeholder="22.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">%</p>
+          </div>
+
+          <!-- Número de Empleados -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="empleados" class="mr-2">
+              <span class="font-medium text-gray-800">N° de Empleados</span>
+            </label>
+            <input type="number" name="empleados" placeholder="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">personas</p>
+          </div>
+
+          <!-- Crecimiento -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="crecimiento" class="mr-2">
+              <span class="font-medium text-gray-800">Crecimiento Anual</span>
+            </label>
+            <input type="number" step="0.01" name="crecimiento" placeholder="18.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">%</p>
+          </div>
+
+          <!-- Endeudamiento -->
+          <div class="metric-input bg-gray-50 p-4 rounded-lg">
+            <label class="flex items-center mb-2">
+              <input type="checkbox" name="metricas[]" value="endeudamiento" class="mr-2">
+              <span class="font-medium text-gray-800">Nivel de Endeudamiento</span>
+            </label>
+            <input type="number" step="0.01" name="endeudamiento" placeholder="45.2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent metric-value" disabled>
+            <p class="text-xs text-gray-500 mt-1">%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Options -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-cogs mr-2 text-gray-600"></i>
+          Opciones de Análisis
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="sectorial-detallado" name="analisis_detallado" class="mr-2">
+            <label for="sectorial-detallado" class="text-sm text-gray-700">Análisis detallado con percentiles</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="sectorial-recomendaciones" name="incluir_recomendaciones" checked class="mr-2">
+            <label for="sectorial-recomendaciones" class="text-sm text-gray-700">Incluir recomendaciones de mejora</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Button -->
+      <div class="flex justify-center pt-4">
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-green-600 to-green-700 text-white px-10 py-4 rounded-lg hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 transition duration-300 text-lg font-semibold shadow-lg"
+        >
+          <i class="fas fa-chart-bar mr-2"></i>Generar Análisis Sectorial
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div id="sectorial-results" class="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200" style="display: none;">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-bold text-gray-800">Resultados del Benchmarking Sectorial</h4>
+        <div class="flex gap-2">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel">
+            <i class="fas fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Analysis Summary -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-clipboard-check mr-2 text-green-600"></i>
+          Resumen del Análisis
+        </h5>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600" id="sectorial-empresas-comparadas">0</div>
+            <div class="text-sm text-gray-600">Empresas Comparadas</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600" id="sectorial-metricas-analizadas">0</div>
+            <div class="text-sm text-gray-600">Métricas Analizadas</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600" id="sectorial-percentil-promedio">0%</div>
+            <div class="text-sm text-gray-600">Percentil Promedio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Metrics Analysis -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-bar mr-2 text-green-600"></i>
+          Análisis Detallado por Métrica
+        </h5>
+
+        <div id="metricas-sectoriales" class="space-y-4">
+          <!-- Metric analysis will be populated here -->
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+          Recomendaciones de Mejora
+        </h5>
+
+        <div id="recomendaciones-sectoriales" class="space-y-3">
+          <!-- Recommendations will be populated here -->
+        </div>
+      </div>
+
+      <!-- Charts Container -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-pie mr-2 text-blue-600"></i>
+          Visualización de Resultados
+        </h5>
+
+        <div class="grid md:grid-cols-1 gap-6">
+          <div>
+            <canvas id="grafico-sectorial-percentiles" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial_guardado')">
+          <i class="fas fa-save mr-2"></i>Guardar Análisis
+        </button>
+        <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-share mr-2"></i>Compartir Resultados
+        </button>
+        <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-redo mr-2"></i>Nuevo Análisis
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

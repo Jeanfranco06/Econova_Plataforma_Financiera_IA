@@ -253,14 +253,17 @@ def crear_app(config_name="development"):
 
         # Check if user is logged in
         if 'usuario_id' not in session:
-            return render_template("resultados.html", simulaciones=[], total_simulaciones=0)
+            return render_template("resultados.html", simulaciones=[], total_simulaciones=0, analisis_benchmarking=[])
 
         # Get user's simulations
         usuario_id = session['usuario_id']
         simulaciones = Simulacion.obtener_simulaciones_usuario(usuario_id, limite=50)
         total_simulaciones = len(simulaciones)
 
-        return render_template("resultados.html", simulaciones=simulaciones, total_simulaciones=total_simulaciones)
+        # Placeholder for benchmarking analysis (will be loaded via JavaScript)
+        analisis_benchmarking = []
+
+        return render_template("resultados.html", simulaciones=simulaciones, total_simulaciones=total_simulaciones, analisis_benchmarking=analisis_benchmarking)
 
     @app.route("/chatbot")
     def chatbot():
@@ -309,6 +312,32 @@ def crear_app(config_name="development"):
     @app.route("/demo")
     def demo():
         return render_template("demo.html")
+
+    @app.route("/gamification")
+    def gamification():
+        from flask import session, flash, redirect, url_for
+        if 'usuario_id' not in session:
+            flash('Debes iniciar sesión para acceder al sistema de gamificación', 'error')
+            return redirect(url_for('login'))
+
+        usuario_id = session.get('usuario_id')
+
+        # Obtener estadísticas del usuario
+        from app.servicios.gamification_servicio import GamificationService
+        from app.modelos.logro import Ranking
+
+        estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
+
+        # Obtener ranking del usuario
+        ranking_usuario = Ranking.obtener_ranking_usuario(usuario_id)
+
+        # Obtener top 10 del ranking general
+        ranking_general = Ranking.obtener_ranking_sector('General', 10)
+
+        return render_template('gamification.html',
+                             estadisticas=estadisticas,
+                             ranking_usuario=ranking_usuario,
+                             ranking_general=ranking_general)
 
     # User page routes (moved from usuarios blueprint to avoid /api/v1 prefix)
     @app.route('/login', methods=['GET'])
@@ -401,6 +430,11 @@ def registrar_blueprints(app):
     from app.rutas.benchmarking import benchmarking_bp
 
     app.register_blueprint(benchmarking_bp, url_prefix="/api/v1")
+
+    # Rutas de Gamificación
+    from app.rutas.gamification import gamification_bp
+
+    app.register_blueprint(gamification_bp)
 
 
 def registrar_manejadores_errores(app):

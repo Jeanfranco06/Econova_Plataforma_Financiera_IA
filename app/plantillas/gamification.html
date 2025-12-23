@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% block title %}Gamificación - Econova{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-center mb-4">
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-4 rounded-full">
+          <i class="fas fa-trophy text-white text-3xl"></i>
+        </div>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">🏆 Sistema de Gamificación</h1>
+      <p class="text-xl text-gray-600">¡Gana puntos, desbloquea insignias y compite con otros usuarios!</p>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Puntaje Total -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-purple-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="bg-purple-100 p-3 rounded-full">
+            <i class="fas fa-star text-purple-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">Total</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900 mb-1" id="puntaje-total">{{ estadisticas.puntaje_total or 0 }}</div>
+        <p class="text-gray-600 text-sm">Puntos acumulados</p>
+      </div>
+
+      <!-- Nivel Actual -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-blue-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="bg-blue-100 p-3 rounded-full">
+            <i class="fas fa-level-up-alt text-blue-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Nivel</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900 mb-1" id="nivel-actual">1</div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div class="bg-blue-600 h-2 rounded-full" style="width: 0%" id="barra-progreso"></div>
+        </div>
+        <p class="text-gray-600 text-sm">Próximo nivel</p>
+      </div>
+
+      <!-- Insignias Obtenidas -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-green-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="bg-green-100 p-3 rounded-full">
+            <i class="fas fa-medal text-green-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Logros</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900 mb-1" id="insignias-total">{{ estadisticas.num_insignias or 0 }}</div>
+        <p class="text-gray-600 text-sm">Insignias desbloqueadas</p>
+      </div>
+
+      <!-- Simulaciones Realizadas -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-orange-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="bg-orange-100 p-3 rounded-full">
+            <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">Actividad</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900 mb-1" id="simulaciones-total">{{ estadisticas.num_simulaciones or 0 }}</div>
+        <p class="text-gray-600 text-sm">Simulaciones completadas</p>
+      </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Panel Izquierdo: Insignias -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+              <i class="fas fa-medal text-yellow-500 mr-2"></i>
+              Mis Insignias
+            </h2>
+            <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300" onclick="verificarInsignias()">
+              <i class="fas fa-refresh mr-2"></i>Verificar Nuevas
+            </button>
+          </div>
+
+          <div id="insignias-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Las insignias se cargarán aquí dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Ranking -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+              <i class="fas fa-trophy text-blue-500 mr-2"></i>
+              Ranking Global
+            </h2>
+            <div class="flex space-x-2">
+              <button class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition duration-300" onclick="cambiarSectorRanking('General')">General</button>
+              <button class="bg-gray-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-gray-700 transition duration-300" onclick="cambiarSectorRanking('Tecnología')">Tecnología</button>
+              <button class="bg-gray-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-gray-700 transition duration-300" onclick="cambiarSectorRanking('Financiero')">Financiero</button>
+            </div>
+          </div>
+
+          <div id="ranking-container" class="space-y-3">
+            <!-- El ranking se cargará aquí dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel Derecho: Actividad Reciente y Próximos Logros -->
+      <div>
+
+        <!-- Próximos Logros -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-target text-red-500 mr-2"></i>
+            Próximos Logros
+          </h3>
+
+          <div id="proximos-logros" class="space-y-4">
+            <!-- Próximos logros se mostrarán aquí -->
+          </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-history text-green-500 mr-2"></i>
+            Actividad Reciente
+          </h3>
+
+          <div id="actividad-reciente" class="space-y-3">
+            <!-- Actividad reciente se mostrará aquí -->
+          </div>
+        </div>
+
+        <!-- Consejos de Gamificación -->
+        <div class="bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+          <h3 class="text-xl font-bold mb-4 flex items-center">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Consejos para Ganar Más Puntos
+          </h3>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-check-circle text-green-300 mt-1"></i>
+              <p>Realiza simulaciones financieras completas (+25 puntos cada una)</p>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-check-circle text-green-300 mt-1"></i>
+              <p>Únete a grupos de benchmarking (+20 puntos)</p>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-check-circle text-green-300 mt-1"></i>
+              <p>Calcula VAN, TIR y otros indicadores (+10 puntos)</p>
+            </div>
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-check-circle text-green-300 mt-1"></i>
+              <p>Usa la plataforma diariamente (+5 puntos por login)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Insignia Mejorado -->
+<div id="modal-insignia" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-gradient-to-br from-yellow-50 via-white to-orange-50 rounded-2xl shadow-2xl max-w-lg w-full mx-4 border-4 border-yellow-300">
+    <!-- Header con confeti animado -->
+    <div class="relative bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-t-2xl p-6">
+      <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-2 left-4 text-2xl animate-bounce">🎉</div>
+        <div class="absolute top-1 right-8 text-xl animate-pulse">✨</div>
+        <div class="absolute bottom-2 left-6 text-lg animate-bounce" style="animation-delay: 0.5s">🎊</div>
+        <div class="absolute bottom-1 right-4 text-xl animate-pulse" style="animation-delay: 0.3s">⭐</div>
+      </div>
+      <div class="relative text-center">
+        <div class="text-8xl mb-2 animate-bounce" id="insignia-icono">🏆</div>
+        <div class="bg-white bg-opacity-90 rounded-full px-4 py-2 inline-block">
+          <h3 class="text-2xl font-bold text-gray-800 mb-1" id="insignia-nombre">¡Nueva Insignia!</h3>
+          <div class="text-sm text-gray-600 font-medium">Has desbloqueado un logro</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="p-8 text-center">
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6 border border-purple-200">
+        <h4 class="text-xl font-bold text-gray-800 mb-3">¡Felicitaciones!</h4>
+        <p class="text-gray-700 text-lg leading-relaxed" id="insignia-descripcion">Has obtenido una nueva insignia por tu excelente rendimiento</p>
+
+        <!-- Puntos ganados -->
+        <div class="mt-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg px-4 py-3 inline-block">
+          <div class="text-white font-bold text-lg" id="insignia-puntos">+100 puntos</div>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+          <div class="text-2xl font-bold text-blue-600" id="stats-insignias">0</div>
+          <div class="text-xs text-blue-700 font-medium">Insignias</div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 border border-green-200">
+          <div class="text-2xl font-bold text-green-600" id="stats-puntos">0</div>
+          <div class="text-xs text-green-700 font-medium">Puntos</div>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+          <div class="text-2xl font-bold text-purple-600" id="stats-nivel">1</div>
+          <div class="text-xs text-purple-700 font-medium">Nivel</div>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="cerrarModalInsignia()" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition duration-300 font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          🎉 ¡Genial!
+        </button>
+        <button onclick="compartirInsignia()" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          📤 Compartir
+        </button>
+      </div>
+    </div>
+
+    <!-- Efectos de celebración -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-4 left-4 text-yellow-400 animate-ping">✨</div>
+      <div class="absolute top-6 right-6 text-pink-400 animate-pulse">💫</div>
+      <div class="absolute bottom-4 left-8 text-blue-400 animate-bounce">🎈</div>
+      <div class="absolute bottom-6 right-8 text-green-400 animate-pulse">🎊</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de compartir insignia -->
+<div id="modal-compartir" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+    <div class="p-6">
+      <div class="text-center mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Compartir Logro</h3>
+        <p class="text-gray-600">¡Comparte tu éxito con otros!</p>
+      </div>
+
+      <div class="space-y-3 mb-6">
+        <button onclick="compartirEnTwitter()" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center justify-center">
+          <i class="fab fa-twitter mr-2"></i> Compartir en Twitter
+        </button>
+        <button onclick="compartirEnFacebook()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center">
+          <i class="fab fa-facebook mr-2"></i> Compartir en Facebook
+        </button>
+        <button onclick="copiarEnlace()" class="w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center">
+          <i class="fas fa-link mr-2"></i> Copiar enlace
+        </button>
+      </div>
+
+      <div class="flex justify-center">
+        <button onclick="cerrarModalCompartir()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition duration-300">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Variables globales
+let sectorRankingActual = 'General';
+
+// Inicializar cuando el DOM esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+  cargarInsignias();
+  cargarRanking();
+  cargarEstadisticas();
+  cargarProximosLogros();
+  cargarActividadReciente();
+});
+
+// Cargar insignias del usuario
+function cargarInsignias() {
+  fetch('/gamification/api/insignias/usuario')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarInsignias(data.insignias);
+      }
+    })
+    .catch(error => console.error('Error cargando insignias:', error));
+}
+
+// Mostrar insignias en el contenedor
+function mostrarInsignias(insignias) {
+  const container = document.getElementById('insignias-container');
+
+  if (insignias.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full text-center py-8">
+        <i class="fas fa-medal text-gray-300 text-4xl mb-4"></i>
+        <p class="text-gray-500">Aún no has obtenido ninguna insignia</p>
+        <p class="text-sm text-gray-400 mt-2">¡Comienza a usar la plataforma para ganar tus primeras insignias!</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  insignias.forEach(item => {
+    const insignia = item.insignia;
+    const fecha = new Date(item.fecha_obtenida).toLocaleDateString('es-ES');
+
+    html += `
+      <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition duration-300">
+        <div class="text-center">
+          <div class="text-4xl mb-3">🏆</div>
+          <h4 class="font-bold text-gray-900 mb-1">${insignia.nombre_insig}</h4>
+          <p class="text-sm text-gray-600 mb-2">${insignia.descripcion_insig}</p>
+          <span class="text-xs text-gray-500">Obtenida: ${fecha}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Cargar ranking
+function cargarRanking() {
+  fetch(`/gamification/api/ranking/${sectorRankingActual}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarRanking(data.ranking, data.usuarios);
+      }
+    })
+    .catch(error => console.error('Error cargando ranking:', error));
+}
+
+// Mostrar ranking
+function mostrarRanking(ranking, usuarios) {
+  const container = document.getElementById('ranking-container');
+
+  if (ranking.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay datos de ranking disponibles</p>';
+    return;
+  }
+
+  let html = '';
+  ranking.forEach((item, index) => {
+    const posicion = index + 1;
+    const usuario = usuarios[index];
+    const esUsuarioActual = usuario.nombre_usuario === '{{ session.usuario }}';
+
+    let clasePosicion = '';
+    let iconoPosicion = '';
+
+    if (posicion === 1) {
+      clasePosicion = 'bg-yellow-50 border-yellow-200';
+      iconoPosicion = '🥇';
+    } else if (posicion === 2) {
+      clasePosicion = 'bg-gray-50 border-gray-200';
+      iconoPosicion = '🥈';
+    } else if (posicion === 3) {
+      clasePosicion = 'bg-orange-50 border-orange-200';
+      iconoPosicion = '🥉';
+    } else {
+      clasePosicion = 'bg-white border-gray-100';
+      iconoPosicion = `#${posicion}`;
+    }
+
+    if (esUsuarioActual) {
+      clasePosicion += ' ring-2 ring-purple-500';
+    }
+
+    html += `
+      <div class="flex items-center justify-between p-3 rounded-lg border ${clasePosicion} ${esUsuarioActual ? 'font-semibold' : ''}">
+        <div class="flex items-center space-x-3">
+          <span class="text-lg">${iconoPosicion}</span>
+          <div>
+            <p class="font-medium text-gray-900">${usuario.nombres} ${usuario.apellidos}</p>
+            <p class="text-sm text-gray-500">@${usuario.nombre_usuario}</p>
+          </div>
+          ${esUsuarioActual ? '<span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Tú</span>' : ''}
+        </div>
+        <div class="text-right">
+          <p class="font-bold text-gray-900">${item.puntaje} pts</p>
+          <p class="text-sm text-gray-500">${item.sector}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Cambiar sector del ranking
+function cambiarSectorRanking(sector) {
+  sectorRankingActual = sector;
+
+  // Actualizar botones
+  document.querySelectorAll('[onclick^="cambiarSectorRanking"]').forEach(btn => {
+    if (btn.textContent.trim() === sector) {
+      btn.className = 'bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition duration-300';
+    } else {
+      btn.className = 'bg-gray-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-gray-700 transition duration-300';
+    }
+  });
+
+  cargarRanking();
+}
+
+// Cargar estadísticas
+function cargarEstadisticas() {
+  fetch('/gamification/api/estadisticas')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        actualizarEstadisticas(data.estadisticas);
+      }
+    })
+    .catch(error => console.error('Error cargando estadísticas:', error));
+}
+
+// Actualizar estadísticas en la UI
+function actualizarEstadisticas(estadisticas) {
+  document.getElementById('puntaje-total').textContent = estadisticas.puntaje_total || 0;
+  document.getElementById('insignias-total').textContent = estadisticas.num_insignias || 0;
+  document.getElementById('simulaciones-total').textContent = estadisticas.num_simulaciones || 0;
+
+  // Calcular nivel basado en puntaje
+  const nivel = Math.floor(estadisticas.puntaje_total / 100) + 1;
+  const puntosEnNivel = estadisticas.puntaje_total % 100;
+  const progreso = (puntosEnNivel / 100) * 100;
+
+  document.getElementById('nivel-actual').textContent = nivel;
+  document.getElementById('barra-progreso').style.width = `${progreso}%`;
+}
+
+// Cargar próximos logros
+function cargarProximosLogros() {
+  // Próximos logros disponibles (simulados)
+  const proximosLogros = [
+    {
+      nombre: 'Analista Avanzado',
+      descripcion: 'Completa 25 simulaciones',
+      progreso: 60,
+      icono: '📊'
+    },
+    {
+      nombre: 'Benchmarking Experto',
+      descripcion: 'Realiza 15 análisis comparativos',
+      progreso: 40,
+      icono: '🔍'
+    },
+    {
+      nombre: 'Inversor Estratégico',
+      descripcion: 'Optimiza 20 portafolios',
+      progreso: 25,
+      icono: '📈'
+    }
+  ];
+
+  const container = document.getElementById('proximos-logros');
+  let html = '';
+
+  proximosLogros.forEach(logro => {
+    html += `
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center space-x-3 mb-2">
+          <span class="text-2xl">${logro.icono}</span>
+          <div>
+            <h4 class="font-semibold text-gray-900">${logro.nombre}</h4>
+            <p class="text-sm text-gray-600">${logro.descripcion}</p>
+          </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-purple-600 h-2 rounded-full" style="width: ${logro.progreso}%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">${logro.progreso}% completado</p>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Cargar actividad reciente
+function cargarActividadReciente() {
+  // Actividad reciente (simulada)
+  const actividades = [
+    {
+      tipo: 'simulacion',
+      descripcion: 'Completaste una simulación de VAN',
+      puntos: '+25',
+      tiempo: '2 horas atrás',
+      icono: '🧮'
+    },
+    {
+      tipo: 'insignia',
+      descripcion: 'Obtuviste la insignia "Primeros Pasos"',
+      puntos: '+100',
+      tiempo: '1 día atrás',
+      icono: '🏆'
+    },
+    {
+      tipo: 'login',
+      descripcion: 'Inicio de sesión diario',
+      puntos: '+5',
+      tiempo: '2 días atrás',
+      icono: '📅'
+    }
+  ];
+
+  const container = document.getElementById('actividad-reciente');
+  let html = '';
+
+  actividades.forEach(actividad => {
+    html += `
+      <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+        <span class="text-xl">${actividad.icono}</span>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">${actividad.descripcion}</p>
+          <p class="text-xs text-gray-500">${actividad.tiempo}</p>
+        </div>
+        <span class="text-green-600 font-semibold text-sm">${actividad.puntos}</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Verificar nuevas insignias
+function verificarInsignias() {
+  fetch('/gamification/api/verificar-insignias', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      if (data.insignias_otorgadas && data.insignias_otorgadas.length > 0) {
+        // Mostrar notificación de nuevas insignias
+        mostrarNotificacionInsignias(data.insignias_otorgadas);
+        // Recargar insignias
+        cargarInsignias();
+        // Actualizar estadísticas
+        cargarEstadisticas();
+      } else {
+        mostrarNotificacion('No hay nuevas insignias disponibles', 'info');
+      }
+    } else {
+      mostrarNotificacion('Error al verificar insignias', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error verificando insignias:', error);
+    mostrarNotificacion('Error al verificar insignias', 'error');
+  });
+}
+
+// Mostrar notificación de nuevas insignias
+function mostrarNotificacionInsignias(insignias) {
+  insignias.forEach(insignia => {
+    mostrarNotificacion(`¡Nueva insignia obtenida: ${insignia}!`, 'success');
+  });
+}
+
+// Mostrar notificación genérica
+function mostrarNotificacion(mensaje, tipo = 'info') {
+  if (window.contextualMessages) {
+    window.contextualMessages[tipo]({
+      title: tipo === 'success' ? '¡Éxito!' : tipo === 'error' ? 'Error' : 'Información',
+      body: mensaje
+    });
+  } else {
+    alert(mensaje);
+  }
+}
+
+// Cerrar modal de insignia
+function cerrarModalInsignia() {
+  document.getElementById('modal-insignia').classList.add('hidden');
+}
+
+// Mostrar modal de insignia
+function mostrarModalInsignia(insignia) {
+  document.getElementById('insignia-icono').textContent = '🏆';
+  document.getElementById('insignia-nombre').textContent = insignia.nombre;
+  document.getElementById('insignia-descripcion').textContent = insignia.descripcion;
+
+  document.getElementById('modal-insignia').classList.remove('hidden');
+}
+</script>
+
+{% endblock %}

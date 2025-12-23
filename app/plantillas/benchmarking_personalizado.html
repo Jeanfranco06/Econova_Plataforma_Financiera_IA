@@ -1,0 +1,278 @@
+<!-- Benchmarking Personalizado Calculator -->
+<div id="personalizado-calculator" class="simulation-calculator" style="display: none;">
+  <div class="bg-white rounded-2xl shadow-xl p-8">
+    <!-- Header with Context -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-bold text-gray-800">Comparación Personalizada</h3>
+          <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <i class="fas fa-balance-scale mr-1"></i>Análisis Personalizado
+          </div>
+        </div>
+        <p class="text-gray-600 mb-3">Compara tu empresa contra competidores específicos que elijas</p>
+
+        <!-- Educational Content -->
+        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4">
+          <div class="flex items-start">
+            <i class="fas fa-graduation-cap text-purple-600 mt-1 mr-3"></i>
+            <div>
+              <h5 class="font-semibold text-purple-800 mb-1">¿Qué es la Comparación Personalizada?</h5>
+              <p class="text-sm text-purple-700">
+                Selecciona manualmente empresas competidoras para comparar tus indicadores financieros.
+                Ideal para análisis competitivo detallado con empresas específicas de tu mercado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="form-comparacion-personalizada" class="space-y-6">
+      <!-- Your Company Section -->
+      <div class="bg-purple-50 p-6 rounded-lg mb-6">
+        <h4 class="font-semibold text-purple-800 mb-4 flex items-center">
+          <i class="fas fa-building mr-2"></i>
+          Información de tu Empresa
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de tu Empresa</label>
+            <input type="text" name="empresa_base_nombre" placeholder="Mi Empresa S.A." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Indicadores Financieros</label>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Ingresos (S/)</label>
+              <input type="number" name="empresa_base_ingresos" placeholder="500000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Margen Beneficio (%)</label>
+              <input type="number" step="0.01" name="empresa_base_margen_beneficio" placeholder="15.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">ROI (%)</label>
+              <input type="number" step="0.01" name="empresa_base_roi" placeholder="22.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Empleados</label>
+              <input type="number" name="empresa_base_empleados" placeholder="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Crecimiento (%)</label>
+              <input type="number" step="0.01" name="empresa_base_crecimiento" placeholder="18.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Companies Section -->
+      <div>
+        <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-users mr-2 text-purple-600"></i>
+          Empresas para Comparar
+        </h4>
+        <p class="text-sm text-gray-600 mb-4">Agrega las empresas con las que deseas comparar tu rendimiento. Ingresa sus datos financieros aproximados.</p>
+
+        <div id="empresas-comparacion-container">
+          <!-- Default first company -->
+          <div class="empresa-comparacion bg-gray-50 p-4 rounded-lg mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h5 class="font-medium text-gray-700">Empresa 1</h5>
+              <button type="button" class="remover-empresa text-red-600 hover:text-red-800">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Nombre</label>
+                <input type="text" name="empresa_1_nombre" placeholder="Empresa Competidora S.A." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Ingresos (S/)</label>
+                  <input type="number" name="empresa_1_ingresos" placeholder="450000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Margen (%)</label>
+                  <input type="number" step="0.01" name="empresa_1_margen_beneficio" placeholder="12.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">ROI (%)</label>
+                  <input type="number" step="0.01" name="empresa_1_roi" placeholder="18.7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Empleados</label>
+                  <input type="number" name="empresa_1_empleados" placeholder="22" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Crecimiento (%)</label>
+                  <input type="number" step="0.01" name="empresa_1_crecimiento" placeholder="15.2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" id="btn-agregar-empresa" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+          <i class="fas fa-plus mr-2"></i>Agregar Empresa
+        </button>
+      </div>
+
+      <!-- Comparison Criteria -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-filter mr-2 text-purple-600"></i>
+          Criterios de Comparación
+        </h4>
+        <p class="text-sm text-gray-600 mb-4">Selecciona qué métricas deseas comparar</p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <label class="flex items-center">
+            <input type="checkbox" name="criterios_comparacion[]" value="ingresos" class="mr-2" checked>
+            <span class="text-sm text-gray-700">Ingresos</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="criterios_comparacion[]" value="margen_beneficio" class="mr-2" checked>
+            <span class="text-sm text-gray-700">Margen de Beneficio</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="criterios_comparacion[]" value="roi" class="mr-2" checked>
+            <span class="text-sm text-gray-700">ROI</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="criterios_comparacion[]" value="empleados" class="mr-2">
+            <span class="text-sm text-gray-700">Número de Empleados</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="criterios_comparacion[]" value="crecimiento" class="mr-2">
+            <span class="text-sm text-gray-700">Crecimiento</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Analysis Options -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-cogs mr-2 text-gray-600"></i>
+          Opciones de Análisis
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="personalizado-insights" name="generar_insights" checked class="mr-2">
+            <label for="personalizado-insights" class="text-sm text-gray-700">Generar insights automáticos</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="personalizado-recomendaciones" name="incluir_recomendaciones" checked class="mr-2">
+            <label for="personalizado-recomendaciones" class="text-sm text-gray-700">Incluir recomendaciones</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Button -->
+      <div class="flex justify-center pt-4">
+        <button
+          type="submit"
+          class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-10 py-4 rounded-lg hover:from-purple-700 hover:to-purple-800 focus:ring-4 focus:ring-purple-300 transition duration-300 text-lg font-semibold shadow-lg"
+        >
+          <i class="fas fa-balance-scale mr-2"></i>Generar Comparación Personalizada
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div id="personalizado-results" class="mt-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200" style="display: none;">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-bold text-gray-800">Resultados de Comparación Personalizada</h4>
+        <div class="flex gap-2">
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100" title="Exportar Excel">
+            <i class="fas fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Analysis Summary -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-clipboard-check mr-2 text-purple-600"></i>
+          Resumen de la Comparación
+        </h5>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600" id="personalizado-empresas-comparadas">0</div>
+            <div class="text-sm text-gray-600">Empresas Comparadas</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-pink-600" id="personalizado-criterios-analizados">0</div>
+            <div class="text-sm text-gray-600">Criterios Analizados</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-indigo-600" id="personalizado-posicion-general">0%</div>
+            <div class="text-sm text-gray-600">Posición General</div>
+          </div>
+        </div>
+
+        <!-- Company Base Info -->
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <h6 class="font-semibold text-purple-800 mb-2">Empresa Base</h6>
+          <p class="text-purple-700" id="personalizado-empresa-base">Empresa Base</p>
+        </div>
+      </div>
+
+      <!-- Detailed Comparison -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-bar mr-2 text-purple-600"></i>
+          Análisis Detallado por Criterio
+        </h5>
+
+        <div id="comparacion-detallada" class="space-y-4">
+          <!-- Detailed comparison will be populated here -->
+        </div>
+      </div>
+
+      <!-- Insights and Conclusions -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+          Insights y Conclusiones
+        </h5>
+
+        <div id="insights-personalizados" class="space-y-3">
+          <!-- Insights will be populated here -->
+        </div>
+      </div>
+
+      <!-- Charts Container -->
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-radar mr-2 text-blue-600"></i>
+          Visualización Comparativa
+        </h5>
+
+        <div class="grid md:grid-cols-1 gap-6">
+          <div>
+            <canvas id="grafico-personalizado-radar" width="400" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+        <button id="btn-guardar-personalizado" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i>Guardar Análisis
+        </button>
+        <button class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.ui.showCalculator('personalizado')">
+          <i class="fas fa-redo mr-2"></i>Nueva Comparación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
