@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gamificación - Econova</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ========================================
+           ESTILOS COMPLETOS INLINE - VISTA GAMIFICACIÓN AUTÓNOMA
+           ======================================== */
+
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            background: #f8fafc;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header Hero */
+        .gamification-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 3rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background: #1e40af;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+            position: relative;
+        }
+
+        .header-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: #1e40af;
+            opacity: 0.2;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+        }
+
+        .header-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            letter-spacing: -0.025em;
+        }
+
+        .header-subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Layout principal */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tarjetas */
+        .content-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: #1e40af;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* Botones */
+        .btn-primary {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Insignias */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .badge-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .badge-card:hover {
+            border-color: #1e40af;
+            transform: translateY(-4px);
+        }
+
+        .badge-name {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .badge-desc {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .badge-empty {
+            grid-column: 1 / -1;
+            padding: 3rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .badge-empty i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        /* Ranking */
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s ease;
+            margin-bottom: 0.25rem;
+        }
+
+        .ranking-item:hover {
+            background: #f8fafc;
+        }
+
+        .ranking-position {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.125rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .ranking-position.gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .ranking-position.silver {
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            color: #374151;
+        }
+
+        .ranking-position.bronze {
+            background: linear-gradient(135deg, #fed7d7, #fca5a5);
+            color: #dc2626;
+        }
+
+        .ranking-position.default {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ranking-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 1rem;
+        }
+
+        .ranking-score {
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 1.125rem;
+            margin-left: auto;
+        }
+
+        /* Logros */
+        .achievement-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .achievement-item:hover {
+            border-color: #059669;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: #f8fafc;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #059669, #0891b2);
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        /* Actividad */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: background 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon i {
+            color: #1e40af;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: #0f172a;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .activity-points {
+            font-weight: 700;
+            color: #059669;
+            font-size: 0.875rem;
+            margin-left: auto;
+        }
+
+        /* Consejos */
+        .tips-section {
+            background: linear-gradient(135deg, #1e40af, #0891b2);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        .tips-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .tips-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .tips-item-icon {
+            color: #fbbf24;
+            font-size: 1rem;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .tips-item-text {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .badges-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+
+        /* Forzar visibilidad absoluta */
+        .gamification-header,
+        .stats-grid,
+        .main-content,
+        .content-card,
+        .stat-card,
+        .badge-card,
+        .achievement-item,
+        .activity-item,
+        .badge-empty,
+        .ranking-item,
+        .tips-section {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Hero -->
+        <div class="gamification-header">
+            <div class="header-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h1 class="header-title">Sistema de Gamificación</h1>
+            <p class="header-subtitle">¡Gana puntos, desbloquea insignias y compite con otros usuarios!</p>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="puntaje-total">0</div>
+                <p class="stat-label">Puntos acumulados</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nivel-actual">1</div>
+                <p class="stat-label">Nivel actual</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="insignias-total">0</div>
+                <p class="stat-label">Insignias desbloqueadas</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="simulaciones-total">0</div>
+                <p class="stat-label">Simulaciones completadas</p>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-content">
+            <!-- Panel Izquierdo -->
+            <div>
+                <!-- Insignias -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-medal"></i>
+                            Mis Insignias
+                        </h2>
+                        <div>
+                            <button class="btn-primary" onclick="verificarInsignias()">
+                                <i class="fas fa-refresh"></i>
+                                Verificar Nuevas
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="insignias-container" class="badges-grid">
+                            <div class="badge-empty">
+                                <i class="fas fa-medal"></i>
+                                <h4>Aún no tienes insignias</h4>
+                                <p>¡Comienza a usar la plataforma para ganar tus primeras insignias!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranking -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-trophy"></i>
+                            Ranking Global
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="ranking-container">
+                            <div style="text-align: center; padding: 2rem; color: #64748b;">
+                                No hay datos de ranking disponibles
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho -->
+            <div>
+                <!-- Próximos Logros -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-target"></i>
+                            Próximos Logros
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="proximos-logros">
+                            <div class="achievement-item">
+                                <h4 class="achievement-name">Analista Avanzado</h4>
+                                <p class="achievement-desc">Completa 25 simulaciones</p>
+                                <div class="progress-track">
+                                    <div class="progress-fill" style="width: 60%"></div>
+                                </div>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">60% completado</p>
+                            </div>
+                            <div class="achievement-item">
+                                <h4 class="achievement-name">Benchmarking Experto</h4>
+                                <p class="achievement-desc">Realiza 15 análisis comparativos</p>
+                                <div class="progress-track">
+                                    <div class="progress-fill" style="width: 40%"></div>
+                                </div>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">40% completado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actividad Reciente -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Actividad Reciente
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="actividad-reciente">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                                <div>
+                                    <p class="activity-text">Completaste una simulación de VAN</p>
+                                    <p class="activity-time">2 horas atrás</p>
+                                </div>
+                                <span class="activity-points">+25</span>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div>
+                                    <p class="activity-text">Obtuviste la insignia "Primeros Pasos"</p>
+                                    <p class="activity-time">1 día atrás</p>
+                                </div>
+                                <span class="activity-points">+100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consejos -->
+                <div class="tips-section">
+                    <h3 class="tips-title">Consejos para Ganar Más Puntos</h3>
+                    <div class="tips-list">
+                        <div class="tips-item">
+                            <i class="fas fa-check-circle tips-item-icon"></i>
+                            <p class="tips-item-text">Realiza simulaciones financieras completas (+25 puntos cada una)</p>
+                        </div>
+                        <div class="tips-item">
+                            <i class="fas fa-check-circle tips-item-icon"></i>
+                            <p class="tips-item-text">Únete a grupos de benchmarking (+20 puntos)</p>
+                        </div>
+                        <div class="tips-item">
+                            <i class="fas fa-check-circle tips-item-icon"></i>
+                            <p class="tips-item-text">Calcula VAN, TIR y otros indicadores (+10 puntos)</p>
+                        </div>
+                        <div class="tips-item">
+                            <i class="fas fa-check-circle tips-item-icon"></i>
+                            <p class="tips-item-text">Usa la plataforma diariamente (+5 puntos por login)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones básicas para demostrar funcionalidad
+        function verificarInsignias() {
+            alert('Funcionalidad de verificación de insignias activada');
+        }
+
+        // Simular carga de datos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simular estadísticas
+            setTimeout(() => {
+                document.getElementById('puntaje-total').textContent = '250';
+                document.getElementById('insignias-total').textContent = '3';
+                document.getElementById('simulaciones-total').textContent = '12';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

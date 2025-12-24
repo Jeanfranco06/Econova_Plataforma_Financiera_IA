@@ -1,3 +1,4 @@
+import json
 from app.utils.base_datos import get_db_connection
 
 class Benchmarking_Grupo:
@@ -29,39 +30,38 @@ class Benchmarking_Grupo:
             db.disconnect()
 
     @staticmethod
+    def listar_grupos():
+        """Listar todos los grupos de benchmarking"""
+        db = get_db_connection()
+        query = "SELECT * FROM Benchmarking_Grupo ORDER BY nombre_grupo"
+        try:
+            db.connect()
+            result = db.execute_query(query, fetch=True)
+            grupos = []
+            if result:
+                for row in result:
+                    grupos.append(Benchmarking_Grupo(**dict(row)))
+            return grupos
+        except Exception as e:
+            print(f"Error listando grupos de benchmarking: {e}")
+            return []
+        finally:
+            db.disconnect()
+
+    @staticmethod
     def obtener_grupo_por_id(benchmarking_id):
-        """Obtener grupo de benchmarking por ID"""
+        """Obtener un grupo específico por ID"""
         db = get_db_connection()
         query = "SELECT * FROM Benchmarking_Grupo WHERE benchmarking_id = %s"
         try:
             db.connect()
             result = db.execute_query(query, (benchmarking_id,), fetch=True)
             if result:
-                data = result[0]
-                return Benchmarking_Grupo(**data)
+                return Benchmarking_Grupo(**dict(result[0]))
             return None
         except Exception as e:
-            print(f"Error obteniendo grupo de benchmarking: {e}")
+            print(f"Error obteniendo grupo por ID: {e}")
             return None
-        finally:
-            db.disconnect()
-
-    @staticmethod
-    def listar_grupos():
-        """Listar todos los grupos de benchmarking"""
-        db = get_db_connection()
-        query = "SELECT * FROM Benchmarking_Grupo ORDER BY benchmarking_id"
-        try:
-            db.connect()
-            result = db.execute_query(query, fetch=True)
-            grupos = []
-            if result:
-                for data in result:
-                    grupos.append(Benchmarking_Grupo(**data))
-            return grupos
-        except Exception as e:
-            print(f"Error listando grupos: {e}")
-            return []
         finally:
             db.disconnect()
 
@@ -72,6 +72,129 @@ class Benchmarking_Grupo:
             'nombre_grupo': self.nombre_grupo,
             'descripcion': self.descripcion
         }
+
+
+class Analisis_Benchmarking:
+    def __init__(self, analisis_id=None, usuario_id=None, tipo_analisis=None, datos=None, resultados=None, recomendaciones=None, fecha=None):
+        self.analisis_id = analisis_id
+        self.usuario_id = usuario_id
+        self.tipo_analisis = tipo_analisis  # 'sectorial' o 'personalizado'
+        self.datos = datos or {}
+        self.resultados = resultados or {}
+        self.recomendaciones = recomendaciones or []
+        self.fecha = fecha
+
+    @staticmethod
+    def guardar_analisis(usuario_id, tipo_analisis, datos, resultados=None, recomendaciones=None):
+        """Guardar un análisis de benchmarking completo"""
+        db = get_db_connection()
+
+        # Convertir datos a JSON
+        datos_json = json.dumps(datos) if datos else None
+        resultados_json = json.dumps(resultados) if resultados else None
+        recomendaciones_json = json.dumps(recomendaciones) if recomendaciones else None
+
+        query = """
+        INSERT INTO Analisis_Benchmarking (usuario_id, tipo_analisis, datos, resultados, recomendaciones)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING analisis_id
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id, tipo_analisis, datos_json, resultados_json, recomendaciones_json), fetch=True)
+            db.commit()
+            if result:
+                analisis_id = result[0]['analisis_id']
+                return Analisis_Benchmarking(
+                    analisis_id=analisis_id,
+                    usuario_id=usuario_id,
+                    tipo_analisis=tipo_analisis,
+                    datos=datos,
+                    resultados=resultados,
+                    recomendaciones=recomendaciones
+                )
+            return None
+        except Exception as e:
+            print(f"Error guardando análisis de benchmarking: {e}")
+            return None
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def obtener_analisis_usuario(usuario_id, limite=50):
+        """Obtener análisis de benchmarking de un usuario"""
+        db = get_db_connection()
+        query = """
+        SELECT * FROM Analisis_Benchmarking
+        WHERE usuario_id = %s
+        ORDER BY fecha DESC
+        LIMIT %s
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id, limite), fetch=True)
+            analisis = []
+            if result:
+                for row in result:
+                    # Convertir Row a dict para permitir modificaciones
+                    data = dict(row)
+                    # Parsear JSON
+                    if data['datos']:
+                        data['datos'] = json.loads(data['datos'])
+                    if data['resultados']:
+                        data['resultados'] = json.loads(data['resultados'])
+                    if data['recomendaciones']:
+                        data['recomendaciones'] = json.loads(data['recomendaciones'])
+
+                    analisis.append(Analisis_Benchmarking(**data))
+            return analisis
+        except Exception as e:
+            print(f"Error obteniendo análisis del usuario: {e}")
+            return []
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def obtener_analisis_por_id(analisis_id):
+        """Obtener un análisis específico por ID"""
+        db = get_db_connection()
+        query = "SELECT * FROM Analisis_Benchmarking WHERE analisis_id = %s"
+        try:
+            db.connect()
+            result = db.execute_query(query, (analisis_id,), fetch=True)
+            if result:
+                # Convertir Row a dict para permitir modificaciones
+                data = dict(result[0])
+                # Parsear JSON
+                if data['datos']:
+                    data['datos'] = json.loads(data['datos'])
+                if data['resultados']:
+                    data['resultados'] = json.loads(data['resultados'])
+                if data['recomendaciones']:
+                    data['recomendaciones'] = json.loads(data['recomendaciones'])
+
+                return Analisis_Benchmarking(**data)
+            return None
+        except Exception as e:
+            print(f"Error obteniendo análisis por ID: {e}")
+            return None
+        finally:
+            db.disconnect()
+
+    def to_dict(self):
+        """Convertir objeto a diccionario"""
+        return {
+            'analisis_id': self.analisis_id,
+            'usuario_id': self.usuario_id,
+            'tipo_analisis': self.tipo_analisis,
+            'datos': self.datos,
+            'resultados': self.resultados,
+            'recomendaciones': self.recomendaciones,
+            'fecha': self.fecha
+        }
+
+
+
 
 
 class Usuario_Benchmarking:

@@ -18,6 +18,7 @@ class GamificationManager {
         this.setupEventListeners();
         this.cargarInsigniasPredefinidas();
         this.cargarEstadoUsuario();
+        this.verificarNotificacionesPendientes();
     }
 
     setupEventListeners() {
@@ -253,14 +254,47 @@ class GamificationManager {
     /**
      * Sistema de rankings
      */
-    actualizarRankings() {
-        // Simular rankings globales (en producción vendría de la BD)
-        this.rankings.global = [
-            { usuario: 'Ana García', puntos: 2500, nivel: 8, insignia: 'maestro_finanzas' },
-            { usuario: 'Carlos López', puntos: 2200, nivel: 7, insignia: 'analista_avanzado' },
-            { usuario: 'María Rodríguez', puntos: 2100, nivel: 7, insignia: 'inversor_estrategico' },
-            { usuario: 'Tú', puntos: this.puntosUsuario, nivel: this.nivelUsuario, insignia: this.obtenerInsigniaPrincipal() }
-        ].sort((a, b) => b.puntos - a.puntos);
+    async actualizarRankings() {
+        // Obtener ranking global real desde la API
+        try {
+            const response = await fetch('/gamification/api/ranking-global?limite=10');
+            const data = await response.json();
+
+            if (data.success) {
+                // Convertir datos de la API al formato esperado
+                this.rankings.global = data.ranking.map(item => ({
+                    usuario: item.nombre,
+                    puntos: item.puntaje,
+                    nivel: item.nivel,
+                    insignia: item.insignia_principal ? item.insignia_principal.nombre.toLowerCase().replace(' ', '_') : null,
+                    posicion: item.posicion
+                }));
+
+                // Agregar al usuario actual si no está en el ranking
+                const usuarioActual = data.usuario_actual;
+                if (usuarioActual && !this.rankings.global.find(r => r.usuario === usuarioActual.nombre)) {
+                    this.rankings.global.push({
+                        usuario: 'Tú',
+                        puntos: usuarioActual.puntaje,
+                        nivel: usuarioActual.nivel,
+                        insignia: usuarioActual.insignia_principal ? usuarioActual.insignia_principal.nombre.toLowerCase().replace(' ', '_') : null,
+                        posicion: usuarioActual.posicion
+                    });
+                }
+
+                // Ordenar por puntos
+                this.rankings.global.sort((a, b) => b.puntos - a.puntos);
+            }
+        } catch (error) {
+            console.warn('Error obteniendo ranking global:', error);
+            // Fallback a datos simulados
+            this.rankings.global = [
+                { usuario: 'Ana García', puntos: 2500, nivel: 8, insignia: 'maestro_finanzas' },
+                { usuario: 'Carlos López', puntos: 2200, nivel: 7, insignia: 'analista_avanzado' },
+                { usuario: 'María Rodríguez', puntos: 2100, nivel: 7, insignia: 'inversor_estrategico' },
+                { usuario: 'Tú', puntos: this.puntosUsuario, nivel: this.nivelUsuario, insignia: this.obtenerInsigniaPrincipal() }
+            ].sort((a, b) => b.puntos - a.puntos);
+        }
 
         // Rankings por sector (simulado)
         this.rankings.sector = {
@@ -275,8 +309,8 @@ class GamificationManager {
         };
     }
 
-    obtenerRankingUsuario() {
-        this.actualizarRankings();
+    async obtenerRankingUsuario() {
+        await this.actualizarRankings();
 
         const posicionGlobal = this.rankings.global.findIndex(r => r.usuario === 'Tú') + 1;
         const totalUsuarios = this.rankings.global.length;
@@ -568,12 +602,13 @@ class GamificationManager {
     /**
      * API pública
      */
-    obtenerEstadoGamification() {
+    async obtenerEstadoGamification() {
+        const ranking = await this.obtenerRankingUsuario();
         return {
             puntos: this.puntosUsuario,
             nivel: this.nivelUsuario,
             insignias: Object.values(this.logros),
-            ranking: this.obtenerRankingUsuario(),
+            ranking: ranking,
             progreso_siguiente_nivel: this.calcularProgresoSiguienteNivel()
         };
     }
@@ -598,6 +633,75 @@ class GamificationManager {
             puntosTotales += i * 100 + (i - 1) * 50;
         }
         return puntosTotales;
+    }
+
+    /**
+     * Verificar notificaciones pendientes de logros
+     */
+    verificarNotificacionesPendientes() {
+        // Solo verificar si hay un usuario autenticado
+        if (!document.querySelector('[data-usuario-id]')) {
+            return;
+        }
+
+        fetch('/gamification/api/notificaciones-pendientes')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.notificaciones && data.notificaciones.length > 0) {
+                    // Mostrar notificaciones de logros pendientes
+                    data.notificaciones.forEach(notificacion => {
+                        if (notificacion.tipo === 'logro') {
+                            this.mostrarNotificacionLogroPendiente(notificacion);
+                        }
+                    });
+
+                    // Marcar notificaciones como leídas después de mostrarlas
+                    this.marcarNotificacionesComoLeidas(data.notificaciones);
+                }
+            })
+            .catch(error => {
+                console.warn('Error verificando notificaciones pendientes:', error);
+            });
+    }
+
+    /**
+     * Mostrar notificación de logro pendiente
+     */
+    mostrarNotificacionLogroPendiente(notificacion) {
+        if (window.contextualMessages) {
+            window.contextualMessages.success({
+                title: '¡Nueva Insignia Obtenida! 🏆',
+                body: notificacion.mensaje,
+                icon: '🎖️'
+            });
+        } else {
+            // Fallback si no hay sistema de mensajes contextuales
+            alert(`¡Felicitaciones! ${notificacion.mensaje}`);
+        }
+    }
+
+    /**
+     * Marcar notificaciones como leídas
+     */
+    marcarNotificacionesComoLeidas(notificaciones) {
+        const ids = notificaciones.map(n => n.notificacion_id);
+
+        fetch('/gamification/api/marcar-leidas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notificaciones_ids: ids })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Notificaciones marcadas como leídas');
+            }
+        })
+        .catch(error => {
+            console.warn('Error marcando notificaciones como leídas:', error);
+        });
     }
 
     dispararEvento(evento, datos) {

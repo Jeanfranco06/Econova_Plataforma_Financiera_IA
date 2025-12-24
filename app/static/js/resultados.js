@@ -299,8 +299,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (key === 'tir' && typeof value === 'number') {
                         displayValue = `${value.toFixed(1)}%`;
                         label = 'TIR';
-                    } else if (key === 'wacc' && typeof value === 'number') {
+                    } else if (key === 'wacc_porcentaje' && typeof value === 'number') {
                         displayValue = `${value.toFixed(1)}%`;
+                        label = 'WACC';
+                    } else if (key === 'wacc' && typeof value === 'number') {
+                        displayValue = `${(value * 100).toFixed(1)}%`;
                         label = 'WACC';
                     } else if (key === 'payback' && typeof value === 'number') {
                         displayValue = `${value.toFixed(1)} años`;
@@ -323,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `);
                 }
             });
-            resultsHTML = `<div class="grid md:grid-cols-2 gap-4">${resultItems.join('')}</div>`;
+            resultsHTML = `<div class="grid md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">${resultItems.join('')}</div>`;
         } else {
             resultsHTML = '<p class="text-gray-600">No hay resultados disponibles para esta simulación.</p>';
         }
@@ -336,9 +339,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (value !== null && value !== undefined) {
                     let displayValue = value;
                     if (Array.isArray(value)) {
-                        displayValue = value.join(', ');
+                        if (value.length === 0) {
+                            displayValue = '(vacío)';
+                        } else if (typeof value[0] === 'object' && value[0] !== null) {
+                            // Array of objects (like activos)
+                            if (key === 'activos') {
+                                displayValue = `${value.length} activos configurados`;
+                            } else {
+                                displayValue = `${value.length} elementos`;
+                            }
+                        } else {
+                            // Regular array
+                            displayValue = value.join(', ');
+                        }
                     } else if (typeof value === 'number') {
                         displayValue = value.toLocaleString('es-ES');
+                    } else if (typeof value === 'object') {
+                        // Handle objects
+                        displayValue = JSON.stringify(value, null, 2);
                     }
                     paramItems.push(`<li class="text-sm"><strong>${key}:</strong> ${displayValue}</li>`);
                 }
@@ -347,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 paramsHTML = `
                     <div class="bg-green-50 p-4 rounded-lg">
                         <h4 class="font-semibold text-green-800 mb-2">Parámetros de la Simulación</h4>
-                        <ul class="text-green-700 space-y-1">${paramItems.join('')}</ul>
+                        <ul class="text-green-700 space-y-1" style="max-height: 160px; overflow-y: auto; word-wrap: break-word; font-size: 14px; line-height: 1.6;">${paramItems.join('')}</ul>
                     </div>
                 `;
             }
@@ -658,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div>
                             <h3 class="font-semibold text-gray-800 mb-4">Resultados por Métrica</h3>
                             <div class="space-y-4">
-                                ${Object.entries(stats).map(([metrica, data]) => `
+                                ${Object.entries(stats).filter(([metrica, data]) => !metrica.startsWith('_')).map(([metrica, data]) => `
                                     <div class="bg-gray-50 p-4 rounded-lg">
                                         <h4 class="font-semibold text-gray-800 mb-2">${BenchmarkingUtils.nombreMetrica(metrica)}</h4>
                                         <div class="grid md:grid-cols-3 gap-4">
@@ -671,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <div class="text-xs text-gray-600">Promedio Sector</div>
                                             </div>
                                             <div class="text-center">
-                                                <div class="text-lg font-bold ${data.posicion_relativa.percentil >= 75 ? 'text-green-600' : data.posicion_relativa.percentil >= 50 ? 'text-blue-600' : data.posicion_relativa.percentil >= 25 ? 'text-yellow-600' : 'text-red-600'}">${data.posicion_relativa.percentil.toFixed(1)}%</div>
+                                                <div class="text-lg font-bold ${data.posicion_relativa && data.posicion_relativa.percentil >= 75 ? 'text-green-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 50 ? 'text-blue-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 25 ? 'text-yellow-600' : 'text-red-600'}">${data.posicion_relativa && data.posicion_relativa.percentil ? data.posicion_relativa.percentil.toFixed(1) : 'N/A'}%</div>
                                                 <div class="text-xs text-gray-600">Tu Percentil</div>
                                             </div>
                                         </div>
@@ -793,8 +811,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function calcularPercentilPromedio(analisis) {
         if (!analisis || typeof analisis !== 'object') return 0;
 
-        const percentiles = Object.values(analisis)
-            .map(stats => stats?.posicion_relativa?.percentil)
+        // Filtrar solo las métricas reales (excluir metadatos que empiezan con _)
+        const metricasReales = Object.entries(analisis)
+            .filter(([key, value]) => !key.startsWith('_') && value && typeof value === 'object' && value.posicion_relativa);
+
+        const percentiles = metricasReales
+            .map(([key, stats]) => stats?.posicion_relativa?.percentil)
             .filter(percentil => typeof percentil === 'number' && !isNaN(percentil));
 
         if (percentiles.length === 0) return 0;

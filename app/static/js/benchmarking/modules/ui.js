@@ -266,7 +266,7 @@ class BenchmarkingUI {
                 e.preventDefault();
                 console.log('💾 Guardando análisis sectorial...');
                 if (window.benchmarkingManager) {
-                    window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial_guardado');
+                    window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial');
                     BenchmarkingUtils.mostrarExito('Análisis guardado exitosamente', '¡Guardado!');
                 }
                 return;
@@ -654,7 +654,7 @@ class BenchmarkingUI {
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial_guardado'); BenchmarkingUtils.mostrarExito('Análisis guardado exitosamente', '¡Guardado!');">
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial', window.benchmarkingManager.datosBenchmarking['sectorial'] || {}); BenchmarkingUtils.mostrarExito('Análisis guardado exitosamente', '¡Guardado!');">
                     <i class="fas fa-save mr-2"></i>Guardar Análisis
                 </button>
                 <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300 font-semibold flex items-center justify-center" id="btn-nuevo-sectorial">

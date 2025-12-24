@@ -19,7 +19,11 @@ except ImportError:
 IS_PRODUCTION = os.getenv('RENDER', False) or os.getenv('PRODUCTION', False)
 
 # Detectar si usar PostgreSQL (producción) o SQLite (desarrollo)
-if Config.DATABASE_URL and POSTGRESQL_AVAILABLE:
+if hasattr(Config, 'IS_LOCAL_DEV') and Config.IS_LOCAL_DEV:
+    # Desarrollo local: Siempre usar SQLite
+    USE_POSTGRESQL = False
+    print("🐘 Usando SQLite (desarrollo local)")
+elif Config.DATABASE_URL and POSTGRESQL_AVAILABLE:
     # Producción: PostgreSQL con DATABASE_URL
     USE_POSTGRESQL = True
     print("🐘 Usando PostgreSQL (producción con DATABASE_URL)")
@@ -120,17 +124,16 @@ class DatabaseConnection:
             print(f"Error en rollback: {e}")
         return False
 
-# Singleton instance
-db = DatabaseConnection()
-
 def get_db_connection():
-    """Obtener instancia de conexión de base de datos"""
-    return db
+    """Obtener nueva instancia de conexión de base de datos"""
+    return DatabaseConnection()
 
 def init_db():
     """Inicializar conexión de base de datos"""
-    return db.connect()
+    temp_db = DatabaseConnection()
+    return temp_db.connect()
 
 def close_db():
     """Cerrar conexión de base de datos"""
-    db.disconnect()
+    temp_db = DatabaseConnection()
+    temp_db.disconnect()

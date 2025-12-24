@@ -149,11 +149,18 @@
               </div>
               {% endif %}
 
-              {% if simulacion.resultados.get('wacc') is not none %}
+              {% if simulacion.resultados.get('wacc_porcentaje') is not none %}
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-600 mb-1">WACC</div>
                 <div class="text-2xl font-bold text-indigo-600">
-                  {{ "{:.1f}".format(simulacion.resultados.wacc) }}%
+                  {{ "{:.1f}".format(simulacion.resultados.wacc_porcentaje) }}%
+                </div>
+              </div>
+              {% elif simulacion.resultados.get('wacc') is not none %}
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600 mb-1">WACC</div>
+                <div class="text-2xl font-bold text-indigo-600">
+                  {{ "{:.1f}".format(simulacion.resultados.wacc * 100) }}%
                 </div>
               </div>
               {% endif %}

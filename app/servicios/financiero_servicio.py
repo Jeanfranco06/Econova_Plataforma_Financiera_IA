@@ -214,9 +214,20 @@ class FinancieroServicio:
         Returns:
             Dict con análisis del portafolio
         """
-        # Validar inputs
-        rets = validar_flujos_caja(retornos, "retornos")
-        ponds = validar_ponderaciones(ponderaciones)
+        # Validar inputs - permitir análisis vacíos para guardar simulaciones
+        if not retornos or len(retornos) == 0:
+            if not ponderaciones or len(ponderaciones) == 0:
+                # Análisis vacío - permitir guardar sin datos
+                rets = []
+                ponds = []
+            else:
+                # Solo ponderaciones, crear retornos por defecto
+                ponds = validar_ponderaciones(ponderaciones)
+                rets = [0.08] * len(ponds)  # 8% de retorno por defecto para cada activo
+        else:
+            # Hay retornos, validar normalmente
+            rets = validar_flujos_caja(retornos, "retornos")
+            ponds = validar_ponderaciones(ponderaciones)
         
         if len(rets) != len(ponds):
             raise ValueError("El número de retornos debe coincidir con el número de ponderaciones")

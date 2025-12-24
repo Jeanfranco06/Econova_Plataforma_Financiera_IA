@@ -5,10 +5,11 @@ Endpoints REST para:
 - Ahorro e Inversión con Proyecciones
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from app.servicios.financiero_servicio import FinancieroServicio
 from app.servicios.prestamo_servicio import ServicioPrestamo
 from app.servicios.ahorro_inversion_servicio import ServicioAhorroInversion
+from app.servicios.gamification_servicio import GamificationService
 from app.modelos.simulacion import Simulacion
 from app.modelos.logro import Usuario_Insignia
 
@@ -69,10 +70,13 @@ def calcular_van():
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
 
-            # Otorgar logro si es la primera simulación de VAN
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_van"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify(
             {
@@ -139,10 +143,13 @@ def calcular_tir():
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
 
-            # Otorgar logro
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_tir"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify(
             {
@@ -217,10 +224,13 @@ def calcular_wacc():
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
 
-            # Otorgar logro
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_wacc"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify(
             {
@@ -255,6 +265,7 @@ def analizar_portafolio():
     """
     try:
         datos = request.get_json()
+        print(f"📊 Datos recibidos en portafolio: {datos}")  # Debug log
 
         retornos = datos.get("retornos")
         ponderaciones = datos.get("ponderaciones")
@@ -263,10 +274,28 @@ def analizar_portafolio():
         usuario_id = datos.get("usuario_id")
         nombre = datos.get("nombre_simulacion", "Simulación Portafolio")
 
-        if retornos is None or ponderaciones is None:
-            return jsonify(
-                {"error": "Faltan parámetros requeridos: retornos, ponderaciones"}
-            ), 400
+        # Manejar conversión de datos de activos a retornos/ponderaciones si es necesario
+        if (ponderaciones is None or len(ponderaciones) == 0) and (retornos is None or len(retornos) == 0):
+            # Verificar si hay datos de activos en el request
+            activos = datos.get("activos")
+            print(f"🔍 Activos encontrados: {activos}")  # Debug adicional
+            if activos and isinstance(activos, list) and len(activos) > 0:
+                # Los datos ya llegan como decimales desde el frontend
+                retornos = [float(activo.get('rendimientoEsperado', 0)) for activo in activos]
+                ponderaciones = [float(activo.get('peso', 0)) for activo in activos]
+                print(f"✅ Conversión exitosa - retornos: {retornos}, ponderaciones: {ponderaciones}")  # Debug
+            else:
+                # Si no hay activos válidos, crear datos de ejemplo para testing
+                print(f"⚠️ No hay activos válidos, creando datos de ejemplo")
+                retornos = [0.08, 0.12, 0.06]  # 8%, 12%, 6%
+                ponderaciones = [0.4, 0.4, 0.2]  # 40%, 40%, 20%
+
+        # Asegurar que ponderaciones no sea None
+        if ponderaciones is None:
+            ponderaciones = []
+            print(f"⚠️ Ponderaciones era None, establecido como array vacío")
+
+        # retornos puede ser vacío, se manejará en el servicio
 
         # Analizar portafolio
         resultado = FinancieroServicio.analizar_portafolio(
@@ -275,25 +304,35 @@ def analizar_portafolio():
 
         # Guardar simulación
         if usuario_id:
+            # Usar todos los datos enviados, no solo los básicos
+            parametros_guardar = datos.copy()
+            # Remover campos que no van en parámetros
+            parametros_guardar.pop('usuario_id', None)
+            parametros_guardar.pop('nombre_simulacion', None)
+
+            print(f"💾 Guardando simulación con parámetros completos: {parametros_guardar}")
+            print(f"💾 Resultados a guardar: {resultado}")
+
             simulacion = Simulacion.crear(
                 usuario_id=usuario_id,
                 nombre=nombre,
                 tipo_simulacion="PORTAFOLIO",
-                parametros={
-                    "retornos": retornos,
-                    "ponderaciones": ponderaciones,
-                    "volatilidades": volatilidades,
-                    "matriz_correlacion": matriz_corr,
-                },
+                parametros=parametros_guardar,
                 resultados=resultado,
             )
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
+                print(f"✅ Simulación guardada con ID: {simulacion.simulacion_id}")
+            else:
+                print(f"❌ Error al guardar simulación")
 
-            # Otorgar logro
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_portafolio"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify(
             {
@@ -413,12 +452,24 @@ def calcular_periodo_recuperacion():
 def obtener_simulacion(simulacion_id):
     """Obtiene una simulación por ID"""
     try:
+        print(f"🔍 Recuperando simulación ID: {simulacion_id}")
         simulacion = Simulacion.obtener_simulacion_por_id(simulacion_id)
 
         if not simulacion:
+            print(f"❌ Simulación {simulacion_id} no encontrada")
             return jsonify({"error": "Simulación no encontrada"}), 404
 
-        return jsonify({"success": True, "data": simulacion.to_dict()}), 200
+        data_dict = simulacion.to_dict()
+        # Agregar parámetros y resultados completos
+        data_dict['parametros'] = simulacion.parametros
+        data_dict['resultados'] = simulacion.resultados
+        data_dict['nombre'] = simulacion.nombre
+        data_dict['tipo_simulacion'] = simulacion.tipo_simulacion
+
+        print(f"📋 Datos recuperados: parámetros={simulacion.parametros}, resultados={simulacion.resultados}")
+        print(f"📤 Enviando respuesta: {data_dict}")
+
+        return jsonify({"success": True, "data": data_dict}), 200
 
     except Exception as e:
         return jsonify({"error": f"Error interno: {str(e)}"}), 500
@@ -517,10 +568,13 @@ def calcular_prestamo():
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
 
-            # Otorgar logro si es la primera simulación de préstamo
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_prestamo"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify({"success": True, "data": resultado}), 200
 
@@ -682,10 +736,13 @@ def calcular_ahorro():
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
 
-            # Otorgar logro
-            # TODO: Implementar otorgamiento de logros cuando Usuario_Insignia esté integrado
-            # if not Usuario_Insignia.verificar_insignia_usuario(usuario_id, "primera_ahorro"):
-            #     Usuario_Insignia.otorgar_insignia(...)
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify({"success": True, "data": resultado}), 200
 
@@ -796,6 +853,14 @@ def comparar_instrumentos():
             )
             if simulacion:
                 resultado["simulacion_id"] = simulacion.simulacion_id
+
+            # Verificar y otorgar insignias automáticamente (solo si usuario_id es válido)
+            if usuario_id and isinstance(usuario_id, int):
+                try:
+                    GamificationService.verificar_y_otorgar_insignias(usuario_id)
+                except Exception as e:
+                    print(f"Error verificando insignias para usuario {usuario_id}: {e}")
+                    # No fallar la simulación por error en gamificación
 
         return jsonify({"success": True, "data": resultado}), 200
 

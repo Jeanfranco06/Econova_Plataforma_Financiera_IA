@@ -1,0 +1,868 @@
+{% extends "base.html" %}
+
+{% block title %}Sistema de Gamificación - Econova{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-white border-b border-gray-200">
+  <div class="container mx-auto px-6 py-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Sistema de Gamificación</h1>
+        <p class="text-gray-600">Gana puntos, desbloquea insignias y compite con otros usuarios</p>
+      </div>
+      <div class="hidden md:flex items-center space-x-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600" id="puntaje-total">{{ estadisticas.puntaje_total or 0 }}</div>
+          <div class="text-sm text-gray-500">Puntos Totales</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-600" id="insignias-total">{{ estadisticas.num_insignias or 0 }}</div>
+          <div class="text-sm text-gray-500">Insignias</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-6 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left Column - Stats & Badges -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Mobile Stats -->
+      <div class="md:hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-center">
+            <div class="text-xl font-bold text-blue-600" id="puntaje-total-mobile">{{ estadisticas.puntaje_total or 0 }}</div>
+            <div class="text-sm text-gray-500">Puntos Totales</div>
+          </div>
+          <div class="text-center">
+            <div class="text-xl font-bold text-green-600" id="insignias-total-mobile">{{ estadisticas.num_insignias or 0 }}</div>
+            <div class="text-sm text-gray-500">Insignias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Badges -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-medal text-blue-600 mr-3"></i>
+              Mis Insignias
+            </h2>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center text-sm" onclick="verificarInsignias()" id="verify-btn">
+              <i class="fas fa-refresh mr-2"></i>
+              Verificar
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <div id="insignias-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Badges will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Ranking -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-trophy text-yellow-600 mr-3"></i>
+            Ranking Global
+          </h2>
+        </div>
+        <div class="p-6">
+          <div id="ranking-container" class="space-y-3">
+            <!-- Ranking will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column - Achievements & Activity -->
+    <div class="space-y-6">
+
+      <!-- Level Progress -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="fas fa-level-up-alt text-purple-600 mr-2"></i>
+          Nivel Actual
+        </h3>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-purple-600 mb-2" id="nivel-actual">{{ (estadisticas.puntaje_total or 0) // 100 + 1 }}</div>
+          <div class="text-sm text-gray-600 mb-3">Nivel</div>
+          <div class="bg-gray-200 rounded-full h-3">
+            <div class="bg-purple-600 h-3 rounded-full transition-all duration-500" style="width: {{ ((estadisticas.puntaje_total or 0) % 100) }}%"></div>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">{{ (estadisticas.puntaje_total or 0) % 100 }}/100 puntos para el siguiente nivel</div>
+        </div>
+      </div>
+
+      <!-- Upcoming Achievements -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-target text-green-600 mr-2"></i>
+            Próximos Logros
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="proximos-logros" class="space-y-4">
+            <!-- Achievements will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-history text-indigo-600 mr-2"></i>
+            Actividad Reciente
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="actividad-reciente" class="space-y-3">
+            <!-- Activity will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips Card -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+          <i class="fas fa-lightbulb text-blue-600 mr-2"></i>
+          Consejos para Ganar Puntos
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-start">
+            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-sm"></i>
+            <p class="text-sm text-blue-800">Realiza simulaciones financieras completas (+25 puntos)</p>
+          </div>
+          <div class="flex items-start">
+            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-sm"></i>
+            <p class="text-sm text-blue-800">Únete a grupos de benchmarking (+20 puntos)</p>
+          </div>
+          <div class="flex items-start">
+            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-sm"></i>
+            <p class="text-sm text-blue-800">Calcula VAN, TIR y otros indicadores (+10 puntos)</p>
+          </div>
+          <div class="flex items-start">
+            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-sm"></i>
+            <p class="text-sm text-blue-800">Usa la plataforma diariamente (+5 puntos por login)</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+console.log('🚀 Gamificación: Sistema inicializado correctamente');
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('🎯 DOM loaded - Starting data loading...');
+  inicializarGamification();
+});
+
+// Main initialization function
+async function inicializarGamification() {
+  try {
+    // Show loading states
+    mostrarEstadosCarga();
+
+    // Load data in parallel for better performance
+    await Promise.all([
+      cargarEstadisticas(),
+      cargarInsignias(),
+      cargarRanking(),
+      cargarProximosLogros(),
+      cargarActividadReciente()
+    ]);
+
+    console.log('✅ All data loaded successfully');
+  } catch (error) {
+    console.error('❌ Initialization error:', error);
+    mostrarErrorGeneral();
+  }
+}
+
+// Show initial loading states
+function mostrarEstadosCarga() {
+  const insigniasContainer = document.getElementById('insignias-container');
+  const rankingContainer = document.getElementById('ranking-container');
+  const logrosContainer = document.getElementById('proximos-logros');
+  const actividadContainer = document.getElementById('actividad-reciente');
+
+  if (insigniasContainer) {
+    insigniasContainer.innerHTML = `
+      <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+        <p class="text-sm">Cargando insignias...</p>
+      </div>
+    `;
+  }
+
+  if (rankingContainer) {
+    rankingContainer.innerHTML = `
+      <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+        <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-spinner fa-spin text-gray-600"></i>
+        </div>
+        <div class="flex-1">
+          <div class="h-3 bg-gray-300 rounded mb-2"></div>
+          <div class="h-2 bg-gray-200 rounded"></div>
+        </div>
+        <div class="text-sm font-medium text-gray-600">---</div>
+      </div>
+    `;
+  }
+
+  if (logrosContainer) {
+    logrosContainer.innerHTML = `
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="h-3 bg-gray-300 rounded mb-2"></div>
+        <div class="h-2 bg-gray-200 rounded mb-2"></div>
+        <div class="h-2 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    `;
+  }
+
+  if (actividadContainer) {
+    actividadContainer.innerHTML = `
+      <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-spinner fa-spin text-gray-600 text-xs"></i>
+        </div>
+        <div class="flex-1">
+          <div class="h-3 bg-gray-300 rounded mb-1"></div>
+          <div class="h-2 bg-gray-200 rounded"></div>
+        </div>
+        <div class="text-green-600 font-bold text-sm">---</div>
+      </div>
+    `;
+  }
+}
+
+// Show general error
+function mostrarErrorGeneral() {
+  const containers = ['insignias-container', 'ranking-container', 'proximos-logros', 'actividad-reciente'];
+
+  containers.forEach(id => {
+    const container = document.getElementById(id);
+    if (container) {
+      container.innerHTML = `
+        <div class="text-center py-8 text-red-500">
+          <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
+          <p class="text-sm">Error al cargar datos</p>
+        </div>
+      `;
+    }
+  });
+}
+
+// Load user statistics
+async function cargarEstadisticas() {
+  console.log('📊 Loading statistics...');
+
+  try {
+    const response = await fetch('/gamification/api/estadisticas');
+    console.log('📊 Statistics response:', response.status);
+
+    if (response.status === 401) {
+      console.log('👤 User not authenticated');
+      actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('📊 Statistics data:', data);
+
+    if (data && data.success) {
+      actualizarEstadisticas(data.estadisticas);
+    } else {
+      console.warn('⚠️ Statistics response not successful');
+      actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
+    }
+  } catch (error) {
+    console.error('❌ Error loading statistics:', error);
+    actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
+  }
+}
+
+// Update statistics in the interface
+function actualizarEstadisticas(estadisticas) {
+  console.log('📊 Updating statistics:', estadisticas);
+
+  // Update all statistic elements
+  const elements = [
+    'puntaje-total', 'puntaje-total-mobile',
+    'insignias-total', 'insignias-total-mobile',
+    'nivel-actual'
+  ];
+
+  elements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      if (id.includes('puntaje')) {
+        element.textContent = estadisticas.puntaje_total || 0;
+      } else if (id.includes('insignias')) {
+        element.textContent = estadisticas.num_insignias || 0;
+      } else if (id === 'nivel-actual') {
+        element.textContent = Math.floor((estadisticas.puntaje_total || 0) / 100) + 1;
+      }
+    }
+  });
+
+  // Update level progress bar
+  const progressBar = document.querySelector('.bg-purple-600');
+  if (progressBar) {
+    const progressPercent = (estadisticas.puntaje_total || 0) % 100;
+    progressBar.style.width = progressPercent + '%';
+
+    const progressText = document.querySelector('.text-xs.text-gray-500');
+    if (progressText) {
+      progressText.textContent = `${progressPercent}/100 puntos para el siguiente nivel`;
+    }
+  }
+}
+
+// Load user badges
+async function cargarInsignias() {
+  console.log('🏆 Loading badges...');
+
+  try {
+    const response = await fetch('/gamification/api/insignias/usuario');
+    console.log('🏆 Badges response:', response.status);
+
+    if (response.status === 401) {
+      mostrarInsignias([]);
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('🏆 Badges data:', data);
+
+    if (data && data.success) {
+      mostrarInsignias(data.insignias);
+    } else {
+      console.warn('⚠️ Badges response not successful');
+      mostrarInsignias([]);
+    }
+  } catch (error) {
+    console.error('❌ Error loading badges:', error);
+    mostrarInsignias([]);
+  }
+}
+
+// Show badges in the interface
+function mostrarInsignias(insignias) {
+  const container = document.getElementById('insignias-container');
+  console.log('🏆 Showing badges:', insignias.length);
+
+  if (!container) return;
+
+  if (insignias.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8 text-gray-500 col-span-full">
+        <i class="fas fa-medal text-4xl mb-4 text-gray-300"></i>
+        <h4 class="font-semibold mb-2">Aún no tienes insignias</h4>
+        <p class="text-sm">¡Comienza a usar la plataforma para ganar tus primeras insignias!</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  insignias.forEach((item, index) => {
+    const insignia = item.insignia;
+    const colors = ['bg-blue-50 border-blue-200', 'bg-green-50 border-green-200', 'bg-purple-50 border-purple-200', 'bg-yellow-50 border-yellow-200'];
+    const colorClass = colors[index % colors.length];
+
+    html += `
+      <div class="${colorClass} p-4 rounded-lg border hover:shadow-md transition-shadow duration-200">
+        <div class="text-3xl mb-2 text-center">${insignia.icono || '🏆'}</div>
+        <div class="font-semibold text-gray-800 text-center mb-1">${insignia.nombre_insig}</div>
+        <p class="text-sm text-gray-600 text-center">${insignia.descripcion_insig}</p>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Load global ranking
+async function cargarRanking() {
+  console.log('🏅 Loading ranking...');
+
+  try {
+    const response = await fetch(`/gamification/api/ranking/${'General'}`);
+    console.log('🏅 Ranking response:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('🏅 Ranking data:', data);
+
+    if (data && data.success) {
+      mostrarRanking(data.ranking, data.usuarios, data.usuario_actual);
+    } else {
+      console.warn('⚠️ Ranking response not successful');
+      mostrarRanking([], [], null);
+    }
+  } catch (error) {
+    console.error('❌ Error loading ranking:', error);
+    mostrarRanking([], [], null);
+  }
+}
+
+// Show ranking in the interface
+function mostrarRanking(ranking, usuarios, usuarioActual) {
+  const container = document.getElementById('ranking-container');
+  console.log('🏅 Showing ranking:', ranking ? ranking.length : 0, 'usuarios:', usuarios ? usuarios.length : 0);
+
+  if (!container) return;
+
+  // Validate input data
+  if (!Array.isArray(ranking) || !Array.isArray(usuarios)) {
+    console.error('❌ Ranking data is not valid arrays');
+    container.innerHTML = `
+      <div class="text-center py-8 text-red-500">
+        <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
+        <p class="text-sm">Error al cargar datos de ranking</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (ranking.length === 0) {
+    container.innerHTML = `
+      <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-trophy text-yellow-600"></i>
+        </div>
+        <div class="flex-1">
+          <div class="font-medium text-gray-800">No hay datos de ranking</div>
+          <div class="text-sm text-gray-600">¡Sé el primero en aparecer!</div>
+        </div>
+        <div class="font-bold text-yellow-600">0 pts</div>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  ranking.forEach((item, index) => {
+    try {
+      const posicion = index + 1;
+      const usuario = usuarios[index];
+
+      // Validate that usuario exists
+      if (!usuario) {
+        console.warn(`⚠️ No user data for ranking position ${posicion}`);
+        return;
+      }
+
+      let bgColor = 'bg-gray-50';
+      let borderColor = 'border-gray-200';
+      let positionStyle = 'text-gray-600';
+      let isCurrentUser = false;
+
+      // Check if this is the current user
+      if (usuarioActual && usuarioActual.usuario && usuarioActual.usuario.usuario_id === item.usuario_id) {
+        isCurrentUser = true;
+        bgColor = 'bg-blue-50 border-blue-300';
+        borderColor = 'border-blue-300';
+        positionStyle = 'text-blue-700 font-bold';
+      } else {
+        // Apply medal styles for top positions
+        if (posicion === 1) {
+          bgColor = 'bg-yellow-50';
+          borderColor = 'border-yellow-200';
+          positionStyle = 'text-yellow-700 font-bold';
+        } else if (posicion === 2) {
+          bgColor = 'bg-gray-50';
+          borderColor = 'border-gray-200';
+          positionStyle = 'text-gray-700 font-semibold';
+        } else if (posicion === 3) {
+          bgColor = 'bg-orange-50';
+          borderColor = 'border-orange-200';
+          positionStyle = 'text-orange-700 font-semibold';
+        }
+      }
+
+      const userLabel = isCurrentUser ? ' (Tú)' : '';
+      const nombres = usuario.nombres || 'Usuario';
+      const apellidos = usuario.apellidos || '';
+      const nombreUsuario = usuario.nombre_usuario || `user${item.usuario_id || 0}`;
+
+      html += `
+        <div class="flex items-center p-4 ${bgColor} border ${borderColor} rounded-lg ${isCurrentUser ? 'ring-2 ring-blue-300' : ''}">
+          <div class="w-10 h-10 ${bgColor} border ${borderColor} rounded-full flex items-center justify-center mr-3 ${positionStyle} text-sm font-bold">
+            ${posicion}
+          </div>
+          <div class="flex-1">
+            <div class="font-medium text-gray-800 text-sm">${nombres} ${apellidos}${userLabel}</div>
+            <div class="text-xs text-gray-500">@${nombreUsuario}</div>
+          </div>
+          <div class="font-bold text-gray-700 text-sm">${item.puntaje || 0} pts</div>
+        </div>
+      `;
+    } catch (error) {
+      console.error(`❌ Error processing ranking item ${index}:`, error);
+    }
+  });
+
+  if (html === '') {
+    html = `
+      <div class="text-center py-8 text-red-500">
+        <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
+        <p class="text-sm">Error al procesar datos de ranking</p>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+// Load upcoming achievements
+async function cargarProximosLogros() {
+  console.log('🎯 Loading achievements...');
+
+  try {
+    const response = await fetch('/gamification/api/logros-proximos');
+    console.log('🎯 Achievements response:', response.status);
+
+    if (response.status === 401) {
+      mostrarLogrosSimulados();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('🎯 Achievements data:', data);
+
+    if (data && data.success) {
+      mostrarLogros(data.logros);
+    } else {
+      console.warn('⚠️ Achievements response not successful');
+      mostrarLogrosSimulados();
+    }
+  } catch (error) {
+    console.error('❌ Error loading achievements:', error);
+    mostrarLogrosSimulados();
+  }
+}
+
+// Show achievements in the interface
+function mostrarLogros(logros) {
+  const container = document.getElementById('proximos-logros');
+  if (!container) return;
+
+  let html = '';
+  logros.forEach((logro) => {
+    const iconMap = {
+      'Analista Avanzado': 'fas fa-chart-line text-blue-600',
+      'Benchmarking Experto': 'fas fa-balance-scale text-green-600',
+      'Inversor Estratégico': 'fas fa-chart-pie text-purple-600'
+    };
+
+    const iconClass = iconMap[logro.nombre] || 'fas fa-target text-purple-600';
+
+    html += `
+      <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div class="flex items-center mb-3">
+          <i class="${iconClass} mr-2"></i>
+          <div class="font-medium text-gray-800 text-sm">${logro.nombre}</div>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">${logro.descripcion}</p>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div class="bg-green-600 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+        </div>
+        <div class="text-xs text-gray-500">${logro.progreso}% completado</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  // Animate progress bars
+  setTimeout(() => {
+    const progressBars = container.querySelectorAll('.bg-green-600');
+    progressBars.forEach((bar, index) => {
+      setTimeout(() => {
+        bar.style.width = logros[index].progreso + '%';
+      }, index * 300);
+    });
+  }, 500);
+}
+
+// Fallback: Show simulated achievements
+function mostrarLogrosSimulados() {
+  const proximosLogros = [
+    {
+      nombre: 'Analista Avanzado',
+      descripcion: 'Completa 25 simulaciones financieras',
+      progreso: 60
+    },
+    {
+      nombre: 'Benchmarking Experto',
+      descripcion: 'Realiza 15 análisis comparativos',
+      progreso: 40
+    },
+    {
+      nombre: 'Inversor Estratégico',
+      descripcion: 'Optimiza 20 portafolios',
+      progreso: 25
+    }
+  ];
+
+  mostrarLogros(proximosLogros);
+}
+
+// Load recent activity
+async function cargarActividadReciente() {
+  console.log('📅 Loading activity...');
+
+  try {
+    const response = await fetch('/gamification/api/actividad-reciente');
+    console.log('📅 Activity response:', response.status);
+
+    if (response.status === 401) {
+      mostrarActividadSimulada();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('📅 Activity data:', data);
+
+    if (data && data.success) {
+      mostrarActividad(data.actividades);
+    } else {
+      console.warn('⚠️ Activity response not successful');
+      mostrarActividadSimulada();
+    }
+  } catch (error) {
+    console.error('❌ Error loading activity:', error);
+    mostrarActividadSimulada();
+  }
+}
+
+// Show activity in the interface
+function mostrarActividad(actividades) {
+  const container = document.getElementById('actividad-reciente');
+  if (!container) return;
+
+  if (actividades.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-history text-4xl mb-4 text-gray-300"></i>
+        <h4 class="font-semibold mb-2">No hay actividad reciente</h4>
+        <p class="text-sm">¡Comienza a usar la plataforma para ver tu actividad!</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  actividades.forEach((actividad) => {
+    html += `
+      <div class="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div class="w-8 h-8 ${actividad.color} rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-${actividad.icono} text-xs"></i>
+        </div>
+        <div class="flex-1">
+          <div class="font-medium text-gray-800 text-sm">${actividad.descripcion}</div>
+          <div class="text-xs text-gray-500">${actividad.tiempo}</div>
+        </div>
+        <div class="text-green-600 font-bold text-sm">${actividad.puntos}</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Fallback: Show simulated activity
+function mostrarActividadSimulada() {
+  const actividades = [
+    {
+      descripcion: 'Completaste una simulación de VAN',
+      puntos: '+25',
+      tiempo: '2 horas atrás',
+      icono: 'calculator',
+      color: 'bg-blue-100 text-blue-600'
+    },
+    {
+      descripcion: 'Obtuviste la insignia "Primeros Pasos"',
+      puntos: '+100',
+      tiempo: '1 día atrás',
+      icono: 'medal',
+      color: 'bg-green-100 text-green-600'
+    },
+    {
+      descripcion: 'Inicio de sesión diario',
+      puntos: '+5',
+      tiempo: '2 días atrás',
+      icono: 'calendar-check',
+      color: 'bg-purple-100 text-purple-600'
+    }
+  ];
+
+  mostrarActividad(actividades);
+}
+
+// Notification system to replace alerts
+function mostrarNotificacion(mensaje, tipo = 'info', incluirBotonGamification = false) {
+  // Remove existing notifications
+  const existingNotifications = document.querySelectorAll('.gamification-notification');
+  existingNotifications.forEach(notification => notification.remove());
+
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'gamification-notification fixed top-4 right-4 z-50 max-w-sm';
+
+  // Define styles based on type
+  const styles = {
+    success: 'bg-green-50 border-green-200 text-green-800',
+    error: 'bg-red-50 border-red-200 text-red-800',
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    info: 'bg-blue-50 border-blue-200 text-blue-800'
+  };
+
+  const icons = {
+    success: 'fas fa-check-circle text-green-600',
+    error: 'fas fa-exclamation-circle text-red-600',
+    warning: 'fas fa-exclamation-triangle text-yellow-600',
+    info: 'fas fa-info-circle text-blue-600'
+  };
+
+  // Add button for gamification page if requested
+  const gamificationButton = incluirBotonGamification ?
+    `<div class="mt-3">
+      <button onclick="window.location.href='/gamification'" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700 transition-colors">
+        Ver mis logros
+      </button>
+    </div>` : '';
+
+  notification.innerHTML = `
+    <div class="${styles[tipo]} border rounded-lg p-4 shadow-lg transform transition-all duration-300 translate-x-full">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="${icons[tipo]} text-lg"></i>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm font-medium">${mensaje}</p>
+          ${gamificationButton}
+        </div>
+        <div class="ml-4 flex-shrink-0">
+          <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add to page
+  document.body.appendChild(notification);
+
+  // Animate in
+  setTimeout(() => {
+    const notificationContent = notification.querySelector('.transform');
+    if (notificationContent) {
+      notificationContent.classList.remove('translate-x-full');
+    }
+  }, 10);
+
+  // Auto remove after 7 seconds (more time if has button)
+  const autoRemoveTime = incluirBotonGamification ? 7000 : 5000;
+  setTimeout(() => {
+    const notificationContent = notification.querySelector('.transform');
+    if (notificationContent) {
+      notificationContent.classList.add('translate-x-full');
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }
+  }, autoRemoveTime);
+}
+
+// Verify new badges
+async function verificarInsignias() {
+  console.log('🔍 Verifying badges...');
+
+  const btn = document.getElementById('verify-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verificando...';
+  }
+
+  try {
+    const response = await fetch('/gamification/api/verificar-insignias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    console.log('🔍 Verification response:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Verification result:', data);
+
+    if (data.success) {
+      const mensaje = data.insignias_otorgadas && data.insignias_otorgadas.length > 0 ?
+        `¡${data.insignias_otorgadas.length} nuevas insignias obtenidas!` :
+        'No hay nuevas insignias disponibles.';
+
+      // Mostrar notificación elegante con botón si se obtuvieron insignias
+      const incluirBoton = data.insignias_otorgadas && data.insignias_otorgadas.length > 0;
+      mostrarNotificacion(mensaje, incluirBoton ? 'success' : 'info', incluirBoton);
+
+      await cargarInsignias();
+      await cargarEstadisticas();
+    } else {
+      mostrarNotificacion('Error al verificar insignias. Inténtalo nuevamente.', 'error');
+    }
+  } catch (error) {
+    console.error('❌ Error verifying badges:', error);
+    mostrarNotificacion('Error al verificar insignias. Inténtalo nuevamente.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-refresh mr-2"></i>Verificar';
+    }
+  }
+}
+</script>
+{% endblock %}

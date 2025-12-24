@@ -11,13 +11,20 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'econova-secret-key-2025-dev')
     DEBUG = os.getenv('FLASK_DEBUG', 'True') == 'True'
 
-    # Configuración de base de datos - Soporte para DATABASE_URL (Render)
+    # Configuración de base de datos - Priorizar desarrollo local
     DATABASE_URL = os.getenv('DATABASE_URL', '')
-    if DATABASE_URL:
-        # Usar DATABASE_URL si está disponible (producción)
+
+    # Detectar si estamos en desarrollo local (no Render, no producción)
+    IS_LOCAL_DEV = not os.getenv('RENDER') and not os.getenv('PRODUCTION') and DEBUG
+
+    if IS_LOCAL_DEV:
+        # Desarrollo local: Siempre usar SQLite
+        DATABASE_URI = ''  # Se usará SQLite por defecto
+    elif DATABASE_URL:
+        # Producción con DATABASE_URL (Render)
         DATABASE_URI = DATABASE_URL
     else:
-        # Configuración tradicional para desarrollo
+        # Configuración tradicional para desarrollo/producción alternativa
         DB_HOST = os.getenv('DB_HOST', 'localhost')
         DB_PORT = os.getenv('DB_PORT', '5432')
         DB_NAME = os.getenv('DB_NAME', 'econova_db')

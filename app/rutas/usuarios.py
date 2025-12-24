@@ -5,6 +5,7 @@ from app.modelos.notificacion import Notificacion
 from app.utils.exportar import GoogleSheetsExporter, ExcelExporter
 from app.utils.base_datos import get_db_connection, USE_POSTGRESQL
 from app.servicios.email_servicio import email_service
+from app.servicios.gamification_servicio import GamificationService
 from werkzeug.security import check_password_hash
 import re
 import secrets
@@ -413,6 +414,9 @@ def procesar_login():
                 session['usuario_nombre'] = f"{usuario.nombres} {usuario.apellidos}"
                 session['usuario_nivel'] = usuario.nivel
                 session['usuario_foto_perfil'] = usuario.foto_perfil
+
+                # Verificar y otorgar insignias automáticamente (incluyendo login diario)
+                GamificationService.verificar_y_otorgar_insignias(usuario.usuario_id)
 
                 return jsonify({
                     'success': True,

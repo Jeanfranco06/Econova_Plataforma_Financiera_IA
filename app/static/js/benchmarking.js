@@ -195,12 +195,51 @@ class BenchmarkingManager {
         }
     }
 
-    cargarHistorialResultados() {
+    async cargarHistorialResultados() {
         try {
+            const usuarioId = this.obtenerUsuarioActual();
+            if (!usuarioId) return;
+
+            // Load from backend API
+            const response = await fetch(`/api/v1/usuarios/${usuarioId}/benchmarking/analisis`);
+            const data = await response.json();
+
+            if (data.success && data.analisis) {
+                console.log('✅ Historial cargado desde backend:', data.analisis.length, 'análisis');
+
+                // Convert to format expected by mostrarHistorialResultados
+                const analisisFormateados = {};
+                data.analisis.forEach(analisis => {
+                    const key = `analisis_${analisis.analisis_id}`;
+                    analisisFormateados[key] = {
+                        id: analisis.analisis_id,
+                        timestamp: analisis.fecha,
+                        tipo_analisis: analisis.tipo_analisis,
+                        datos: analisis.datos,
+                        analisis: analisis.resultados, // Para análisis sectorial
+                        comparacion: analisis.resultados, // Para análisis personalizado
+                        recomendaciones: analisis.recomendaciones
+                    };
+                });
+
+                this.mostrarHistorialResultados(analisisFormateados);
+                return;
+            }
+
+            // Fallback to localStorage
+            console.log('🔄 Cargando historial desde localStorage...');
             const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
             this.mostrarHistorialResultados(analisisGuardados);
+
         } catch (error) {
             console.error('Error cargando historial de resultados:', error);
+            // Fallback to localStorage
+            try {
+                const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
+                this.mostrarHistorialResultados(analisisGuardados);
+            } catch (localError) {
+                console.error('Error cargando desde localStorage:', localError);
+            }
         }
     }
 
@@ -272,7 +311,7 @@ class BenchmarkingManager {
             this.crearGraficosBenchmarking(analisis, datos);
 
             // Guardar análisis
-            this.guardarAnalisisBenchmarking('sectorial', { datos, analisis, recomendaciones });
+            await this.guardarAnalisisBenchmarking('sectorial', { datos, analisis, recomendaciones });
 
             // Actualizar historial
             this.cargarHistorialResultados();
@@ -446,7 +485,7 @@ class BenchmarkingManager {
     /**
      * Calcular análisis sectorial
      */
-    calcularAnalisisSectorial(metricasEmpresa, datosSectoriales, tamanoEmpresa) {
+    calcularAnalisisSectorial(metricasEmpresa, datosSectoriales, tamanoEmpresa, sector) {
         const analisis = {};
 
         // Filtrar por tamaño de empresa si es relevante
@@ -475,6 +514,17 @@ class BenchmarkingManager {
                     };
                 }
             }
+        });
+
+        // Añadir propiedades de metadatos para estadísticas del análisis
+        analisis._empresasComparadas = datosFiltrados.length;
+        analisis._sectorSeleccionado = sector;
+        analisis._tamanoEmpresa = tamanoEmpresa;
+
+        console.log('📊 Estadísticas calculadas:', {
+            '_empresasComparadas': analisis._empresasComparadas,
+            '_sectorSeleccionado': analisis._sectorSeleccionado,
+            '_tamanoEmpresa': analisis._tamanoEmpresa
         });
 
         return analisis;
@@ -555,7 +605,16 @@ class BenchmarkingManager {
     generarRecomendacionesBenchmarking(analisis, datos) {
         const recomendaciones = [];
 
-        Object.entries(analisis).forEach(([metrica, stats]) => {
+        // Filtrar solo métricas reales (excluir metadatos que empiezan con _)
+        const metricasReales = Object.entries(analisis)
+            .filter(([key, value]) => !key.startsWith('_') && value && typeof value === 'object');
+
+        metricasReales.forEach(([metrica, stats]) => {
+            if (!stats || typeof stats !== 'object') {
+                console.warn('⚠️ Estadísticas incompletas para métrica:', metrica);
+                return;
+            }
+
             const { valor_empresa, promedio_sector, percentil_25, percentil_75, posicion_relativa } = stats;
 
             if (valor_empresa < percentil_25) {
@@ -575,7 +634,7 @@ class BenchmarkingManager {
             }
 
             // Recomendaciones específicas por percentil
-            if (posicion_relativa.percentil < 50) {
+            if (posicion_relativa && typeof posicion_relativa.percentil === 'number' && posicion_relativa.percentil < 50) {
                 recomendaciones.push({
                     tipo: 'benchmarking',
                     metrica: metrica,
@@ -752,7 +811,7 @@ class BenchmarkingManager {
                 <div class="space-y-4">
         `;
 
-        Object.entries(analisis).forEach(([metrica, stats]) => {
+        Object.entries(analisis).filter(([metrica, stats]) => !metrica.startsWith('_')).forEach(([metrica, stats]) => {
             const nombreMetrica = this.nombreMetrica(metrica);
             const posicion = stats.posicion_relativa;
 
@@ -822,7 +881,7 @@ class BenchmarkingManager {
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial_guardado')">
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial')">
                     <i class="fas fa-save mr-2"></i>Guardar Análisis
                 </button>
                 <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold flex items-center justify-center">
@@ -968,7 +1027,7 @@ class BenchmarkingManager {
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('personalizado_guardado')">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.benchmarkingManager.guardarAnalisisBenchmarking('personalizado')">
                     <i class="fas fa-save mr-2"></i>Guardar Análisis
                 </button>
                 <button class="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition duration-300 font-semibold flex items-center justify-center">
@@ -1516,14 +1575,64 @@ class BenchmarkingManager {
         });
     }
 
-    verResultadoHistorial(analisisId) {
+    async verResultadoHistorial(analisisId) {
         try {
+            console.log('🔍 Cargando análisis del historial:', analisisId);
+
+            // First try to load from backend
+            const response = await fetch(`/api/v1/benchmarking/analisis/${analisisId}`);
+            const data = await response.json();
+
+            if (data.success && data.analisis) {
+                console.log('✅ Análisis cargado desde backend:', data.analisis);
+
+                const analisis = data.analisis;
+
+                // Cambiar a la pestaña de resultados
+                const resultadosTab = document.getElementById('btn-resultados');
+                if (resultadosTab) {
+                    resultadosTab.click();
+                }
+
+                // Mostrar el resultado basado en el tipo
+                if (analisis.tipo_analisis === 'sectorial' && analisis.resultados) {
+                    // Reconstruir datos para mostrarResultadosBenchmarking
+                    const datos = analisis.datos || {};
+                    const recomendaciones = analisis.recomendaciones || [];
+
+                    this.mostrarResultadosBenchmarking(analisis.resultados, recomendaciones, datos);
+                    if (Object.keys(analisis.resultados).length > 0) {
+                        this.crearGraficosBenchmarking(analisis.resultados, datos);
+                    }
+                } else if (analisis.tipo_analisis === 'personalizado' && analisis.resultados) {
+                    // Reconstruir datos para mostrarResultadosComparacion
+                    const datos = analisis.datos || {};
+                    const insights = []; // Insights would need to be regenerated or stored
+
+                    this.mostrarResultadosComparacion(analisis.resultados, insights, datos);
+                    if (analisis.resultados && Object.keys(analisis.resultados).length > 0) {
+                        this.crearGraficosComparacion(analisis.resultados);
+                    }
+                } else {
+                    this.mostrarError('Tipo de análisis no soportado o datos incompletos');
+                }
+
+                return;
+            }
+
+            // Fallback: try localStorage
+            console.log('🔄 Intentando cargar desde localStorage...');
             const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
             const analisis = Object.values(analisisGuardados).find(a => a.id == analisisId);
 
             if (analisis) {
+                console.log('✅ Análisis cargado desde localStorage');
+
                 // Cambiar a la pestaña de resultados
-                document.getElementById('btn-resultados').click();
+                const resultadosTab = document.getElementById('btn-resultados');
+                if (resultadosTab) {
+                    resultadosTab.click();
+                }
 
                 // Mostrar el resultado
                 if (analisis.analisis) {
@@ -1537,10 +1646,13 @@ class BenchmarkingManager {
                         this.crearGraficosComparacion(analisis.comparacion);
                     }
                 }
+            } else {
+                this.mostrarError('Análisis no encontrado');
             }
+
         } catch (error) {
             console.error('Error cargando resultado del historial:', error);
-            this.mostrarError('Error al cargar el resultado');
+            this.mostrarError('Error al cargar el resultado del análisis');
         }
     }
 
@@ -1578,7 +1690,13 @@ class BenchmarkingManager {
     obtenerUsuarioActual() {
         // Intentar obtener el usuario ID desde la sesión Flask
         try {
-            // Buscar el usuario ID en el elemento oculto del template
+            // Buscar el usuario ID en el atributo data del body (desde base.html)
+            const bodyElement = document.body;
+            if (bodyElement && bodyElement.dataset.usuarioId && bodyElement.dataset.usuarioId.trim() !== '') {
+                return parseInt(bodyElement.dataset.usuarioId);
+            }
+
+            // Buscar en elemento específico user-info (para compatibilidad)
             const userInfoElement = document.getElementById('user-info');
             if (userInfoElement && userInfoElement.dataset.userId) {
                 return parseInt(userInfoElement.dataset.userId);
@@ -1842,20 +1960,76 @@ class BenchmarkingManager {
         }
     }
 
-    guardarAnalisisBenchmarking(tipo, datos) {
-        this.datosBenchmarking[tipo] = {
-            ...datos,
-            timestamp: new Date(),
-            id: Date.now()
-        };
-
-        // Guardar en localStorage
+    async guardarAnalisisBenchmarking(tipo, datos) {
         try {
-            const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
-            analisisGuardados[tipo] = this.datosBenchmarking[tipo];
-            localStorage.setItem('econova_benchmarking', JSON.stringify(analisisGuardados));
+            // Preparar datos para enviar al backend
+            const datosEnvio = {
+                usuario_id: this.obtenerUsuarioActual(),
+                tipo_analisis: tipo,
+                datos: datos.datos || {},
+                resultados: datos.analisis || datos.comparacion || {},
+                recomendaciones: datos.recomendaciones || []
+            };
+
+            console.log('📤 Enviando análisis de benchmarking al backend:', datosEnvio);
+
+            // Enviar al backend
+            const response = await fetch('/api/v1/benchmarking/analisis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datosEnvio)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('✅ Análisis guardado exitosamente:', result.analisis_id);
+
+                // También guardar en localStorage como respaldo
+                this.datosBenchmarking[tipo] = {
+                    ...datos,
+                    timestamp: new Date(),
+                    id: result.analisis_id || Date.now()
+                };
+
+                try {
+                    const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
+                    analisisGuardados[tipo] = this.datosBenchmarking[tipo];
+                    localStorage.setItem('econova_benchmarking', JSON.stringify(analisisGuardados));
+                } catch (error) {
+                    console.warn('Error guardando en localStorage:', error);
+                }
+
+                this.mostrarExito('Análisis guardado exitosamente');
+                return result.analisis_id;
+            } else {
+                console.error('❌ Error guardando análisis:', result.error);
+                this.mostrarError(result.error || 'Error guardando análisis');
+                return null;
+            }
         } catch (error) {
-            console.warn('No se pudo guardar el análisis de benchmarking:', error);
+            console.error('💥 Error enviando análisis al backend:', error);
+            this.mostrarError('Error conectando con el servidor');
+
+            // Fallback: guardar solo en localStorage
+            console.log('🔄 Guardando en localStorage como respaldo');
+            this.datosBenchmarking[tipo] = {
+                ...datos,
+                timestamp: new Date(),
+                id: Date.now()
+            };
+
+            try {
+                const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
+                analisisGuardados[tipo] = this.datosBenchmarking[tipo];
+                localStorage.setItem('econova_benchmarking', JSON.stringify(analisisGuardados));
+            } catch (localError) {
+                console.warn('Error guardando en localStorage:', localError);
+            }
+
+            return null;
         }
     }
 

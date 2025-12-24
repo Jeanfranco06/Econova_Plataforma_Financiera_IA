@@ -126,6 +126,20 @@ def crear_tablas_sqlite():
             )
         """)
 
+        # Crear tabla Analisis_Benchmarking
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Analisis_Benchmarking (
+                analisis_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                tipo_analisis TEXT NOT NULL,
+                datos TEXT,
+                resultados TEXT,
+                recomendaciones TEXT,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
         # Crear índices
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_email ON Usuarios(email)")
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_nombre_usuario ON Usuarios(nombre_usuario)")
@@ -334,10 +348,15 @@ def crear_app(config_name="development"):
         # Obtener top 10 del ranking general
         ranking_general = Ranking.obtener_ranking_sector('General', 10)
 
-        return render_template('gamification.html',
+        return render_template('gamification_nuevo.html',
                              estadisticas=estadisticas,
                              ranking_usuario=ranking_usuario,
                              ranking_general=ranking_general)
+
+    @app.route("/gamification-demo")
+    def gamification_demo():
+        """Página de demostración de gamificación completamente funcional"""
+        return render_template('gamification-standalone.html')
 
     # User page routes (moved from usuarios blueprint to avoid /api/v1 prefix)
     @app.route('/login', methods=['GET'])

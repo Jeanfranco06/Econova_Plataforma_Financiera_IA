@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.modelos.benchmarking import (
-    Benchmarking_Grupo, Usuario_Benchmarking, BenchmarkingService
+    Benchmarking_Grupo, Usuario_Benchmarking, BenchmarkingService, Analisis_Benchmarking
 )
 from app.modelos.logro import Ranking
 from app.utils.exportar import GoogleSheetsExporter, ExcelExporter
@@ -16,6 +16,81 @@ def listar_grupos_benchmarking():
             'success': True,
             'grupos': [grupo.to_dict() for grupo in grupos]
         })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@benchmarking_bp.route('/benchmarking/analisis', methods=['POST'])
+def guardar_analisis_benchmarking():
+    """Guardar un análisis de benchmarking completo"""
+    try:
+        data = request.get_json()
+        usuario_id = data.get('usuario_id')
+        tipo_analisis = data.get('tipo_analisis')  # 'sectorial' o 'personalizado'
+        datos = data.get('datos', {})
+        resultados = data.get('resultados', {})
+        recomendaciones = data.get('recomendaciones', [])
+
+        if not usuario_id or not tipo_analisis:
+            return jsonify({
+                'success': False,
+                'error': 'Usuario ID y tipo de análisis requeridos'
+            }), 400
+
+        analisis = Analisis_Benchmarking.guardar_analisis(
+            usuario_id, tipo_analisis, datos, resultados, recomendaciones
+        )
+
+        if analisis:
+            return jsonify({
+                'success': True,
+                'message': 'Análisis guardado exitosamente',
+                'analisis_id': analisis.analisis_id
+            }), 201
+        return jsonify({
+            'success': False,
+            'error': 'Error guardando análisis'
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@benchmarking_bp.route('/usuarios/<int:usuario_id>/benchmarking/analisis', methods=['GET'])
+def obtener_analisis_usuario(usuario_id):
+    """Obtener análisis de benchmarking de un usuario"""
+    try:
+        limite = request.args.get('limite', 50, type=int)
+        analisis = Analisis_Benchmarking.obtener_analisis_usuario(usuario_id, limite)
+
+        return jsonify({
+            'success': True,
+            'analisis': [a.to_dict() for a in analisis]
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@benchmarking_bp.route('/benchmarking/analisis/<int:analisis_id>', methods=['GET'])
+def obtener_analisis_por_id(analisis_id):
+    """Obtener un análisis específico por ID"""
+    try:
+        analisis = Analisis_Benchmarking.obtener_analisis_por_id(analisis_id)
+
+        if analisis:
+            return jsonify({
+                'success': True,
+                'analisis': analisis.to_dict()
+            })
+        return jsonify({
+            'success': False,
+            'error': 'Análisis no encontrado'
+        }), 404
     except Exception as e:
         return jsonify({
             'success': False,

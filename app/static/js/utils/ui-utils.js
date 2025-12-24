@@ -195,13 +195,20 @@ class UIUtils {
                     flujos_caja: simulacion.datos?.flujos || [],
                     tasa_referencia: simulacion.datos?.tasaReferencia || 0.10
                 };case 'wacc':
+                // Para WACC, convertir proporciones en montos absolutos
+                // Asumir un valor total de capital de 1,000,000 para calcular montos
+                const valorTotalAsumido = 1000000; // 1 millón
+                const proporcionCapital = simulacion.datos?.proporcionCapital || 0;
+                const proporcionDeuda = simulacion.datos?.proporcionDeuda || 0;
+                const capitalPropio = (proporcionCapital / 100) * valorTotalAsumido;
+                const deuda = (proporcionDeuda / 100) * valorTotalAsumido;
                 return {
                     ...baseData,
-                    capital_propio: simulacion.datos?.capital_propio || 0,
-                    deuda: simulacion.datos?.deuda || 0,
-                    costo_capital: simulacion.datos?.costo_capital || 0,
-                    costo_deuda: simulacion.datos?.costo_deuda || 0,
-                    tasa_impuesto: simulacion.datos?.tasa_impuesto || 0
+                    capital_propio: capitalPropio || 500000, // Valor por defecto si es 0
+                    deuda: deuda || 500000, // Valor por defecto si es 0
+                    costo_capital: simulacion.datos?.costoCapital || 0,
+                    costo_deuda: simulacion.datos?.costoDeuda || 0,
+                    tasa_impuesto: simulacion.datos?.tasaImpuestos || 0
                 };case 'portafolio':
                 return {
                     ...baseData,

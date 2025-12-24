@@ -10,21 +10,27 @@ gamification_bp = Blueprint('gamification', __name__, url_prefix='/gamification'
 def gamification_dashboard():
     """Mostrar dashboard de gamificación"""
     if 'usuario_id' not in session:
-        flash('Debes iniciar sesión para acceder al sistema de gamificación', 'error')
-        return redirect(url_for('login'))
+        # Usuario no autenticado - mostrar página con datos por defecto
+        estadisticas = {
+            'puntaje_total': 0,
+            'num_insignias': 0,
+            'num_simulaciones': 0
+        }
+        ranking_usuario = []
+        ranking_general = []
+    else:
+        usuario_id = session.get('usuario_id')
 
-    usuario_id = session.get('usuario_id')
+        # Obtener estadísticas del usuario
+        estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
 
-    # Obtener estadísticas del usuario
-    estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
+        # Obtener ranking del usuario
+        ranking_usuario = Ranking.obtener_ranking_usuario(usuario_id)
 
-    # Obtener ranking del usuario
-    ranking_usuario = Ranking.obtener_ranking_usuario(usuario_id)
+        # Obtener top 10 del ranking general
+        ranking_general = Ranking.obtener_ranking_sector('General', 10)
 
-    # Obtener top 10 del ranking general
-    ranking_general = Ranking.obtener_ranking_sector('General', 10)
-
-    return render_template('gamification.html',
+    return render_template('gamification_nuevo.html',
                          estadisticas=estadisticas,
                          ranking_usuario=ranking_usuario,
                          ranking_general=ranking_general)
@@ -45,6 +51,34 @@ def obtener_estadisticas():
         return jsonify({
             'success': True,
             'estadisticas': estadisticas
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@gamification_bp.route('/api/ranking-global')
+def obtener_ranking_global():
+    """Obtener ranking global de usuarios"""
+    limite = request.args.get('limite', 10, type=int)
+
+    try:
+        ranking_global = GamificationService.obtener_ranking_global(limite)
+
+        # Verificar si el usuario actual está en el ranking
+        usuario_actual = None
+        if 'usuario_id' in session:
+            usuario_id_actual = session.get('usuario_id')
+            for item in ranking_global:
+                if item['usuario_id'] == usuario_id_actual:
+                    usuario_actual = item
+                    break
+
+        return jsonify({
+            'success': True,
+            'ranking': ranking_global,
+            'usuario_actual': usuario_actual
         })
     except Exception as e:
         return jsonify({
@@ -80,20 +114,98 @@ def verificar_insignias():
 @gamification_bp.route('/api/ranking/<sector>')
 def obtener_ranking_sector(sector):
     """Obtener ranking de un sector específico"""
-    if 'usuario_id' not in session:
-        return jsonify({
-            'success': False,
-            'error': 'Usuario no autenticado'
-        }), 401
-
     limite = request.args.get('limite', 20, type=int)
 
     try:
+        # Para el sector 'General', usar ranking global basado en gamificación
+        if sector == 'General':
+            ranking_data = GamificationService.obtener_ranking_global(limite)
+
+            # Convertir al formato esperado por el frontend
+            ranking = []
+            usuarios = []
+
+            for item in ranking_data:
+                try:
+                    usuario_id = item.get('usuario_id', 0)
+                    ranking_item = {
+                        'usuario_id': usuario_id,
+                        'puntaje': item.get('puntaje', 0),
+                        'posicion': item.get('posicion', 0)
+                    }
+
+                    # Extraer nombres y apellidos del campo 'nombre'
+                    nombre_completo = item.get('nombre', f'Usuario {usuario_id}')
+                    if isinstance(nombre_completo, str):
+                        partes_nombre = nombre_completo.split(' ')
+                        nombres = partes_nombre[0] if len(partes_nombre) > 0 else 'Usuario'
+                        apellidos = ' '.join(partes_nombre[1:]) if len(partes_nombre) > 1 else ''
+                    else:
+                        nombres = 'Usuario'
+                        apellidos = str(usuario_id)
+
+                    usuario_item = {
+                        'usuario_id': usuario_id,
+                        'nombres': nombres,
+                        'apellidos': apellidos,
+                        'nombre_usuario': f"user{usuario_id}",
+                        'nivel': item.get('nivel', 1)
+                    }
+
+                    ranking.append(ranking_item)
+                    usuarios.append(usuario_item)
+                except Exception as e:
+                    print(f"Error procesando item de ranking: {e}, item: {item}")
+                    continue
+
+            # Verificar si el usuario actual está en el ranking
+            usuario_actual = None
+            if 'usuario_id' in session:
+                usuario_id_actual = session.get('usuario_id')
+                for i, item in enumerate(ranking_data):
+                    if item['usuario_id'] == usuario_id_actual:
+                        usuario_actual = {
+                            'ranking': ranking[i],
+                            'usuario': usuarios[i]
+                        }
+                        break
+
+            # Asegurar que ranking y usuarios tengan la misma longitud
+            min_length = min(len(ranking), len(usuarios))
+            ranking = ranking[:min_length]
+            usuarios = usuarios[:min_length]
+
+            response_data = {
+                'success': True,
+                'ranking': ranking,
+                'usuarios': usuarios
+            }
+
+            if usuario_actual:
+                response_data['usuario_actual'] = usuario_actual
+
+            return jsonify(response_data)
+
+        # Para otros sectores, usar el ranking tradicional
         ranking = Ranking.obtener_ranking_sector(sector, limite)
+
+        # Verificar si el usuario actual está autenticado y en el ranking
+        usuario_actual = None
+        if 'usuario_id' in session:
+            usuario_id_actual = session.get('usuario_id')
+            for item in ranking:
+                if item['ranking']['usuario_id'] == usuario_id_actual:
+                    usuario_actual = {
+                        'ranking': item['ranking'],
+                        'usuario': item['usuario']
+                    }
+                    break
+
         return jsonify({
             'success': True,
-            'ranking': [item['ranking'].to_dict() for item in ranking],
-            'usuarios': [item['usuario'] for item in ranking]
+            'ranking': [item['ranking'] for item in ranking],
+            'usuarios': [item['usuario'] for item in ranking],
+            'usuario_actual': usuario_actual
         })
     except Exception as e:
         return jsonify({
@@ -231,6 +343,52 @@ def registrar_logro(tipo):
             'error': str(e)
         }), 500
 
+@gamification_bp.route('/api/logros-proximos')
+def obtener_logros_proximos():
+    """Obtener logros próximos (insignias que el usuario puede obtener próximamente)"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
+    usuario_id = session.get('usuario_id')
+
+    try:
+        logros_proximos = GamificationService.obtener_logros_proximos(usuario_id)
+        return jsonify({
+            'success': True,
+            'logros': logros_proximos
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@gamification_bp.route('/api/actividad-reciente')
+def obtener_actividad_reciente():
+    """Obtener actividad reciente del usuario"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
+    usuario_id = session.get('usuario_id')
+
+    try:
+        actividades = GamificationService.obtener_actividad_reciente(usuario_id)
+        return jsonify({
+            'success': True,
+            'actividades': actividades
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @gamification_bp.route('/api/puntaje-total')
 def obtener_puntaje_total():
     """Obtener puntaje total de gamificación del usuario"""
@@ -247,6 +405,68 @@ def obtener_puntaje_total():
         return jsonify({
             'success': True,
             'puntaje': puntaje
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@gamification_bp.route('/api/notificaciones-pendientes')
+def obtener_notificaciones_pendientes():
+    """Obtener notificaciones pendientes del usuario"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
+    usuario_id = session.get('usuario_id')
+
+    try:
+        from app.modelos.notificacion import Notificacion
+        notificaciones = Notificacion.obtener_notificaciones_no_leidas(usuario_id)
+
+        # Obtener las notificaciones pendientes
+        notificaciones_pendientes = Notificacion.obtener_notificaciones_usuario(usuario_id, limite=10)
+        notificaciones_pendientes = [n for n in notificaciones_pendientes if n.estado == 'Pendiente']
+
+        return jsonify({
+            'success': True,
+            'notificaciones': [n.to_dict() for n in notificaciones_pendientes],
+            'total_pendientes': len(notificaciones_pendientes)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@gamification_bp.route('/api/marcar-leidas', methods=['POST'])
+def marcar_notificaciones_leidas():
+    """Marcar notificaciones como leídas"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
+    usuario_id = session.get('usuario_id')
+    data = request.get_json()
+    notificaciones_ids = data.get('notificaciones_ids', [])
+
+    try:
+        from app.modelos.notificacion import Notificacion
+
+        marcadas = 0
+        for notif_id in notificaciones_ids:
+            if Notificacion.marcar_como_leida(notif_id):
+                marcadas += 1
+
+        return jsonify({
+            'success': True,
+            'marcadas': marcadas,
+            'mensaje': f'Se marcaron {marcadas} notificaciones como leídas'
         })
     except Exception as e:
         return jsonify({
