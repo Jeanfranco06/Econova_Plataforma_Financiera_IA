@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-600">Empresas Comparadas</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-2xl font-bold text-blue-600">${Object.keys(stats).length}</div>
+                                <div class="text-2xl font-bold text-blue-600">${analisisItem.numeroMetricas || Object.keys(stats).filter(k => !k.startsWith('_')).length}</div>
                                 <div class="text-sm text-gray-600">Métricas Analizadas</div>
                             </div>
                             <div class="text-center">
@@ -538,8 +538,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="bg-green-50 p-4 rounded-lg">
                             <h6 class="font-semibold text-green-800 mb-2">Información del Análisis</h6>
                             <div class="grid md:grid-cols-2 gap-4 text-sm">
-                                <div><strong>Sector:</strong> ${analisisItem.datos.sector}</div>
-                                <div><strong>Tamaño:</strong> ${analisisItem.datos.tamanoEmpresa}</div>
+                                <div><strong>Sector:</strong> ${analisisItem.sector || analisisItem.datos?.sector || 'No disponible'}</div>
+                                <div><strong>Tamaño:</strong> ${analisisItem.tamanoEmpresa || analisisItem.datos?.tamanoEmpresa || 'No disponible'}</div>
                             </div>
                         </div>
                     `;
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         <div class="flex justify-between items-center mt-4">
                             <div class="text-sm text-gray-500">
-                                ${tipo === 'Sectorial' ? Object.keys(analisisItem.analisis || {}).length : Object.keys(analisisItem.comparacion?.resultados || {}).length} métricas analizadas
+                                ${analisisItem.numeroMetricas || (tipo === 'Sectorial' ? Object.keys(analisisItem.analisis || {}).filter(k => !k.startsWith('_')).length : Object.keys(analisisItem.comparacion?.resultados || {}).length)} métricas analizadas
                             </div>
                         </div>
                     </div>
@@ -669,8 +669,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="bg-green-50 p-4 rounded-lg">
                             <h3 class="font-semibold text-green-800 mb-2">Información General</h3>
                             <p class="text-green-700"><strong>Fecha:</strong> ${fecha}</p>
-                            <p class="text-green-700"><strong>Sector:</strong> ${analisis.datos.sector}</p>
-                            <p class="text-green-700"><strong>Tamaño:</strong> ${analisis.datos.tamanoEmpresa}</p>
+                            <p class="text-green-700"><strong>Sector:</strong> ${analisis.sector || analisis.datos?.sector || 'No disponible'}</p>
+                            <p class="text-green-700"><strong>Tamaño:</strong> ${analisis.tamanoEmpresa || analisis.datos?.tamanoEmpresa || 'No disponible'}</p>
                         </div>
 
                         <div>
@@ -689,8 +689,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <div class="text-xs text-gray-600">Promedio Sector</div>
                                             </div>
                                             <div class="text-center">
-                                                <div class="text-lg font-bold ${data.posicion_relativa && data.posicion_relativa.percentil >= 75 ? 'text-green-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 50 ? 'text-blue-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 25 ? 'text-yellow-600' : 'text-red-600'}">${data.posicion_relativa && data.posicion_relativa.percentil ? data.posicion_relativa.percentil.toFixed(1) : 'N/A'}%</div>
-                                                <div class="text-xs text-gray-600">Tu Percentil</div>
+                                                <div class="text-lg font-bold ${data.posicion_relativa && data.posicion_relativa.percentil >= 75 ? 'text-green-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 50 ? 'text-blue-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 25 ? 'text-yellow-600' : 'text-red-600'}">${formatearPercentilBenchmarking(data.posicion_relativa?.percentil)}</div>
+                                                <div class="text-xs text-gray-600">Tu Posición</div>
                                             </div>
                                         </div>
                                     </div>
@@ -819,6 +819,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .map(([key, stats]) => stats?.posicion_relativa?.percentil)
             .filter(percentil => typeof percentil === 'number' && !isNaN(percentil));
 
+        console.log('📊 Calculando percentil promedio:', {
+            metricasReales: metricasReales.length,
+            percentiles: percentiles
+        });
+
         if (percentiles.length === 0) return 0;
 
         const promedio = percentiles.reduce((sum, p) => sum + p, 0) / percentiles.length;
@@ -881,4 +886,12 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error eliminando datos de benchmarking:', error);
         }
     };
+
+    // Function to format percentiles in benchmarking results
+    function formatearPercentilBenchmarking(percentil) {
+        if (percentil === null || percentil === undefined || isNaN(percentil)) {
+            return '0.0%';
+        }
+        return percentil.toFixed(1) + '%';
+    }
 });

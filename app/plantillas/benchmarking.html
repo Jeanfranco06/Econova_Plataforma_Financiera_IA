@@ -6,10 +6,8 @@
 <!-- Chart.js for visualizations -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Benchmarking functionality (modular) -->
-<script src="{{ url_for('static', filename='js/benchmarking/modules/utils.js') }}"></script>
-<script src="{{ url_for('static', filename='js/benchmarking/modules/ui.js') }}"></script>
-<script src="{{ url_for('static', filename='js/benchmarking/benchmarking.js') }}"></script>
+<!-- Benchmarking functionality ULTIMATE FINAL 2025 - Sistema completamente nuevo e inmune al caché -->
+<script src="{{ url_for('static', filename='js/benchmarking/benchmarking-ultimate-final-2025.js') }}?cachebuster={{ range(1000000, 9999999)|random }}"></script>
 
 <!-- Custom notification system for benchmarking -->
 <script>
