@@ -29,8 +29,7 @@ class BenchmarkingUI {
             });
         });
 
-        console.log('🔍 Selector de calculadoras configurado');
-    }
+        }
 
     showCalculator(type) {
         // Hide all calculators
@@ -44,8 +43,7 @@ class BenchmarkingUI {
         }
 
         this.currentCalculator = type;
-        console.log(`🔍 Mostrando calculadora: ${type}`);
-    }
+        }
 
     setupEventListeners() {
         // Form submissions
@@ -59,8 +57,7 @@ class BenchmarkingUI {
 
     setupGroupManagement() {
         // Setup group management buttons
-        console.log('🔍 Gestión de grupos configurada');
-    }
+        }
 
     setupMetricInputs() {
         // Enable/disable metric inputs based on checkboxes
@@ -80,19 +77,15 @@ class BenchmarkingUI {
 
     setupPersonalizedComparison() {
         // Setup personalized comparison
-        console.log('🔍 Comparación personalizada configurada');
-    }
+        }
 
     mostrarLoading(mensaje) {
-        console.log('Loading:', mensaje);
-    }
+        }
 
     ocultarLoading() {
-        console.log('Loading finished');
-    }
+        }
 
     mostrarError(mensaje) {
-        console.error('Error:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.error(mensaje);
         } else {
@@ -101,7 +94,6 @@ class BenchmarkingUI {
     }
 
     mostrarExito(mensaje, titulo = 'Éxito') {
-        console.log('Éxito:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.success(mensaje, titulo);
         } else {
@@ -518,8 +510,6 @@ class BenchmarkingUI {
      */
     async verResultadoHistorial(analisisId) {
         try {
-            console.log('🔍 Cargando análisis del historial:', analisisId);
-
             // Buscar en localStorage
             const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
             const analisis = Object.values(analisisGuardados).find(a => a.id == analisisId);
@@ -545,7 +535,6 @@ class BenchmarkingUI {
                 this.mostrarError('Análisis no encontrado');
             }
         } catch (error) {
-            console.error('Error cargando resultado del historial:', error);
             this.mostrarError('Error al cargar el resultado del análisis');
         }
     }
@@ -674,7 +663,6 @@ class BenchmarkingUI {
         document.querySelectorAll('.unirse-grupo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const grupoId = e.target.closest('.unirse-grupo').dataset.grupoId;
-                console.log('Unirse a grupo:', grupoId);
                 // Implementación básica
                 this.mostrarExito('Funcionalidad de grupos próximamente');
             });
@@ -684,7 +672,6 @@ class BenchmarkingUI {
         document.querySelectorAll('.ver-grupo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const grupoId = e.target.closest('.ver-grupo').dataset.grupoId;
-                console.log('Ver grupo:', grupoId);
                 // Implementación básica
                 this.mostrarExito('Funcionalidad de grupos próximamente');
             });
@@ -699,7 +686,6 @@ class BenchmarkingUI {
         document.querySelectorAll('.ver-miembro').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const grupoId = e.target.closest('.ver-miembro').dataset.grupoId;
-                console.log('Ver grupo miembro:', grupoId);
                 // Implementación básica
                 this.mostrarExito('Funcionalidad de grupos próximamente');
             });
@@ -709,7 +695,6 @@ class BenchmarkingUI {
         document.querySelectorAll('.abandonar-grupo').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const grupoId = e.target.closest('.abandonar-grupo').dataset.grupoId;
-                console.log('Abandonar grupo:', grupoId);
                 // Implementación básica
                 this.mostrarExito('Funcionalidad de grupos próximamente');
             });

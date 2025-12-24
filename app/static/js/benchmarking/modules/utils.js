@@ -28,8 +28,7 @@ class BenchmarkingUtils {
                 return 1;
             }
         } catch (error) {
-            console.warn('Error obteniendo usuario actual:', error);
-        }
+            }
 
         // Si no hay usuario autenticado, redirigir al login
         this.mostrarError('Debes iniciar sesión para usar las funciones de benchmarking. Redirigiendo...', 'Sesión requerida');
@@ -185,8 +184,7 @@ class BenchmarkingUtils {
             Object.keys(analisisGuardados).forEach(key => {
                 if (key.startsWith(`${tipo}_`) || key === tipo || key === `${tipo}_guardado`) {
                     delete analisisGuardados[key];
-                    console.log('🗑️ Eliminando entrada antigua:', key);
-                }
+                    }
             });
 
             // Store only with unique key
@@ -195,10 +193,8 @@ class BenchmarkingUtils {
 
             localStorage.setItem('econova_benchmarking', JSON.stringify(analisisGuardados));
 
-            console.log('💾 Análisis guardado con clave única:', uniqueKey, analisisData);
-        } catch (error) {
-            console.warn('No se pudo guardar el análisis de benchmarking:', error);
-        }
+            } catch (error) {
+            }
 
         return analisisData;
     }
@@ -210,7 +206,6 @@ class BenchmarkingUtils {
         try {
             return JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
         } catch (error) {
-            console.warn('Error cargando análisis de benchmarking:', error);
             return {};
         }
     }

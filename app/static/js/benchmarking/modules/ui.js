@@ -27,8 +27,7 @@ class BenchmarkingUI {
             targetCalculator.style.display = 'block';
         }
 
-        console.log(`🔍 Mostrando calculadora: ${type}`);
-    }
+        }
 
     /**
      * Configurar navegación por pestañas
@@ -247,7 +246,6 @@ class BenchmarkingUI {
             // Botón "Actualizar Grupos"
             if (button.querySelector('.fa-refresh') || button.textContent.includes('Actualizar Grupos')) {
                 e.preventDefault();
-                console.log('🔄 Actualizando grupos...');
                 if (window.benchmarkingManager) {
                     window.benchmarkingManager.cargarGruposBenchmarking();
                 }
@@ -264,7 +262,6 @@ class BenchmarkingUI {
             // Botón "Guardar Análisis" (sectorial)
             if (button.id === 'btn-guardar-sectorial') {
                 e.preventDefault();
-                console.log('💾 Guardando análisis sectorial...');
                 if (window.benchmarkingManager) {
                     window.benchmarkingManager.guardarAnalisisBenchmarking('sectorial');
                     BenchmarkingUtils.mostrarExito('Análisis guardado exitosamente', '¡Guardado!');
@@ -275,7 +272,6 @@ class BenchmarkingUI {
             // Botón "Guardar Análisis" (personalizado)
             if (button.id === 'btn-guardar-personalizado') {
                 e.preventDefault();
-                console.log('💾 Guardando análisis personalizado...');
                 if (window.benchmarkingManager) {
                     window.benchmarkingManager.guardarAnalisisBenchmarking('personalizada');
                     BenchmarkingUtils.mostrarExito('Análisis personalizado guardado exitosamente', '¡Guardado!');
@@ -286,7 +282,6 @@ class BenchmarkingUI {
             // Botón "Nuevo Análisis" (sectorial)
             if (button.id === 'btn-nuevo-sectorial') {
                 e.preventDefault();
-                console.log('🔄 Nuevo análisis sectorial...');
                 // Resetear formulario y ocultar resultados
                 const form = document.getElementById('form-benchmarking-sectorial');
                 const results = document.getElementById('sectorial-results');
@@ -298,8 +293,7 @@ class BenchmarkingUI {
             }
         });
 
-        console.log('✅ Event listeners para botones de acción configurados');
-    }
+        }
 
     /**
      * Mostrar guía rápida
@@ -475,16 +469,14 @@ class BenchmarkingUI {
      */
     mostrarLoading(mensaje) {
         // Implementar indicador de carga
-        console.log('Loading:', mensaje);
-    }
+        }
 
     /**
      * Ocultar loading
      */
     ocultarLoading() {
         // Ocultar indicador de carga
-        console.log('Loading finished');
-    }
+        }
 
     /**
      * Mostrar resultados de benchmarking sectorial
@@ -559,15 +551,12 @@ class BenchmarkingUI {
                    (stats.valor_empresa !== undefined || stats.promedio_sector !== undefined);
         });
 
-        console.log('📊 Métricas reales a mostrar:', metricasReales.length, metricasReales.map(([k]) => k));
-
         metricasReales.forEach(([metrica, stats]) => {
             const nombreMetrica = BenchmarkingUtils.nombreMetrica(metrica);
             const posicion = stats.posicion_relativa;
 
             // Debug: Check if posicion_relativa exists
             if (!posicion) {
-                console.warn('⚠️ Métrica sin posicion_relativa:', metrica, stats);
                 // Skip this metric or show error
                 html += `
                     <div class="bg-red-50 p-4 rounded-lg border border-red-200">
@@ -876,14 +865,10 @@ class BenchmarkingUI {
      * Crear gráfico de percentiles para benchmarking sectorial
      */
     crearGraficoPercentiles(analisis, datos) {
-        console.log('🔍 Buscando canvas para gráfico...', document.getElementById('grafico-sectorial-percentiles'));
         const ctx = document.getElementById('grafico-sectorial-percentiles');
         if (!ctx) {
-            console.error('❌ Canvas no encontrado: grafico-sectorial-percentiles');
             return;
         }
-        console.log('✅ Canvas encontrado, creando gráfico...');
-
         const metricas = Object.keys(analisis);
         const datasets = [];
 

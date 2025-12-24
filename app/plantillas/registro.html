@@ -704,40 +704,28 @@ function clearErrorMessage() {
 
 // Initialize wizard
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🎯 Initializing registration wizard...');
   showStep(currentStep);
 
   // Next button
   const nextBtn = document.getElementById('next-btn');
   if (nextBtn) {
-    console.log('🎯 Next button found, adding event listener');
     nextBtn.addEventListener('click', async function(e) {
-      console.log('🎯 Next button clicked, current step:', currentStep);
       e.preventDefault();
       if (await validateStep(currentStep)) {
-        console.log('🎯 Validation passed, moving to step:', currentStep + 1);
         currentStep++;
         showStep(currentStep);
-      } else {
-        console.log('🎯 Validation failed for step:', currentStep);
       }
     });
-  } else {
-    console.error('🎯 Next button not found!');
   }
 
   // Previous button
   const prevBtn = document.getElementById('prev-btn');
   if (prevBtn) {
-    console.log('🎯 Previous button found, adding event listener');
     prevBtn.addEventListener('click', function(e) {
-      console.log('🎯 Previous button clicked');
       e.preventDefault();
       currentStep--;
       showStep(currentStep);
     });
-  } else {
-    console.log('🎯 Previous button not found (this is normal for step 1)');
   }
 });
 

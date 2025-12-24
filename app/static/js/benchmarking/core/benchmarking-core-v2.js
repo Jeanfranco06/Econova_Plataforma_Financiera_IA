@@ -13,8 +13,6 @@ class BenchmarkingCore {
      * Genera análisis sectorial completo
      */
     async generarAnalisisSectorial(metricas, sector, tamanoEmpresa) {
-        console.log('🔬 Generando análisis sectorial...', { metricas, sector, tamanoEmpresa });
-
         // Obtener datos sectoriales
         const datosSectoriales = await this.obtenerDatosSectoriales(sector);
 
@@ -28,12 +26,6 @@ class BenchmarkingCore {
         analisis._empresasComparadas = datosFiltrados.length;
         analisis._sectorSeleccionado = sector;
         analisis._tamanoEmpresa = tamanoEmpresa;
-
-        console.log('📊 Análisis completado:', {
-            empresasComparadas: analisis._empresasComparadas,
-            metricasAnalizadas: Object.keys(analisis).filter(k => !k.startsWith('_')).length,
-            percentilPromedio: this.calcularPercentilPromedio(analisis)
-        });
 
         return analisis;
     }
@@ -229,12 +221,6 @@ class BenchmarkingCore {
         const sorted = [...valores].sort((a, b) => a - b);
         let valoresMenoresOIguales = 0;
 
-        console.log('🔢 Calculando percentil:', {
-            valorEmpresa: valor,
-            valoresSectorOrdenados: sorted.slice(0, 10), // Mostrar primeros 10
-            totalValores: sorted.length
-        });
-
         // Contar cuántos valores son menores o iguales al valor de la empresa
         for (let i = 0; i < sorted.length; i++) {
             if (valor >= sorted[i]) {
@@ -246,12 +232,6 @@ class BenchmarkingCore {
 
         // Calcular percentil correctamente
         const percentil = (valoresMenoresOIguales / sorted.length) * 100;
-
-        console.log('📊 Resultado percentil:', {
-            valoresMenoresOIguales,
-            totalValores: sorted.length,
-            percentil: percentil.toFixed(2) + '%'
-        });
 
         return {
             percentil: percentil,

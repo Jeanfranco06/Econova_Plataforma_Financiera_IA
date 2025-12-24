@@ -6,12 +6,9 @@
 // ==================== CORE MODULE ====================
 class BenchmarkingCoreFinal {
     constructor() {
-        console.log('🏗️ Core Benchmarking inicializado');
-    }
+        }
 
     async generarAnalisisSectorial(metricas, sector, tamanoEmpresa) {
-        console.log('🔬 Generando análisis sectorial...', { metricas, sector, tamanoEmpresa });
-
         const datosSectoriales = this.obtenerDatosSectoriales(sector);
         const datosFiltrados = this.filtrarPorTamanoEmpresa(datosSectoriales, tamanoEmpresa);
         const analisis = this.calcularAnalisisSectorial(metricas, datosFiltrados);
@@ -20,7 +17,6 @@ class BenchmarkingCoreFinal {
         analisis._sectorSeleccionado = sector;
         analisis._tamanoEmpresa = tamanoEmpresa;
 
-        console.log('📊 Análisis completado');
         return analisis;
     }
 
@@ -135,8 +131,7 @@ class BenchmarkingCoreFinal {
 class BenchmarkingUIFinal {
     constructor() {
         this.currentCalculator = null;
-        console.log('🎨 UI Benchmarking inicializada');
-    }
+        }
 
     setupCalculatorSelection() {
         document.querySelectorAll('.calculator-card').forEach(card => {
@@ -345,7 +340,6 @@ class BenchmarkingUIFinal {
     }
 
     mostrarExito(mensaje) {
-        console.log('✅ Éxito:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.success(mensaje);
         } else {
@@ -354,7 +348,6 @@ class BenchmarkingUIFinal {
     }
 
     mostrarError(mensaje) {
-        console.log('❌ Error:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.error(mensaje);
         } else {
@@ -366,8 +359,7 @@ class BenchmarkingUIFinal {
 // ==================== UTILS MODULE ====================
 class BenchmarkingUtilsFinal {
     constructor() {
-        console.log('🛠️ Utils Benchmarking inicializados');
-    }
+        }
 
     validarDatosBenchmarking(datos) {
         return datos.sector && datos.metricas && Object.keys(datos.metricas).length > 0;
@@ -396,8 +388,6 @@ class BenchmarkingUtilsFinal {
 // ==================== MAIN MANAGER ====================
 class BenchmarkingManagerFinal {
     constructor() {
-        console.log('🚀 Inicializando BenchmarkingManager FINAL v3.0...');
-
         this.core = new BenchmarkingCoreFinal();
         this.ui = new BenchmarkingUIFinal();
         this.utils = new BenchmarkingUtilsFinal();
@@ -413,20 +403,9 @@ class BenchmarkingManagerFinal {
 
         // Simular carga de grupos (funcionalidad básica)
         setTimeout(() => {
-            console.log('✅ Grupos de benchmarking cargados (simulado)');
-        }, 500);
+            }, 500);
 
-        console.log('✅ BenchmarkingManager FINAL v3.0 listo');
-        console.log('🎯 TODOS LOS PROBLEMAS SOLUCIONADOS:');
-        console.log('   ✅ Inputs pequeños (w-32)');
-        console.log('   ✅ Mensajes únicos');
-        console.log('   ✅ Opciones funcionales');
-        console.log('   ✅ Gráfica visible');
-        console.log('   ✅ Botón guardar visible');
-        console.log('   ✅ Recomendaciones mostradas');
-        console.log('   ✅ Endeudamiento incluido');
-        console.log('   ✅ Procesamiento seguro');
-    }
+        }
 
     setupEventListeners() {
         document.addEventListener('submit', (e) => {
@@ -434,7 +413,6 @@ class BenchmarkingManagerFinal {
                 e.preventDefault();
 
                 if (this.isProcessing) {
-                    console.log('⏳ Procesando, ignorando...');
                     return;
                 }
 
@@ -484,7 +462,6 @@ class BenchmarkingManagerFinal {
             this.ui.mostrarExito('Análisis completado exitosamente');
 
         } catch (error) {
-            console.error('Error:', error);
             this.ui.mostrarError('Error generando análisis');
         } finally {
             this.isProcessing = false;
@@ -492,7 +469,6 @@ class BenchmarkingManagerFinal {
     }
 
     guardarAnalisis() {
-        console.log('💾 Guardando análisis...');
         this.ui.mostrarExito('Análisis guardado correctamente');
     }
 }

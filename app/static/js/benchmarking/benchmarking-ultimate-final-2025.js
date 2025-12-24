@@ -6,11 +6,10 @@
 // ==================== CORE MODULE ====================
 class BenchmarkingCoreFinal {
     constructor() {
-        console.log('🏗️ Core Benchmarking inicializado');
+        // Core Benchmarking inicializado
     }
 
     async generarAnalisisSectorial(metricas, sector, tamanoEmpresa, gruposUsuario = []) {
-        console.log('🔬 Generando análisis sectorial...', { metricas, sector, tamanoEmpresa, gruposUsuario: gruposUsuario.length });
 
         const datosSectoriales = this.obtenerDatosSectoriales(sector, gruposUsuario);
         const datosFiltrados = this.filtrarPorTamanoEmpresa(datosSectoriales, tamanoEmpresa);
@@ -21,35 +20,25 @@ class BenchmarkingCoreFinal {
         analisis._tamanoEmpresa = tamanoEmpresa;
         analisis._gruposUsuario = gruposUsuario.length;
 
-        console.log('📊 Análisis completado con datos específicos de grupos');
         return analisis;
     }
 
     async obtenerGruposUsuarioActualesDirecto(usuarioId) {
         try {
-            console.log('🔍 Obteniendo grupos para usuario ID:', usuarioId);
-
             if (!usuarioId) {
-                console.log('⚠️ No hay usuario ID disponible');
                 return [];
             }
 
             const response = await fetch(`/api/v1/usuarios/${usuarioId}/benchmarking/grupos`);
             const result = await response.json();
 
-            console.log('📡 Respuesta de API de grupos:', result);
-
             if (result.success && result.grupos) {
-                console.log('✅ Grupos encontrados:', result.grupos.length);
                 return result.grupos;
             } else {
-                console.log('⚠️ No se encontraron grupos o respuesta no exitosa');
                 return [];
             }
         } catch (error) {
-            console.error('❌ Error obteniendo grupos de usuario:', error);
-            console.error('Detalles del error:', error);
-        }
+            }
         return [];
     }
 
@@ -248,12 +237,6 @@ class BenchmarkingCoreFinal {
     // ==================== FUNCIONES PERSONALIZADAS ====================
 
     async generarAnalisisPersonalizado(empresaBase, empresasComparacion, criteriosSeleccionados) {
-        console.log('🔬 Generando análisis personalizado...', {
-            empresaBase: empresaBase.nombre,
-            empresasComparacion: empresasComparacion.length,
-            criterios: criteriosSeleccionados
-        });
-
         const analisis = {};
 
         // Para cada criterio seleccionado, calcular estadísticas comparativas
@@ -304,7 +287,6 @@ class BenchmarkingCoreFinal {
         analisis._empresasComparadas = empresasComparacion.length;
         analisis._criteriosAnalizados = criteriosSeleccionados.length;
 
-        console.log('✅ Análisis personalizado completado');
         return analisis;
     }
 
@@ -339,14 +321,11 @@ class BenchmarkingCoreFinal {
     }
 
     generarInsightsPersonalizados(analisis, empresaBase, empresasComparacion) {
-        console.log('💡 Generando insights personalizados...');
-
         const insights = [];
 
         Object.entries(analisis).filter(([key]) => !key.startsWith('_')).forEach(([criterio, stats]) => {
             // Verificar que stats tenga todas las propiedades necesarias
             if (!stats || !stats.posicion_relativa || typeof stats.posicion_relativa.percentil === 'undefined') {
-                console.warn(`⚠️ Saltando criterio ${criterio}: datos incompletos`, stats);
                 return;
             }
 
@@ -423,7 +402,6 @@ class BenchmarkingCoreFinal {
             });
         }
 
-        console.log(`Generados ${insights.length} insights`);
         return insights;
     }
 
@@ -445,14 +423,11 @@ class BenchmarkingCoreFinal {
     }
 
     generarRecomendacionesPersonalizadas(analisis, empresaBase) {
-        console.log('🎯 Generando recomendaciones personalizadas...');
-
         const recomendaciones = [];
 
         Object.entries(analisis).filter(([key]) => !key.startsWith('_')).forEach(([criterio, stats]) => {
             // Verificar que stats tenga posicion_relativa válida
             if (!stats || !stats.posicion_relativa || typeof stats.posicion_relativa.percentil === 'undefined') {
-                console.warn(`⚠️ Saltando criterio ${criterio} en recomendaciones: datos incompletos`, stats);
                 return;
             }
 
@@ -529,7 +504,6 @@ class BenchmarkingCoreFinal {
             });
         }
 
-        console.log(`✅ Generadas ${recomendaciones.length} recomendaciones`);
         return recomendaciones;
     }
 }
@@ -538,8 +512,7 @@ class BenchmarkingCoreFinal {
 class BenchmarkingUIFinal {
     constructor() {
         this.currentCalculator = null;
-        console.log('🎨 UI Benchmarking inicializada');
-    }
+        }
 
     setupCalculatorSelection() {
         document.querySelectorAll('.calculator-card').forEach(card => {
@@ -866,7 +839,6 @@ class BenchmarkingUIFinal {
     }
 
     mostrarExito(mensaje) {
-        console.log('✅ Éxito:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.success(mensaje);
         } else {
@@ -875,7 +847,6 @@ class BenchmarkingUIFinal {
     }
 
     mostrarError(mensaje) {
-        console.log('❌ Error:', mensaje);
         if (window.benchmarkingNotifications) {
             window.benchmarkingNotifications.error(mensaje);
         } else {
@@ -1223,8 +1194,7 @@ class BenchmarkingUIFinal {
 // ==================== UTILS MODULE ====================
 class BenchmarkingUtilsFinal {
     constructor() {
-        console.log('🛠️ Utils Benchmarking inicializados');
-    }
+        }
 
     validarDatosBenchmarking(datos) {
         return datos.sector && datos.metricas && Object.keys(datos.metricas).length > 0;
@@ -1253,8 +1223,6 @@ class BenchmarkingUtilsFinal {
 // ==================== MAIN MANAGER ====================
 class BenchmarkingManagerFinal {
     constructor() {
-        console.log('🚀 Inicializando BenchmarkingManager FINAL v3.0...');
-
         this.core = new BenchmarkingCoreFinal();
         this.ui = new BenchmarkingUIFinal();
         this.utils = new BenchmarkingUtilsFinal();
@@ -1273,18 +1241,7 @@ class BenchmarkingManagerFinal {
         // Cargar grupos de benchmarking reales desde la API
         this.cargarGruposBenchmarking();
 
-        console.log('✅ BenchmarkingManager FINAL v3.0 listo');
-        console.log('🎯 TODOS LOS PROBLEMAS SOLUCIONADOS:');
-        console.log('   ✅ Inputs pequeños (w-32)');
-        console.log('   ✅ Inputs funcionales (habilitan con checkboxes)');
-        console.log('   ✅ Mensajes únicos');
-        console.log('   ✅ Opciones funcionales');
-        console.log('   ✅ Gráfica visible');
-        console.log('   ✅ Botón guardar visible');
-        console.log('   ✅ Recomendaciones mostradas');
-        console.log('   ✅ Endeudamiento incluido');
-        console.log('   ✅ Procesamiento seguro');
-    }
+        }
 
     setupEventListeners() {
         document.addEventListener('submit', (e) => {
@@ -1292,7 +1249,6 @@ class BenchmarkingManagerFinal {
                 e.preventDefault();
 
                 if (this.isProcessing) {
-                    console.log('⏳ Procesando, ignorando...');
                     return;
                 }
 
@@ -1304,7 +1260,6 @@ class BenchmarkingManagerFinal {
                 e.preventDefault();
 
                 if (this.isProcessing) {
-                    console.log('⏳ Procesando comparación personalizada, ignorando...');
                     return;
                 }
 
@@ -1382,7 +1337,6 @@ class BenchmarkingManagerFinal {
             this.ui.mostrarExito('Análisis completado exitosamente');
 
         } catch (error) {
-            console.error('Error:', error);
             this.ui.mostrarError('Error generando análisis');
         } finally {
             this.isProcessing = false;
@@ -1391,11 +1345,8 @@ class BenchmarkingManagerFinal {
 
     guardarAnalisis() {
         try {
-            console.log('💾 Guardando análisis...');
-
             // Validar que haya datos de análisis actual
             if (!this.datosAnalisisActual || !this.datosAnalisisActual.datos) {
-                console.warn('⚠️ No hay análisis actual para guardar');
                 this.ui.mostrarError('Primero debes generar un análisis antes de guardarlo');
                 return;
             }
@@ -1405,7 +1356,6 @@ class BenchmarkingManagerFinal {
             // Validar que tenga datos mínimos
             if (!analisisActual.datos.sector || !analisisActual.datos.metricas ||
                 Object.keys(analisisActual.datos.metricas).length === 0) {
-                console.warn('⚠️ Análisis incompleto, faltan datos');
                 this.ui.mostrarError('El análisis no tiene datos completos para guardar');
                 return;
             }
@@ -1447,21 +1397,16 @@ class BenchmarkingManagerFinal {
             existentes[analisisData.id] = analisisData;
             localStorage.setItem('econova_benchmarking', JSON.stringify(existentes));
 
-            console.log('✅ Análisis guardado exitosamente:', analisisData.id);
             this.ui.mostrarExito('Análisis guardado correctamente');
 
         } catch (error) {
-            console.error('❌ Error guardando análisis:', error);
             this.ui.mostrarError('Error al guardar el análisis');
         }
     }
 
     async cargarGruposBenchmarking() {
-        console.log('🔄 Cargando grupos de benchmarking desde la API...');
-
         const gruposContainer = document.getElementById('grupos-container');
         if (!gruposContainer) {
-            console.error('❌ No se encontró el contenedor de grupos');
             return;
         }
 
@@ -1616,13 +1561,11 @@ class BenchmarkingManagerFinal {
                 }
 
                 gruposContainer.innerHTML = html;
-                console.log(`✅ Cargados ${todosLosGrupos.length} grupos totales (${gruposUnidos.length} unidos, ${gruposDisponibles.length} disponibles)`);
-            } else {
+                } else {
                 throw new Error(resultGrupos.error || 'Error al cargar grupos');
             }
 
         } catch (error) {
-            console.error('❌ Error cargando grupos:', error);
             gruposContainer.innerHTML = `
                 <div class="text-center text-red-500 py-8">
                     <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
@@ -1634,8 +1577,6 @@ class BenchmarkingManagerFinal {
     }
 
     async unirseAGrupo(benchmarkingId) {
-        console.log(`🔗 Intentando unirse al grupo ${benchmarkingId}...`);
-
         try {
             const response = await fetch(`/api/v1/benchmarking/grupos/${benchmarkingId}/usuarios`, {
                 method: 'POST',
@@ -1656,7 +1597,6 @@ class BenchmarkingManagerFinal {
             }
 
         } catch (error) {
-            console.error('❌ Error uniéndose al grupo:', error);
             this.ui.mostrarError('Error al unirse al grupo: ' + error.message);
         }
     }
@@ -1707,17 +1647,13 @@ class BenchmarkingManagerFinal {
                         input.value = '';
                     }
                 }
-                console.log(`🔄 Input ${metrica}: ${e.target.checked ? 'habilitado' : 'deshabilitado'}`);
-            }
+                }
         });
-        console.log('🔧 Sistema de inputs métricos configurado');
-    }
+        }
 
     // ==================== FUNCIONALIDAD PERSONALIZADA ====================
 
     async procesarComparacionPersonalizada(form) {
-        console.log('🎯 Procesando comparación personalizada...');
-
         const formData = new FormData(form);
 
         // Recopilar datos de la empresa base
@@ -1802,7 +1738,6 @@ class BenchmarkingManagerFinal {
             this.ui.mostrarExito('Comparación personalizada completada exitosamente');
 
         } catch (error) {
-            console.error('❌ Error en comparación personalizada:', error);
             this.ui.mostrarError('Error generando comparación personalizada');
         } finally {
             this.isProcessing = false;
@@ -1810,11 +1745,8 @@ class BenchmarkingManagerFinal {
     }
 
     agregarEmpresaComparacion() {
-        console.log('➕ Agregando nueva empresa para comparación...');
-
         const container = document.getElementById('empresas-comparacion-container');
         if (!container) {
-            console.error('❌ No se encontró el contenedor de empresas');
             return;
         }
 
@@ -1863,23 +1795,17 @@ class BenchmarkingManagerFinal {
         `;
 
         container.appendChild(nuevaEmpresa);
-        console.log(`✅ Empresa ${numeroEmpresa} agregada`);
-    }
+        }
 
     removerEmpresaComparacion(botonRemover) {
-        console.log('🗑️ Removiendo empresa de comparación...');
-
         const empresaDiv = botonRemover.closest('.empresa-comparacion');
         if (empresaDiv) {
             empresaDiv.remove();
             this.reordenarEmpresasComparacion();
-            console.log('✅ Empresa removida');
-        }
+            }
     }
 
     reordenarEmpresasComparacion() {
-        console.log('🔄 Reordenando empresas de comparación...');
-
         const container = document.getElementById('empresas-comparacion-container');
         if (!container) return;
 
@@ -1903,16 +1829,12 @@ class BenchmarkingManagerFinal {
             });
         });
 
-        console.log('✅ Empresas reordenadas');
-    }
+        }
 
     guardarAnalisisPersonalizado() {
         try {
-            console.log('💾 Guardando análisis personalizado...');
-
             // Validar que haya datos de análisis actual
             if (!this.datosAnalisisActual || this.datosAnalisisActual.tipo !== 'personalizado') {
-                console.warn('⚠️ No hay análisis personalizado actual para guardar');
                 this.ui.mostrarError('Primero debes generar una comparación personalizada antes de guardarla');
                 return;
             }
@@ -1923,7 +1845,6 @@ class BenchmarkingManagerFinal {
             if (!analisisActual.empresaBase || !analisisActual.empresasComparacion ||
                 analisisActual.empresasComparacion.length === 0 || !analisisActual.criteriosSeleccionados ||
                 analisisActual.criteriosSeleccionados.length === 0) {
-                console.warn('⚠️ Análisis personalizado incompleto, faltan datos');
                 this.ui.mostrarError('El análisis personalizado no tiene datos completos para guardar');
                 return;
             }
@@ -1954,7 +1875,6 @@ class BenchmarkingManagerFinal {
             existentes[analisisData.id] = analisisData;
             localStorage.setItem('econova_benchmarking', JSON.stringify(existentes));
 
-            console.log('✅ Análisis personalizado guardado exitosamente:', analisisData.id);
             this.ui.mostrarExito('Comparación personalizada guardada correctamente');
 
             // Trigger gamification event
@@ -1965,7 +1885,6 @@ class BenchmarkingManagerFinal {
             });
 
         } catch (error) {
-            console.error('❌ Error guardando análisis personalizado:', error);
             this.ui.mostrarError('Error al guardar la comparación personalizada');
         }
     }

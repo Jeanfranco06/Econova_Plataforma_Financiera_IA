@@ -6,28 +6,39 @@
 // Clase para manejar el sistema de temas
 class ThemeManager {
     constructor() {
-        this.currentTheme = this.getStoredTheme() || 'light';this.init();}
+        this.currentTheme = this.getStoredTheme() || 'light';
+        this.init();
+    }
 
     // Obtener tema almacenado
     getStoredTheme() {
         if (typeof localStorage !== 'undefined') {
-            return localStorage.getItem('econova-theme');}
-        return null;}
+            return localStorage.getItem('econova-theme');
+        }
+        return null;
+    }
 
     // Almacenar tema
     storeTheme(theme) {
         if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('econova-theme', theme);}
+            localStorage.setItem('econova-theme', theme);
+        }
     }
 
     // Aplicar tema
     applyTheme(theme) {
-        this.currentTheme = theme;this.storeTheme(theme);// Actualizar clase del body
-        document.body.classList.remove('theme-light', 'theme-dark');document.body.classList.add(`theme-${theme}`);// Aplicar estilos CSS variables
-        this.setCSSVariables(theme);// Disparar evento de cambio de tema
+        this.currentTheme = theme;
+        this.storeTheme(theme);
+        // Actualizar clase del body
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(`theme-${theme}`);
+        // Aplicar estilos CSS variables
+        this.setCSSVariables(theme);
+        // Disparar evento de cambio de tema
         document.dispatchEvent(new CustomEvent('themeChanged', {
             detail: { theme: theme }
-        }));}
+        }));
+    }
 
     // Establecer variables CSS según el tema
     setCSSVariables(theme) {

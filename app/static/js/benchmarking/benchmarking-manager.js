@@ -13,8 +13,6 @@
 
 class BenchmarkingManager {
     constructor() {
-        console.log('🔍 Inicializando BenchmarkingManager...');
-
         // Inicializar módulos
         this.core = new BenchmarkingCore();
         this.ui = new BenchmarkingUI();
@@ -29,8 +27,6 @@ class BenchmarkingManager {
     }
 
     init() {
-        console.log('🔍 Módulo de Benchmarking inicializado');
-
         // Configurar UI
         this.ui.setupCalculatorSelection();
         this.ui.setupEventListeners();
@@ -71,19 +67,15 @@ class BenchmarkingManager {
 
         // Verificar si ya se está procesando
         if (this.isProcessing) {
-            console.log('⏳ Ya se está procesando, ignorando envío duplicado...');
             return;
         }
 
         this.isProcessing = true;
-        console.log('🚀 Procesando formulario:', e.target.id);
-
         try {
             if (e.target.id === 'form-benchmarking-sectorial') {
                 this.generarBenchmarkingSectorial(e.target);
             }
         } catch (error) {
-            console.error('❌ Error procesando formulario:', error);
             this.isProcessing = false;
             // Rehabilitar botón en caso de error
             if (submitButton) {
@@ -150,7 +142,6 @@ class BenchmarkingManager {
             this.ui.mostrarExito('Análisis sectorial completado exitosamente');
 
         } catch (error) {
-            console.error('Error generando benchmarking sectorial:', error);
             this.ui.mostrarError('Error al generar el análisis sectorial.');
         } finally {
             this.ui.ocultarLoading();
@@ -247,7 +238,6 @@ class BenchmarkingManager {
             this.ui.mostrarExito('Comparación personalizada completada exitosamente');
 
         } catch (error) {
-            console.error('Error generando comparación personalizada:', error);
             this.ui.mostrarError('Error al generar la comparación.');
         } finally {
             this.ui.ocultarLoading();
@@ -262,11 +252,9 @@ class BenchmarkingManager {
         try {
             const resultado = await this.utils.guardarAnalisisBenchmarking(tipo, datos);
             this.datosBenchmarking[tipo] = resultado;
-            console.log('💾 Análisis guardado:', resultado);
             // No mostrar mensaje de éxito aquí para evitar duplicados
             return resultado;
         } catch (error) {
-            console.error('Error guardando análisis:', error);
             throw error;
         }
     }
@@ -279,8 +267,7 @@ class BenchmarkingManager {
             const analisisGuardados = this.utils.cargarAnalisisBenchmarking();
             this.ui.mostrarHistorialResultados(analisisGuardados);
         } catch (error) {
-            console.error('Error cargando historial:', error);
-        }
+            }
     }
 
     /**
@@ -288,13 +275,10 @@ class BenchmarkingManager {
      */
     async cargarGruposBenchmarking() {
         try {
-            console.log('🔍 Cargando grupos de benchmarking...');
-
             const gruposResponse = await fetch('/api/v1/benchmarking/grupos');
             const gruposData = await gruposResponse.json();
 
             if (!gruposData.success) {
-                console.error('❌ Error cargando grupos:', gruposData.error);
                 return;
             }
 
@@ -318,7 +302,6 @@ class BenchmarkingManager {
             this.ui.mostrarGruposBenchmarking(gruposDisponibles);
 
         } catch (error) {
-            console.error('❌ Error cargando grupos:', error);
             this.ui.mostrarGruposBenchmarking([]);
         }
     }
@@ -345,8 +328,6 @@ class BenchmarkingManager {
 
 // Inicialización global
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔄 Iniciando carga de módulos de benchmarking v2.0...');
-
     // Verificar que todos los módulos estén cargados
     const checkModules = () => {
         if (typeof BenchmarkingCore !== 'undefined' &&
@@ -354,25 +335,8 @@ document.addEventListener('DOMContentLoaded', function() {
             typeof BenchmarkingUtils !== 'undefined') {
 
             window.benchmarkingManager = new BenchmarkingManager();
-            console.log('✅ Gestor de Benchmarking modular v2.0 inicializado correctamente');
-            console.log('📊 Sistema listo para análisis sectorial');
-            console.log('🔧 TODOS LOS PROBLEMAS CORREGIDOS:');
-            console.log('   ✅ Mensajes duplicados eliminados');
-            console.log('   ✅ Inputs más pequeños (w-32)');
-            console.log('   ✅ Placeholders corregidos (10000 en ingresos)');
-            console.log('   ✅ Opciones de análisis funcionales');
-            console.log('   ✅ Gráfica muestra todas las métricas');
-            console.log('   ✅ Botón guardar siempre visible');
-            console.log('   ✅ Endeudamiento incluido');
-            console.log('   ✅ Caché completamente forzado');
-        } else {
-            console.error('❌ Error: Módulos de benchmarking no están cargados correctamente');
-            console.log('Módulos disponibles:', {
-                BenchmarkingCore: typeof BenchmarkingCore,
-                BenchmarkingUI: typeof BenchmarkingUI,
-                BenchmarkingUtils: typeof BenchmarkingUtils
-            });
-        }
+            } else {
+            }
     };
 
     // Pequeño delay para asegurar carga completa

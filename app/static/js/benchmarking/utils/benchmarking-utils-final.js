@@ -45,8 +45,7 @@ class BenchmarkingUtils {
                 return parseInt(storedUserId);
             }
         } catch (error) {
-            console.warn('Error obteniendo usuario actual:', error);
-        }
+            }
         return null;
     }
 
@@ -68,8 +67,6 @@ class BenchmarkingUtils {
                 recomendaciones: datos.recomendaciones || []
             };
 
-            console.log('📤 Enviando análisis al backend:', datosEnvio);
-
             const response = await fetch('/api/v1/benchmarking/analisis', {
                 method: 'POST',
                 headers: {
@@ -81,8 +78,6 @@ class BenchmarkingUtils {
             const result = await response.json();
 
             if (result.success) {
-                console.log('✅ Análisis guardado exitosamente:', result.analisis_id);
-
                 // Guardar en localStorage como respaldo
                 this.guardarEnLocalStorage(tipo, {
                     ...datos,
@@ -92,14 +87,10 @@ class BenchmarkingUtils {
 
                 return result.analisis_id;
             } else {
-                console.error('❌ Error guardando análisis:', result.error);
                 throw new Error(result.error || 'Error guardando análisis');
             }
         } catch (error) {
-            console.error('💥 Error guardando análisis:', error);
-
             // Fallback: guardar solo en localStorage
-            console.log('🔄 Guardando en localStorage como respaldo');
             this.guardarEnLocalStorage(tipo, {
                 ...datos,
                 timestamp: new Date(),
@@ -118,7 +109,6 @@ class BenchmarkingUtils {
             const analisisGuardados = JSON.parse(localStorage.getItem('econova_benchmarking') || '{}');
             return analisisGuardados;
         } catch (error) {
-            console.error('Error cargando análisis:', error);
             return {};
         }
     }
@@ -132,8 +122,7 @@ class BenchmarkingUtils {
             analisisGuardados[tipo] = datos;
             localStorage.setItem('econova_benchmarking', JSON.stringify(analisisGuardados));
         } catch (error) {
-            console.warn('Error guardando en localStorage:', error);
-        }
+            }
     }
 
     /**
@@ -152,10 +141,8 @@ class BenchmarkingUtils {
     limpiarAnalisisBenchmarking() {
         try {
             localStorage.removeItem('econova_benchmarking');
-            console.log('🗑️ Todos los análisis han sido eliminados');
             return true;
         } catch (error) {
-            console.error('Error limpiando análisis:', error);
             return false;
         }
     }

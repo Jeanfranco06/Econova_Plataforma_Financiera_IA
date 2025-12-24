@@ -165,11 +165,8 @@
 </div>
 
 <script>
-console.log('🚀 Gamificación: Sistema inicializado correctamente');
-
-// Initialize when DOM is loaded
+// Inicializar cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('🎯 DOM loaded - Starting data loading...');
   inicializarGamification();
 });
 
@@ -188,7 +185,7 @@ async function inicializarGamification() {
       cargarActividadReciente()
     ]);
 
-    console.log('✅ All data loaded successfully');
+    // All data loaded successfully
   } catch (error) {
     console.error('❌ Initialization error:', error);
     mostrarErrorGeneral();
@@ -271,14 +268,10 @@ function mostrarErrorGeneral() {
 
 // Load user statistics
 async function cargarEstadisticas() {
-  console.log('📊 Loading statistics...');
-
   try {
     const response = await fetch('/gamification/api/estadisticas');
-    console.log('📊 Statistics response:', response.status);
 
     if (response.status === 401) {
-      console.log('👤 User not authenticated');
       actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
       return;
     }
@@ -288,24 +281,19 @@ async function cargarEstadisticas() {
     }
 
     const data = await response.json();
-    console.log('📊 Statistics data:', data);
 
     if (data && data.success) {
       actualizarEstadisticas(data.estadisticas);
     } else {
-      console.warn('⚠️ Statistics response not successful');
       actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
     }
   } catch (error) {
-    console.error('❌ Error loading statistics:', error);
     actualizarEstadisticas({ puntaje_total: 0, num_insignias: 0, num_simulaciones: 0 });
   }
 }
 
 // Update statistics in the interface
 function actualizarEstadisticas(estadisticas) {
-  console.log('📊 Updating statistics:', estadisticas);
-
   // Update all statistic elements
   const elements = [
     'puntaje-total', 'puntaje-total-mobile',
@@ -341,11 +329,8 @@ function actualizarEstadisticas(estadisticas) {
 
 // Load user badges
 async function cargarInsignias() {
-  console.log('🏆 Loading badges...');
-
   try {
     const response = await fetch('/gamification/api/insignias/usuario');
-    console.log('🏆 Badges response:', response.status);
 
     if (response.status === 401) {
       mostrarInsignias([]);
@@ -357,16 +342,13 @@ async function cargarInsignias() {
     }
 
     const data = await response.json();
-    console.log('🏆 Badges data:', data);
 
     if (data && data.success) {
       mostrarInsignias(data.insignias);
     } else {
-      console.warn('⚠️ Badges response not successful');
       mostrarInsignias([]);
     }
   } catch (error) {
-    console.error('❌ Error loading badges:', error);
     mostrarInsignias([]);
   }
 }
@@ -374,7 +356,6 @@ async function cargarInsignias() {
 // Show badges in the interface
 function mostrarInsignias(insignias) {
   const container = document.getElementById('insignias-container');
-  console.log('🏆 Showing badges:', insignias.length);
 
   if (!container) return;
 
@@ -409,27 +390,21 @@ function mostrarInsignias(insignias) {
 
 // Load global ranking
 async function cargarRanking() {
-  console.log('🏅 Loading ranking...');
-
   try {
     const response = await fetch(`/gamification/api/ranking/${'General'}`);
-    console.log('🏅 Ranking response:', response.status);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('🏅 Ranking data:', data);
 
     if (data && data.success) {
       mostrarRanking(data.ranking, data.usuarios, data.usuario_actual);
     } else {
-      console.warn('⚠️ Ranking response not successful');
       mostrarRanking([], [], null);
     }
   } catch (error) {
-    console.error('❌ Error loading ranking:', error);
     mostrarRanking([], [], null);
   }
 }
@@ -437,7 +412,6 @@ async function cargarRanking() {
 // Show ranking in the interface
 function mostrarRanking(ranking, usuarios, usuarioActual) {
   const container = document.getElementById('ranking-container');
-  console.log('🏅 Showing ranking:', ranking ? ranking.length : 0, 'usuarios:', usuarios ? usuarios.length : 0);
 
   if (!container) return;
 
@@ -545,11 +519,8 @@ function mostrarRanking(ranking, usuarios, usuarioActual) {
 
 // Load upcoming achievements
 async function cargarProximosLogros() {
-  console.log('🎯 Loading achievements...');
-
   try {
     const response = await fetch('/gamification/api/logros-proximos');
-    console.log('🎯 Achievements response:', response.status);
 
     if (response.status === 401) {
       mostrarLogrosSimulados();
@@ -561,16 +532,13 @@ async function cargarProximosLogros() {
     }
 
     const data = await response.json();
-    console.log('🎯 Achievements data:', data);
 
     if (data && data.success) {
       mostrarLogros(data.logros);
     } else {
-      console.warn('⚠️ Achievements response not successful');
       mostrarLogrosSimulados();
     }
   } catch (error) {
-    console.error('❌ Error loading achievements:', error);
     mostrarLogrosSimulados();
   }
 }
@@ -643,11 +611,8 @@ function mostrarLogrosSimulados() {
 
 // Load recent activity
 async function cargarActividadReciente() {
-  console.log('📅 Loading activity...');
-
   try {
     const response = await fetch('/gamification/api/actividad-reciente');
-    console.log('📅 Activity response:', response.status);
 
     if (response.status === 401) {
       mostrarActividadSimulada();
@@ -659,16 +624,13 @@ async function cargarActividadReciente() {
     }
 
     const data = await response.json();
-    console.log('📅 Activity data:', data);
 
     if (data && data.success) {
       mostrarActividad(data.actividades);
     } else {
-      console.warn('⚠️ Activity response not successful');
       mostrarActividadSimulada();
     }
   } catch (error) {
-    console.error('❌ Error loading activity:', error);
     mostrarActividadSimulada();
   }
 }
@@ -817,8 +779,6 @@ function mostrarNotificacion(mensaje, tipo = 'info', incluirBotonGamification = 
 
 // Verify new badges
 async function verificarInsignias() {
-  console.log('🔍 Verifying badges...');
-
   const btn = document.getElementById('verify-btn');
   if (btn) {
     btn.disabled = true;
@@ -831,14 +791,11 @@ async function verificarInsignias() {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    console.log('🔍 Verification response:', response.status);
-
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('✅ Verification result:', data);
 
     if (data.success) {
       const mensaje = data.insignias_otorgadas && data.insignias_otorgadas.length > 0 ?
