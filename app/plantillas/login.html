@@ -4,40 +4,40 @@
 
 {% block content %}
 <!-- Login Hero -->
-<section class="bg-white text-gray-900 py-24 relative overflow-hidden">
+<section class="py-24 relative overflow-hidden" style="background: var(--color-surface); color: var(--color-text-primary);">
   <!-- Elementos decorativos sutiles -->
   <div class="absolute inset-0 opacity-3">
-    <div class="absolute top-20 left-10 w-32 h-32 border-2 border-blue-200 rounded-full"></div>
-    <div class="absolute top-40 right-20 w-24 h-24 border border-blue-300 rounded-lg rotate-45"></div>
-    <div class="absolute bottom-32 left-1/4 w-16 h-16 bg-blue-100 rounded-full"></div>
+    <div class="absolute top-20 left-10 w-32 h-32 border-2 rounded-full" style="border-color: var(--color-primary); opacity: 0.1;"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 border rounded-lg rotate-45" style="border-color: var(--color-primary); opacity: 0.1;"></div>
+    <div class="absolute bottom-32 left-1/4 w-16 h-16 rounded-full" style="background: rgba(37, 99, 235, 0.1);"></div>
   </div>
 
   <div class="container mx-auto px-6 text-center relative">
-    <h1 class="text-h1 mb-6 font-heading animate-hero-title">
+    <h1 class="text-h1 mb-6 font-heading animate-hero-title" style="color: var(--color-text-primary);">
       Inicia Sesión
     </h1>
-    <p class="text-body-lg text-gray-600 mb-8 max-w-2xl mx-auto font-primary">
+    <p class="text-body-lg mb-8 max-w-2xl mx-auto font-primary" style="color: var(--color-text-secondary);">
       Accede a tu cuenta y continúa con tus simulaciones financieras
     </p>
   </div>
 </section>
 
 <!-- Login Form -->
-<section class="py-16 bg-gray-50">
+<section class="py-16" style="background: var(--color-background);">
   <div class="container mx-auto px-6">
     <div class="max-w-md mx-auto">
-      <div class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="rounded-2xl p-8" style="background: var(--color-card-bg); box-shadow: var(--color-shadow);">
 
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">Bienvenido de vuelta</h2>
-          <p class="text-gray-600">Ingresa tus credenciales para continuar</p>
+          <h2 class="text-2xl font-bold mb-2" style="color: var(--color-text-primary);">Bienvenido de vuelta</h2>
+          <p style="color: var(--color-text-secondary);">Ingresa tus credenciales para continuar</p>
         </div>
 
         <!-- Login Form -->
         <form id="login-form" method="POST" action="/api/v1/login" class="space-y-6">
 
           <div>
-            <label for="email_username" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="email_username" class="block text-sm font-medium mb-2" style="color: var(--color-text-secondary);">
               Correo Electrónico o Nombre de Usuario
             </label>
             <input
@@ -46,13 +46,14 @@
               name="email_username"
               required
               value="{{ email_value or '' }}"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              class="w-full px-4 py-3 rounded-lg transition duration-200"
+              style="border: 1px solid var(--color-border); background: var(--color-input-bg); color: var(--color-text-primary);"
               placeholder="tu@email.com o tu_usuario"
             >
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="password" class="block text-sm font-medium mb-2" style="color: var(--color-text-secondary);">
               Contraseña
             </label>
             <div class="relative">
@@ -61,10 +62,11 @@
                 id="password"
                 name="password"
                 required
-                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                class="w-full px-4 py-3 pr-12 rounded-lg transition duration-200"
+                style="border: 1px solid var(--color-border); background: var(--color-input-bg); color: var(--color-text-primary);"
                 placeholder="••••••••"
               >
-              <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+              <button type="button" id="toggle-password" class="absolute right-3 top-3" style="color: var(--color-text-secondary);" onmouseover="this.style.color='var(--color-text-primary)'" onmouseout="this.style.color='var(--color-text-secondary)'">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -77,13 +79,14 @@
                 id="remember"
                 name="remember"
                 {% if remember_checked %}checked{% endif %}
-                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                class="h-4 w-4 rounded"
+                style="accent-color: var(--color-primary);"
               >
-              <label for="remember" class="ml-2 text-sm text-gray-700">
+              <label for="remember" class="ml-2 text-sm" style="color: var(--color-text-secondary);">
                 Recordarme
               </label>
             </div>
-            <a href="/recuperar-password" class="text-sm text-blue-600 hover:text-blue-800">
+            <a href="/recuperar-password" class="text-sm hover:underline" style="color: var(--color-primary);" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
@@ -91,41 +94,23 @@
           <button
             type="submit"
             id="submit-btn"
-            class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300"
+            class="w-full py-3 px-6 rounded-lg font-semibold transition duration-300"
+            style="background: var(--color-primary); color: white;"
+            onmouseover="this.style.background='#2563eb'"
+            onmouseout="this.style.background='var(--color-primary)'"
           >
             <i class="fas fa-sign-in-alt mr-2"></i>
             Iniciar Sesión
           </button>
         </form>
 
-        <!-- Social Login (Opcional) -->
-        <div class="mt-8">
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-gray-500">O continúa con</span>
-            </div>
-          </div>
 
-          <div class="mt-6 grid grid-cols-2 gap-3">
-            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <i class="fab fa-google mr-2 text-red-500"></i>
-              Google
-            </button>
-            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <i class="fab fa-facebook mr-2 text-blue-600"></i>
-              Facebook
-            </button>
-          </div>
-        </div>
 
         <!-- Register Link -->
         <div class="text-center mt-8">
-          <p class="text-gray-600">
+          <p style="color: var(--color-text-secondary);">
             ¿No tienes cuenta?
-            <a href="/api/v1/registro" class="text-blue-600 hover:text-blue-800 font-medium">Regístrate aquí</a>
+            <a href="/api/v1/registro" class="font-medium hover:underline" style="color: var(--color-primary);" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">Regístrate aquí</a>
           </p>
         </div>
 
@@ -133,7 +118,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
-              <div class="mt-6 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-green-50 text-green-800 border border-green-200{% endif %}">
+              <div class="mt-6 p-4 rounded-lg" style="{% if category == 'error' %}background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.3);{% else %}background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);{% endif %}">
                 <i class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
                 {{ message }}
               </div>
@@ -143,7 +128,7 @@
 
         <!-- URL Parameter Messages -->
         <div id="url-message" class="mt-6 hidden">
-          <div class="p-4 rounded-lg bg-green-50 text-green-800 border border-green-200">
+          <div class="p-4 rounded-lg" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);">
             <i class="fas fa-check-circle mr-2"></i>
             <span id="url-message-text"></span>
           </div>
@@ -231,11 +216,11 @@ function showMessage(message, type) {
 
   // Create new message element
   const messageDiv = document.createElement('div');
-  messageDiv.className = `message-alert mt-6 p-4 rounded-lg border ${
-    type === 'error'
-      ? 'bg-red-50 text-red-800 border-red-200'
-      : 'bg-green-50 text-green-800 border-green-200'
-  }`;
+  messageDiv.className = 'message-alert mt-6 p-4 rounded-lg border';
+  messageDiv.style.cssText = type === 'error'
+    ? 'background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);'
+    : 'background: rgba(34, 197, 94, 0.1); color: var(--color-success); border-color: rgba(34, 197, 94, 0.3);';
+
   messageDiv.innerHTML = `
     <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-2"></i>
     ${message}

@@ -51,12 +51,16 @@ def inicializar_insignias():
             'descripcion': 'Has realizado 15 análisis de benchmarking'
         },
         {
+            'nombre': 'Optimizador',
+            'descripcion': 'Ve a "Portafolio" en Calculadoras y encuentra la mejor combinación de activos (10 optimizaciones)'
+        },
+        {
             'nombre': 'Líder de Sector',
-            'descripcion': 'Has alcanzado el primer lugar en el ranking de tu sector'
+            'descripcion': 'Únete a grupos de benchmarking y alcanza el top 3 en tu sector'
         },
         {
             'nombre': 'Inversor Estratégico',
-            'descripcion': 'Has optimizado 20 portafolios de inversión'
+            'descripcion': 'Ve a "Portafolio" en Calculadoras y optimiza 20 portafolios de inversión'
         },
         {
             'nombre': 'Maestro de Finanzas',
@@ -92,7 +96,7 @@ def inicializar_insignias():
         },
         {
             'nombre': 'Innovador',
-            'descripcion': 'Has usado funcionalidades experimentales de IA'
+            'descripcion': 'Crea estrategias únicas combinando diferentes herramientas financieras (5 estrategias)'
         },
         {
             'nombre': 'Financiero Profesional',
@@ -134,5 +138,57 @@ def inicializar_insignias():
     finally:
         db.disconnect()
 
+def actualizar_descripciones_insignias():
+    """Actualizar descripciones de insignias existentes para que sean más claras"""
+
+    actualizaciones = {
+        'Optimizador': 'Ve a "Portafolio" en Calculadoras y encuentra la mejor combinación de activos (10 optimizaciones)',
+        'Líder de Sector': 'Únete a grupos de benchmarking y alcanza el top 3 en tu sector',
+        'Innovador': 'Crea estrategias únicas combinando diferentes herramientas financieras (5 estrategias)',
+        'Inversor Estratégico': 'Ve a "Portafolio" en Calculadoras y optimiza 20 portafolios de inversión',
+        'Benchmarking Experto': 'Realiza 15 análisis de benchmarking (sectorial o personalizado)',
+        'Analista Avanzado': 'Ve a la sección "Simulaciones" y completa 25 análisis financieros diferentes',
+        'Experto en VAN': 'Ve a "VAN" en Calculadoras y calcula el VAN en más de 10 proyectos',
+        'Maestro TIR': 'Ve a "TIR" en Calculadoras y domina escenarios complejos de retorno'
+    }
+
+    print("🔄 Actualizando descripciones de insignias...")
+
+    db = get_db_connection()
+    try:
+        db.connect()
+
+        for nombre, nueva_descripcion in actualizaciones.items():
+            try:
+                # Buscar la insignia por nombre
+                insignias = Insignia.listar_insignias()
+                insignia = next((i for i in insignias if i.nombre_insig == nombre), None)
+
+                if insignia:
+                    # Actualizar descripción
+                    query = "UPDATE Insignias SET descripcion_insig = %s WHERE insignia_id = %s"
+                    success = db.execute_query(query, (nueva_descripcion, insignia.insignia_id))
+
+                    if success:
+                        print(f"✅ Actualizada descripción de: {nombre}")
+                    else:
+                        print(f"❌ Error actualizando: {nombre}")
+                else:
+                    print(f"⚠️ Insignia no encontrada: {nombre}")
+
+            except Exception as e:
+                print(f"❌ Error procesando {nombre}: {e}")
+
+        print("\n✅ Proceso de actualización de descripciones completado!")
+
+    except Exception as e:
+        print(f"❌ Error general en actualización: {e}")
+    finally:
+        db.disconnect()
+
 if __name__ == "__main__":
-    inicializar_insignias()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == 'update':
+        actualizar_descripciones_insignias()
+    else:
+        inicializar_insignias()

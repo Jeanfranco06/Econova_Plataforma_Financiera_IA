@@ -122,29 +122,29 @@
 
             {% if simulacion.resultados %}
             <div class="grid md:grid-cols-3 gap-6 mb-6">
-              {% if simulacion.resultados.get('van') is not none %}
+              {% if simulacion.resultados.get('van') is not none or simulacion.resultados.get('van_calculado') is not none %}
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-600 mb-1">VAN Calculado</div>
-                <div class="text-2xl font-bold {{ 'text-green-600' if simulacion.resultados.van >= 0 else 'text-red-600' }}">
-                  S/ {{ "{:,.0f}".format(simulacion.resultados.van) }}
+                <div class="text-2xl font-bold {{ 'text-green-600' if (simulacion.resultados.van or simulacion.resultados.van_calculado) >= 0 else 'text-red-600' }}">
+                  S/ {{ "{:,.0f}".format(simulacion.resultados.van or simulacion.resultados.van_calculado) }}
                 </div>
               </div>
               {% endif %}
 
-              {% if simulacion.resultados.get('tir') is not none %}
+              {% if simulacion.resultados.get('tir') is not none or simulacion.resultados.get('tir_calculado') is not none %}
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-600 mb-1">TIR</div>
                 <div class="text-2xl font-bold text-blue-600">
-                  {{ "{:.1f}".format(simulacion.resultados.tir) }}%
+                  {{ "{:.1f}".format(simulacion.resultados.tir or simulacion.resultados.tir_calculado) }}%
                 </div>
               </div>
               {% endif %}
 
-              {% if simulacion.resultados.get('payback') is not none %}
+              {% if simulacion.resultados.get('payback') is not none or simulacion.resultados.get('payback_calculado') is not none %}
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-600 mb-1">Periodo Recuperación</div>
                 <div class="text-2xl font-bold text-purple-600">
-                  {{ "{:.1f}".format(simulacion.resultados.payback) }} años
+                  {{ "{:.1f}".format(simulacion.resultados.payback or simulacion.resultados.payback_calculado) }} años
                 </div>
               </div>
               {% endif %}

@@ -1,0 +1,332 @@
+================================================================================
+                    GUÍA COMPLETA PARA COMPLETAR LOGROS
+                    Sistema de Gamificación - Econova
+================================================================================
+
+Esta guía proporciona instrucciones detalladas paso a paso para completar
+todos los logros disponibles en la plataforma Econova. Cada logro incluye
+datos de ejemplo y pasos específicos para lograr el objetivo.
+
+================================================================================
+LOGRO: ANALISTA AVANZADO
+Descripción: Ve a la sección "Simulaciones" y completa 25 análisis financieros diferentes
+Objetivo: 25 simulaciones completadas
+================================================================================
+
+PASO A PASO:
+
+1. Inicia sesión en la plataforma Econova
+2. Ve al menú principal y selecciona "Simulaciones"
+3. Completa 25 simulaciones diferentes con estos datos de ejemplo:
+
+   SIMULACIÓN 1-5: PRÉSTAMOS PERSONALES
+   - Tipo: Préstamo Personal
+   - Monto: $5,000
+   - Plazo: 24 meses
+   - Tasa de interés: 15% anual
+   - Ingreso mensual: $3,000
+
+   SIMULACIÓN 6-10: CRÉDITOS HIPOTECARIOS
+   - Tipo: Crédito Hipotecario
+   - Valor de la propiedad: $150,000
+   - Enganche: 20% ($30,000)
+   - Plazo: 360 meses (30 años)
+   - Tasa de interés: 8.5% anual
+
+   SIMULACIÓN 11-15: INVERSIÓN EN ACCIONES
+   - Tipo: Inversión en Bolsa
+   - Monto inicial: $10,000
+   - Rendimiento esperado: 12% anual
+   - Plazo: 5 años
+   - Riesgo: Moderado
+
+   SIMULACIÓN 16-20: AHORRO PARA RETIRO
+   - Tipo: Plan de Ahorro
+   - Aporte mensual: $500
+   - Rendimiento esperado: 8% anual
+   - Años hasta retiro: 25
+   - Inflación estimada: 3%
+
+   SIMULACIÓN 21-25: CRÉDITOS EMPRESARIALES
+   - Tipo: Crédito Empresarial
+   - Monto solicitado: $50,000
+   - Plazo: 60 meses
+   - Tasa de interés: 18% anual
+   - Flujo de caja mensual: $8,000
+
+4. Después de completar cada simulación, haz clic en "Guardar Resultados"
+5. Verifica tu progreso en la sección "Gamificación" > "Próximos Logros"
+
+================================================================================
+LOGRO: BENCHMARKING EXPERTO
+Descripción: Realiza 15 análisis de benchmarking (sectorial o personalizado)
+Objetivo: 15 análisis completados
+================================================================================
+
+PASO A PASO:
+
+1. Ve al menú principal y selecciona "Benchmarking"
+2. Selecciona el tipo "Sectorial" o "Personalizado"
+
+   ANÁLISIS SECTORIALES (10 análisis):
+   - Sector: Tecnología
+   - Indicadores: ROI, EBITDA, Crecimiento de Ventas
+   - Período: Últimos 3 años
+
+   - Sector: Retail
+   - Indicadores: Margen Bruto, Rotación de Inventario
+   - Período: Últimos 2 años
+
+   - Sector: Manufactura
+   - Indicadores: Productividad, Costos Operativos
+   - Período: Último año
+
+   ANÁLISIS PERSONALIZADOS (5 análisis):
+   - Empresas a comparar: Apple, Microsoft, Google
+   - Indicadores: Precio/Beneficio, Crecimiento de Ingresos
+   - Período: 2020-2024
+
+3. Para benchmarking personalizado:
+   - Selecciona "Personalizado" en el menú de benchmarking
+   - Agrega empresas: Coca-Cola, PepsiCo, Red Bull
+   - Elige indicadores: Margen de Beneficio, ROE
+   - Haz clic en "Generar Comparación Personalizada"
+
+4. Para cada análisis:
+   - Selecciona los indicadores a comparar
+   - Elige el período de tiempo
+   - Haz clic en "Generar Análisis"
+   - Revisa los insights automáticos
+   - Lee las recomendaciones proporcionadas
+   - Guarda el análisis
+
+5. Repite hasta completar 15 análisis diferentes
+
+================================================================================
+LOGRO: OPTIMIZADOR
+Descripción: Ve a "Portafolio" en Calculadoras y encuentra la mejor combinación de activos (10 optimizaciones)
+Objetivo: 10 optimizaciones de portafolio completadas
+================================================================================
+
+PASO A PASO:
+
+1. Ve al menú principal > "Calculadoras" > "Portafolio"
+2. Realiza 10 optimizaciones diferentes con estos datos:
+
+   OPTIMIZACIÓN 1: PORTAFOLIO CONSERVADOR
+   - Activos disponibles:
+     * Bonos del Tesoro: 40%
+     * Acciones Blue Chip: 30%
+     * Fondos Mutuos: 20%
+     * Caja/Efectivo: 10%
+   - Restricciones: Riesgo máximo 5%
+   - Objetivo: Maximizar retorno con riesgo mínimo
+
+   OPTIMIZACIÓN 2: PORTAFOLIO AGRESIVO
+   - Activos disponibles:
+     * Acciones Tecnológicas: 50%
+     * Criptomonedas: 20%
+     * Bonos Corporativos: 20%
+     * Commodities: 10%
+   - Restricciones: Retorno mínimo esperado 15%
+   - Objetivo: Maximizar ganancias
+
+   OPTIMIZACIÓN 3: PORTAFOLIO BALANCEADO
+   - Activos disponibles:
+     * Acciones: 50%
+     * Bonos: 30%
+     * Bienes Raíces (REITs): 20%
+   - Restricciones: Relación riesgo/retorno óptima
+   - Objetivo: Equilibrio perfecto
+
+3. Para cada optimización:
+   - Selecciona los activos disponibles
+   - Define las restricciones (riesgo, retorno mínimo)
+   - Establece el objetivo de optimización
+   - Haz clic en "Optimizar Portafolio"
+   - Revisa la distribución recomendada
+   - Guarda los resultados
+
+4. Experimenta con diferentes combinaciones:
+   - Cambia porcentajes de asignación
+   - Agrega/quita activos
+   - Modifica restricciones de riesgo
+   - Prueba diferentes objetivos
+
+================================================================================
+LOGRO: LÍDER DE SECTOR
+Descripción: Únete a grupos de benchmarking y alcanza el top 3 en tu sector
+Objetivo: Alcanzar posición top 3 en ranking sectorial
+================================================================================
+
+PASO A PASO:
+
+1. Ve al menú principal > "Benchmarking" > "Grupos"
+2. Únete a grupos activos en tu sector de interés:
+   - Tecnología
+   - Finanzas
+   - Manufactura
+   - Retail
+   - Servicios
+
+3. Participa activamente en los grupos:
+   - Realiza análisis de benchmarking regulares
+   - Comparte insights con otros miembros
+   - Mantén tus indicadores actualizados
+
+4. Mejora tu posición en el ranking:
+   - Realiza más análisis que otros miembros
+   - Mantén indicadores competitivos
+   - Participa en desafíos del grupo
+
+5. Monitorea tu progreso:
+   - Ve a "Gamificación" > "Ranking Global"
+   - Busca tu posición en el sector
+   - Mantén actividad consistente para subir posiciones
+
+================================================================================
+LOGRO: INNOVADOR
+Descripción: Crea estrategias únicas combinando diferentes herramientas financieras (5 estrategias)
+Objetivo: 5 estrategias únicas creadas
+================================================================================
+
+PASO A PASO:
+
+1. Combina múltiples herramientas para crear estrategias únicas:
+
+   ESTRATEGIA 1: INVERSIÓN EN TECNOLOGÍA + BENCHMARKING
+   - Usa calculadora VAN para evaluar startups tecnológicas
+   - Compara con empresas del sector usando benchmarking
+   - Crea estrategia basada en análisis comparativo
+
+   ESTRATEGIA 2: AHORRO + INVERSIÓN EN PORTAFOLIO
+   - Simula plan de ahorro mensual usando "Ahorro e Inversión"
+   - Optimiza portafolio de inversión usando calculadora de portafolio
+   - Combina ambos para estrategia financiera completa
+
+   ESTRATEGIA 3: PRÉSTAMO + ANÁLISIS DE RIESGO
+   - Evalúa capacidad de pago usando simulador de préstamos
+   - Analiza riesgo usando benchmarking sectorial
+   - Crea estrategia de endeudamiento inteligente
+
+   ESTRATEGIA 4: TIR + PORTAFOLIO ÓPTIMO
+   - Calcula TIR de diferentes inversiones usando calculadora TIR
+   - Optimiza portafolio usando calculadora de portafolio
+   - Selecciona inversiones con mejor TIR para portafolio
+
+   ESTRATEGIA 5: WACC + BENCHMARKING PERSONALIZADO
+   - Calcula WACC de tu empresa usando calculadora WACC
+   - Compara con competidores usando benchmarking personalizado
+   - Desarrolla estrategia de reducción de costo de capital
+
+2. Para cada estrategia:
+   - Documenta los pasos seguidos
+   - Guarda los resultados de cada herramienta usada
+   - Explica cómo combinaste las diferentes funcionalidades
+   - Registra la estrategia como completada
+
+================================================================================
+LOGRO: EXPERTO EN VAN
+Descripción: Ve a "VAN" en Calculadoras y calcula el VAN en más de 10 proyectos
+Objetivo: 10 cálculos VAN completados
+================================================================================
+
+PASO A PASO:
+
+1. Ve a "Calculadoras" > "VAN"
+2. Realiza 10 cálculos diferentes con estos datos:
+
+   PROYECTO 1: INVERSIÓN EN EQUIPO
+   - Inversión inicial: $100,000
+   - Flujos de caja anuales: $25,000 por 5 años
+   - Tasa de descuento: 12%
+
+   PROYECTO 2: EXPANSIÓN DE NEGOCIO
+   - Inversión inicial: $500,000
+   - Flujos: Año 1: $100,000; A2: $150,000; A3: $200,000; A4: $180,000; A5: $120,000
+   - Tasa de descuento: 15%
+
+   PROYECTO 3: PROYECTO DE MARKETING
+   - Inversión inicial: $50,000
+   - Flujos: Aumento de 20% en ventas anualmente por 3 años
+   - Tasa de descuento: 10%
+
+3. Para cada cálculo:
+   - Ingresa la inversión inicial
+   - Define los flujos de caja por período
+   - Establece la tasa de descuento apropiada
+   - Haz clic en "Calcular VAN"
+   - Interpreta el resultado (positivo = viable, negativo = no viable)
+   - Guarda los resultados
+
+================================================================================
+LOGRO: MAESTRO TIR
+Descripción: Ve a "TIR" en Calculadoras y domina escenarios complejos de retorno
+Objetivo: 10 cálculos TIR completados
+================================================================================
+
+PASO A PASO:
+
+1. Ve a "Calculadoras" > "TIR"
+2. Realiza 10 cálculos diferentes:
+
+   INVERSIÓN 1: BONOS CORPORATIVOS
+   - Inversión inicial: $10,000
+   - Pagos anuales: $1,200 por 10 años
+   - Valor nominal: $10,000
+
+   INVERSIÓN 2: PROYECTO IRR COMPLEJO
+   - Flujos: -$50,000, +$15,000, +$20,000, +$25,000, +$30,000, +$35,000
+
+   INVERSIÓN 3: INVERSIÓN EN REAL ESTATE
+   - Compra: $200,000
+   - Renta mensual: $2,000
+   - Apreciación anual: 5%
+   - Venta en 10 años
+
+3. Para cada cálculo:
+   - Ingresa los flujos de caja (positivos y negativos)
+   - Asegúrate de que haya al menos un flujo negativo inicial
+   - Haz clic en "Calcular TIR"
+   - Compara con tasa requerida de retorno
+   - Guarda los resultados
+
+================================================================================
+CONSEJOS GENERALES PARA COMPLETAR LOGROS
+================================================================================
+
+1. REGISTRA TUS ACCIONES:
+   - El sistema automáticamente registra simulaciones y cálculos
+   - Los análisis de benchmarking se guardan automáticamente
+   - Las optimizaciones de portafolio se registran
+
+2. MONITOREA TU PROGRESO:
+   - Ve a "Gamificación" para ver barras de progreso
+   - Revisa el porcentaje completado de cada logro
+   - Identifica qué logros están más cerca de completarse
+
+3. ESTRATEGIAS PARA ACELERAR PROGRESO:
+   - Completa múltiples simulaciones en una sesión
+   - Experimenta con diferentes combinaciones en calculadoras
+   - Participa activamente en benchmarking
+
+4. LOGROS RELACIONADOS:
+   - Muchos logros se complementan entre sí
+   - Completar uno puede ayudar con otros
+   - Por ejemplo: VAN + TIR + Portafolio = Estrategia Completa
+
+5. VERIFICACIÓN AUTOMÁTICA:
+   - El sistema verifica automáticamente el cumplimiento
+   - Las insignias se otorgan cuando se alcanzan los objetivos
+   - Revisa "Gamificación" > "Verificar Nuevas" para actualizar
+
+================================================================================
+CONTACTO Y SOPORTE
+================================================================================
+
+Si tienes dificultades para completar algún logro o encuentras problemas:
+- Revisa esta guía nuevamente
+- Verifica que estás siguiendo los pasos correctamente
+- Contacta al soporte técnico si persisten los problemas
+
+¡Felicitaciones por tu compromiso con el aprendizaje financiero! 🎉

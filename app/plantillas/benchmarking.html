@@ -205,30 +205,30 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="user-info" data-user-id="{{ session.usuario_id }}" style="display: none;"></div>
 {% endif %}
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen" style="background: var(--color-background);">
   <!-- Benchmarking Hero -->
-  <section class="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-16">
+  <section style="background: linear-gradient(135deg, var(--color-card-bg), var(--color-primary)); color: var(--color-text-primary);" class="py-16">
     <div class="container mx-auto px-6 text-center">
       <div class="max-w-4xl mx-auto">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6" style="background: linear-gradient(135deg, var(--color-text-primary), var(--color-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
           Benchmarking Anónimo
         </h1>
-        <p class="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
+        <p class="text-xl md:text-2xl mb-8 leading-relaxed" style="color: var(--color-text-secondary);">
           Compara tus resultados con otros empresarios de manera <span class="font-semibold">100% anónima</span> y confidencial
         </p>
 
         <!-- Trust Indicators -->
         <div class="flex flex-wrap justify-center gap-6 mb-8">
-          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-            <i class="fas fa-shield-alt text-green-400 mr-2"></i>
+          <div class="flex items-center rounded-full px-4 py-2" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+            <i class="fas fa-shield-alt mr-2" style="color: var(--color-success);"></i>
             <span class="text-sm font-medium">Anonimización Avanzada</span>
           </div>
-          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-            <i class="fas fa-chart-line text-blue-400 mr-2"></i>
+          <div class="flex items-center rounded-full px-4 py-2" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+            <i class="fas fa-chart-line mr-2" style="color: var(--color-primary);"></i>
             <span class="text-sm font-medium">Análisis Inteligente</span>
           </div>
-          <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-            <i class="fas fa-users text-purple-400 mr-2"></i>
+          <div class="flex items-center rounded-full px-4 py-2" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+            <i class="fas fa-users mr-2" style="color: var(--color-warning);"></i>
             <span class="text-sm font-medium">Comparaciones Seguras</span>
           </div>
         </div>
@@ -237,55 +237,55 @@ document.addEventListener('DOMContentLoaded', function() {
   </section>
 
   <!-- Calculator Selection -->
-  <section class="py-12 bg-white">
+  <section class="py-12" style="background: var(--color-surface);">
     <div class="container mx-auto px-6">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-10">
-          <h2 class="text-3xl font-bold text-gray-800 mb-4">Elige tu Tipo de Benchmarking</h2>
-          <p class="text-gray-600 text-lg">Selecciona la herramienta que mejor se adapte a tus necesidades de comparación</p>
+          <h2 class="text-3xl font-bold mb-4" style="color: var(--color-text-primary);">Elige tu Tipo de Benchmarking</h2>
+          <p class="text-lg" style="color: var(--color-text-secondary);">Selecciona la herramienta que mejor se adapte a tus necesidades de comparación</p>
         </div>
 
         <!-- Calculator Cards -->
         <div class="grid md:grid-cols-3 gap-6 mb-8">
           <!-- Grupos de Benchmarking -->
-          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="grupos">
+          <div class="calculator-card rounded-xl p-6 cursor-pointer transition-all duration-300" style="background: var(--color-card-bg); border: 2px solid var(--color-border);" onmouseover="this.style.borderColor='var(--color-primary)'; this.style.boxShadow='var(--color-shadow)';" onmouseout="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none';" data-calculator="grupos">
             <div class="text-center">
-              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-users text-blue-600 text-2xl"></i>
+              <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(37, 99, 235, 0.1);">
+                <i class="fas fa-users text-2xl" style="color: var(--color-primary);"></i>
               </div>
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Grupos</h3>
-              <p class="text-sm text-gray-600">Únete a comunidades especializadas y compara con pares similares</p>
+              <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text-primary);">Grupos</h3>
+              <p class="text-sm" style="color: var(--color-text-secondary);">Únete a comunidades especializadas y compara con pares similares</p>
             </div>
           </div>
 
           <!-- Benchmarking Sectorial -->
-          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-green-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="sectorial">
+          <div class="calculator-card rounded-xl p-6 cursor-pointer transition-all duration-300" style="background: var(--color-card-bg); border: 2px solid var(--color-border);" onmouseover="this.style.borderColor='var(--color-success)'; this.style.boxShadow='var(--color-shadow)';" onmouseout="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none';" data-calculator="sectorial">
             <div class="text-center">
-              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-industry text-green-600 text-2xl"></i>
+              <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(34, 197, 94, 0.1);">
+                <i class="fas fa-industry text-2xl" style="color: var(--color-success);"></i>
               </div>
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Sectorial</h3>
-              <p class="text-sm text-gray-600">Analiza tu desempeño contra estándares sectoriales</p>
+              <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text-primary);">Sectorial</h3>
+              <p class="text-sm" style="color: var(--color-text-secondary);">Analiza tu desempeño contra estándares sectoriales</p>
             </div>
           </div>
 
           <!-- Comparación Personalizada -->
-          <div class="calculator-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-purple-500 hover:shadow-lg transition-all duration-300 cursor-pointer" data-calculator="personalizado">
+          <div class="calculator-card rounded-xl p-6 cursor-pointer transition-all duration-300" style="background: var(--color-card-bg); border: 2px solid var(--color-border);" onmouseover="this.style.borderColor='var(--color-warning)'; this.style.boxShadow='var(--color-shadow)';" onmouseout="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none';" data-calculator="personalizado">
             <div class="text-center">
-              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-balance-scale text-purple-600 text-2xl"></i>
+              <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(168, 85, 247, 0.1);">
+                <i class="fas fa-balance-scale text-2xl" style="color: var(--color-warning);"></i>
               </div>
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Personalizada</h3>
-              <p class="text-sm text-gray-600">Compara contra empresas específicas que elijas</p>
+              <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text-primary);">Personalizada</h3>
+              <p class="text-sm" style="color: var(--color-text-secondary);">Compara contra empresas específicas que elijas</p>
             </div>
           </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="text-center">
-          <div class="inline-flex items-center space-x-4 bg-gray-50 rounded-full px-6 py-3">
-            <span class="text-sm text-gray-600">¿Nuevo aquí?</span>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition duration-300">
+          <div class="inline-flex items-center space-x-4 rounded-full px-6 py-3" style="background: var(--color-background);">
+            <span class="text-sm" style="color: var(--color-text-secondary);">¿Nuevo aquí?</span>
+            <button class="px-4 py-2 rounded-full text-sm font-medium transition duration-300" style="background: var(--color-primary); color: white;" onmouseover="this.style.background='#2563eb';" onmouseout="this.style.background='var(--color-primary)';">
               Ver Guía Rápida
             </button>
           </div>
@@ -295,9 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
   </section>
 
   <!-- Calculator Content Area -->
-  <section class="py-12 bg-gray-50">
-    <div class="container mx-auto px-6">
-      <div class="max-w-6xl mx-auto">
+  <section class="py-12" style="background: var(--color-background);">
+    <div class="max-w-none mx-auto px-6">
+      <div class="w-full">
         <!-- Grupos de Benchmarking Calculator -->
         {% include 'benchmarking_groups.html' %}
 
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- Back to Dashboard -->
         <div class="text-center mt-12">
-          <a href="/dashboard" class="inline-flex items-center bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+          <a href="/dashboard" class="inline-flex items-center px-6 py-3 rounded-lg transition duration-300" style="background: var(--color-secondary); color: white;" onmouseover="this.style.background='#4b5563';" onmouseout="this.style.background='var(--color-secondary)';">
             <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
           </a>
         </div>
@@ -318,34 +318,34 @@ document.addEventListener('DOMContentLoaded', function() {
   </section>
 
   <!-- Educational Footer -->
-  <section class="py-12 bg-white border-t">
+  <section class="py-12 border-t" style="background: var(--color-surface); border-color: var(--color-border);">
     <div class="container mx-auto px-6">
       <div class="max-w-4xl mx-auto text-center">
-        <h3 class="text-2xl font-bold text-gray-800 mb-6">¿Por qué usar Benchmarking Anónimo?</h3>
+        <h3 class="text-2xl font-bold mb-6" style="color: var(--color-text-primary);">¿Por qué usar Benchmarking Anónimo?</h3>
 
         <div class="grid md:grid-cols-3 gap-8">
           <div class="text-center">
-            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-lock text-blue-600"></i>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(37, 99, 235, 0.1);">
+              <i class="fas fa-lock" style="color: var(--color-primary);"></i>
             </div>
-            <h4 class="font-semibold text-gray-800 mb-2">Confidencialidad Total</h4>
-            <p class="text-gray-600 text-sm">Tus datos nunca se identifican. Utilizamos técnicas avanzadas de anonimización.</p>
+            <h4 class="font-semibold mb-2" style="color: var(--color-text-primary);">Confidencialidad Total</h4>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Tus datos nunca se identifican. Utilizamos técnicas avanzadas de anonimización.</p>
           </div>
 
           <div class="text-center">
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-lightbulb text-green-600"></i>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(34, 197, 94, 0.1);">
+              <i class="fas fa-lightbulb" style="color: var(--color-success);"></i>
             </div>
-            <h4 class="font-semibold text-gray-800 mb-2">Insights Accionables</h4>
-            <p class="text-gray-600 text-sm">Recomendaciones específicas basadas en mejores prácticas del sector.</p>
+            <h4 class="font-semibold mb-2" style="color: var(--color-text-primary);">Insights Accionables</h4>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Recomendaciones específicas basadas en mejores prácticas del sector.</p>
           </div>
 
           <div class="text-center">
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-rocket text-purple-600"></i>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(168, 85, 247, 0.1);">
+              <i class="fas fa-rocket" style="color: var(--color-warning);"></i>
             </div>
-            <h4 class="font-semibold text-gray-800 mb-2">Mejora Continua</h4>
-            <p class="text-gray-600 text-sm">Identifica oportunidades de mejora y establece metas realistas.</p>
+            <h4 class="font-semibold mb-2" style="color: var(--color-text-primary);">Mejora Continua</h4>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Identifica oportunidades de mejora y establece metas realistas.</p>
           </div>
         </div>
       </div>

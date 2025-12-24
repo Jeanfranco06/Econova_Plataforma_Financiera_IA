@@ -128,11 +128,17 @@ class UIUtils {
             console.error('❌ Usuario no autenticado');UIUtils.mostrarNotificacion('Debe iniciar sesión para guardar análisis', 'error');return;}
 
         // Preparar datos para enviar al backend
+        const datosPreparados = this.prepararDatosParaBackend(tipo, simulacion);
         const datosEnvio = {
             usuario_id: usuarioId,
             nombre_simulacion: `${tipo.toUpperCase()} - ${new Date().toLocaleDateString()}`,
-            ...this.prepararDatosParaBackend(tipo, simulacion)
-        };try {
+            ...datosPreparados
+        };
+
+        console.log('📤 Datos a enviar al backend:', datosEnvio);
+        console.log('📊 Simulación original:', simulacion);
+
+        try {
             // Hacer la petición al backend (sin modal)
             
             const response = await fetch(`/api/v1/financiero/${tipo.toLowerCase()}`, {
@@ -143,8 +149,17 @@ class UIUtils {
                 body: JSON.stringify(datosEnvio)
             });const result = await response.json();if (response.ok && result.success) {
                 // Actualizar localStorage con el ID de simulación
-                simulacion.simulacion_id = result.data.simulacion_id;UIUtils.guardarSimulacion(tipo, simulacion);// Mostrar mensaje de éxito
-                
+                simulacion.simulacion_id = result.data.simulacion_id;UIUtils.guardarSimulacion(tipo, simulacion);
+
+                // Verificar y otorgar insignias automáticamente
+                console.log('🏆 Verificando insignias después de guardar...');
+                try {
+                    await UIUtils.verificarYOtorgarInsignias(tipo);
+                } catch (error) {
+                    console.error('❌ Error verificando insignias:', error);
+                }
+
+                // Mostrar mensaje de éxito
                 UIUtils.mostrarNotificacion('Análisis guardado exitosamente en su cuenta.');} else {
                 console.error('❌ Error en respuesta del servidor:', result.error);throw new Error(result.error || 'Error al guardar el análisis');}
 
@@ -489,6 +504,213 @@ class UIUtils {
             const addButton = document.getElementById(`add-flujo-${tabType}`);if (addButton) {
                 addButton.style.display = 'flex';}
         }
+    }
+
+    /**
+     * Verificar y otorgar insignias automáticamente después de guardar simulación
+     */
+    static async verificarYOtorgarInsignias(tipo) {
+        const usuarioId = this.getUsuarioId();
+        if (!usuarioId) {
+            console.error('❌ No hay usuario autenticado para verificar insignias');
+            return;
+        }
+
+        try {
+            console.log('🔍 Consultando estadísticas de usuario para verificar insignias...');
+
+            // Obtener estadísticas del usuario
+            const response = await fetch(`/api/v1/gamification/estadisticas/${usuarioId}`);
+            if (!response.ok) {
+                console.error('❌ Error obteniendo estadísticas del usuario');
+                return;
+            }
+
+            const estadisticas = await response.json();
+            console.log('📊 Estadísticas obtenidas:', estadisticas);
+
+            // Verificar insignias basadas en las estadísticas
+            const insigniasVerificadas = await this.verificarInsigniasUsuario(estadisticas, tipo);
+
+            if (insigniasVerificadas && insigniasVerificadas.length > 0) {
+                console.log('🎉 Insignias verificadas para otorgar:', insigniasVerificadas);
+
+                // Mostrar modal de felicitación si hay nuevas insignias
+                this.mostrarModalInsignias(insigniasVerificadas);
+
+                // Actualizar la interfaz de gamificación si está abierta
+                this.actualizarInterfazGamification();
+            }
+
+        } catch (error) {
+            console.error('💥 Error verificando insignias:', error);
+        }
+    }
+
+    /**
+     * Verificar qué insignias debe tener el usuario basado en sus estadísticas
+     */
+    static async verificarInsigniasUsuario(estadisticas, tipoSimulacion) {
+        const insigniasOtorgadas = [];
+
+        try {
+            // Verificar insignias basadas en conteos
+            if (estadisticas.simulaciones_van >= 1 && !this.tieneInsignia('Primeros Pasos', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Primeros Pasos');
+                insigniasOtorgadas.push('Primeros Pasos');
+            }
+
+            if (estadisticas.simulaciones_van >= 5 && !this.tieneInsignia('Analista Novato', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Analista Novato');
+                insigniasOtorgadas.push('Analista Novato');
+            }
+
+            if (estadisticas.simulaciones_van >= 10 && !this.tieneInsignia('Analista Avanzado', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Analista Avanzado');
+                insigniasOtorgadas.push('Analista Avanzado');
+            }
+
+            if (estadisticas.simulaciones_van >= 10 && !this.tieneInsignia('Experto en VAN', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Experto en VAN');
+                insigniasOtorgadas.push('Experto en VAN');
+            }
+
+            if (estadisticas.simulaciones_tir >= 10 && !this.tieneInsignia('Experto en TIR', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Experto en TIR');
+                insigniasOtorgadas.push('Experto en TIR');
+            }
+
+            if (estadisticas.simulaciones_tir >= 15 && !this.tieneInsignia('Maestro TIR', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Maestro TIR');
+                insigniasOtorgadas.push('Maestro TIR');
+            }
+
+            if (estadisticas.simulaciones_wacc >= 10 && !this.tieneInsignia('Financiero Estratégico', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Financiero Estratégico');
+                insigniasOtorgadas.push('Financiero Estratégico');
+            }
+
+            if (estadisticas.simulaciones_portafolio >= 20 && !this.tieneInsignia('Inversor Estratégico', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Inversor Estratégico');
+                insigniasOtorgadas.push('Inversor Estratégico');
+            }
+
+            // Verificar insignia "Maestro de Finanzas" (todas las categorías)
+            const tieneTodasLasCategorias = estadisticas.simulaciones_van >= 10 &&
+                                          estadisticas.simulaciones_tir >= 10 &&
+                                          estadisticas.simulaciones_wacc >= 10 &&
+                                          estadisticas.simulaciones_portafolio >= 10;
+
+            if (tieneTodasLasCategorias && !this.tieneInsignia('Maestro de Finanzas', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Maestro de Finanzas');
+                insigniasOtorgadas.push('Maestro de Finanzas');
+            }
+
+            // Verificar insignias de conteo total
+            const totalSimulaciones = estadisticas.simulaciones_van +
+                                    estadisticas.simulaciones_tir +
+                                    estadisticas.simulaciones_wacc +
+                                    estadisticas.simulaciones_portafolio;
+
+            if (totalSimulaciones >= 10 && !this.tieneInsignia('Calculador Financiero', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Calculador Financiero');
+                insigniasOtorgadas.push('Calculador Financiero');
+            }
+
+            if (totalSimulaciones >= 25 && !this.tieneInsignia('Analista Avanzado', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Analista Avanzado');
+                insigniasOtorgadas.push('Analista Avanzado');
+            }
+
+            if (totalSimulaciones >= 100 && !this.tieneInsignia('Financiero Profesional', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Financiero Profesional');
+                insigniasOtorgadas.push('Financiero Profesional');
+            }
+
+            // Verificar insignia "Maestro de WACC" (10 simulaciones WACC)
+            if (estadisticas.simulaciones_wacc >= 10 && !this.tieneInsignia('Maestro de WACC', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Maestro de WACC');
+                insigniasOtorgadas.push('Maestro de WACC');
+            }
+
+            // Verificar insignias de actividad
+            if (estadisticas.dias_consecutivos >= 7 && !this.tieneInsignia('Login Diario', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Login Diario');
+                insigniasOtorgadas.push('Login Diario');
+            }
+
+            if (estadisticas.dias_consecutivos >= 30 && !this.tieneInsignia('Streak Master', estadisticas.insignias)) {
+                await this.otorgarInsigniaUsuario('Streak Master');
+                insigniasOtorgadas.push('Streak Master');
+            }
+
+        } catch (error) {
+            console.error('❌ Error verificando insignias específicas:', error);
+        }
+
+        return insigniasOtorgadas;
+    }
+
+    /**
+     * Verificar si el usuario ya tiene una insignia
+     */
+    static tieneInsignia(nombreInsignia, insigniasUsuario = []) {
+        return insigniasUsuario.some(insignia => insignia.nombre === nombreInsignia);
+    }
+
+    /**
+     * Otorgar insignia al usuario
+     */
+    static async otorgarInsigniaUsuario(nombreInsignia) {
+        const usuarioId = this.getUsuarioId();
+        if (!usuarioId) return;
+
+        try {
+            const response = await fetch('/api/v1/gamification/otorgar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    usuario_id: usuarioId,
+                    nombre_insignia: nombreInsignia
+                })
+            });
+
+            if (response.ok) {
+                console.log(`✅ Insignia "${nombreInsignia}" otorgada exitosamente`);
+            } else {
+                console.error(`❌ Error otorgando insignia "${nombreInsignia}"`);
+            }
+        } catch (error) {
+            console.error('💥 Error en la petición de otorgar insignia:', error);
+        }
+    }
+
+    /**
+     * Mostrar modal de felicitación por nuevas insignias
+     */
+    static mostrarModalInsignias(insignias) {
+        if (!insignias || insignias.length === 0) return;
+
+        const titulo = insignias.length === 1 ?
+            '¡Nueva Insignia Obtenida!' :
+            `¡${insignias.length} nuevas insignias obtenidas!`;
+
+        const mensaje = insignias.length === 1 ?
+            `Felicitaciones! Has obtenido la insignia: <strong>${insignias[0]}</strong>` :
+            `Felicitaciones! Has obtenido las siguientes insignias:<br><br>${insignias.map(i => `• ${i}`).join('<br>')}`;
+
+        this.mostrarModal(titulo, mensaje, 'success', 5000);
+    }
+
+    /**
+     * Actualizar interfaz de gamificación si está abierta
+     */
+    static actualizarInterfazGamification() {
+        // Disparar evento para actualizar la interfaz de gamificación
+        const event = new CustomEvent('gamificationActualizada');
+        document.dispatchEvent(event);
     }
 }
 

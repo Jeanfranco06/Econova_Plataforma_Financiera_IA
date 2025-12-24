@@ -48,6 +48,11 @@ class WACCCalculator {
             this.crearGraficoSensibilidadWACC(datos, resultado);
         }
 
+        // Actualizar tabla de comparación sectorial si está solicitado
+        if (datos.comparacionSector) {
+            this.actualizarTablaComparacionSectorial(resultado);
+        }
+
         // Guardar simulación
         UIUtils.guardarSimulacion('wacc', {
             datos,
@@ -429,6 +434,89 @@ class WACCCalculator {
               </div>
             </div>
 
+            ${datos.analisisSensibilidad ? `
+            <!-- Análisis de Sensibilidad -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-2 text-purple-600"></i>
+                Análisis de Sensibilidad - WACC vs Variación en Costos de Capital
+              </h5>
+
+              <div class="mb-4">
+                <canvas id="grafico-wacc-sensibilidad" width="400" height="200"></canvas>
+              </div>
+
+              <div class="bg-purple-50 p-4 rounded-lg">
+                <h6 class="font-semibold text-purple-800 mb-2">Interpretación</h6>
+                <p class="text-purple-700 text-sm">
+                  El gráfico muestra cómo cambia el WACC cuando varían los costos de deuda y capital propio.
+                  Una pendiente pronunciada indica alta sensibilidad a cambios en los costos de financiamiento.
+                  ${resultado.sensibilidad ? `Rango analizado: ${Math.min(...resultado.sensibilidad.map(s => s.variacion))}% - ${Math.max(...resultado.sensibilidad.map(s => s.variacion))}%` : ''}
+                </p>
+              </div>
+            </div>
+            ` : ''}
+
+            ${datos.comparacionSector ? `
+            <!-- Comparación Sectorial Detallada -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-industry mr-2 text-blue-600"></i>
+                Comparación Sectorial Detallada
+              </h5>
+
+              <div class="mb-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div class="bg-blue-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-blue-800 mb-2">Su Empresa</h6>
+                    <div class="space-y-2">
+                      <p class="text-sm"><strong>Sector:</strong> ${resultado.referenciasSectoriales.descripcion}</p>
+                      <p class="text-sm"><strong>WACC Calculado:</strong> ${FinancialUtils.formatearPorcentaje(resultado.wacc)}</p>
+                      <p class="text-sm"><strong>Posición Relativa:</strong>
+                        ${resultado.wacc < resultado.referenciasSectoriales.wacc ? 'Por debajo del promedio' :
+                          resultado.wacc > resultado.referenciasSectoriales.rango[1] ? 'Por encima del rango' :
+                          'Dentro del rango'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="bg-green-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-green-800 mb-2">Referencia Sectorial</h6>
+                    <div class="space-y-2">
+                      <p class="text-sm"><strong>WACC Promedio:</strong> ${FinancialUtils.formatearPorcentaje(resultado.referenciasSectoriales.wacc)}</p>
+                      <p class="text-sm"><strong>Rango Típico:</strong> ${FinancialUtils.formatearPorcentaje(resultado.referenciasSectoriales.rango[0])} - ${FinancialUtils.formatearPorcentaje(resultado.referenciasSectoriales.rango[1])}</p>
+                      <p class="text-sm"><strong>Diferencia:</strong>
+                        ${resultado.wacc - resultado.referenciasSectoriales.wacc >= 0 ?
+                          '+' + FinancialUtils.formatearPorcentaje(resultado.wacc - resultado.referenciasSectoriales.wacc) :
+                          FinancialUtils.formatearPorcentaje(resultado.wacc - resultado.referenciasSectoriales.wacc)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h6 class="font-semibold text-gray-800 mb-2">Análisis de Competitividad</h6>
+                <div class="space-y-2 text-sm text-gray-700">
+                  ${resultado.wacc < resultado.referenciasSectoriales.wacc ?
+                    '<p>✅ <strong>Ventaja Competitiva:</strong> Su WACC está por debajo del promedio sectorial, lo que le da una ventaja en la evaluación de proyectos.</p>' :
+                    resultado.wacc > resultado.referenciasSectoriales.rango[1] ?
+                    '<p>⚠️ <strong>Desventaja Competitiva:</strong> Su WACC está por encima del rango sectorial. Considere revisar su estructura de capital o costos de financiamiento.</p>' :
+                    '<p>📊 <strong>Alineado con el Sector:</strong> Su WACC está dentro del rango esperado para su sector industrial.</p>'
+                  }
+                  <p><strong>Recomendación:</strong>
+                    ${resultado.wacc < resultado.referenciasSectoriales.wacc ?
+                      'Mantenga o mejore su posición competitiva actual.' :
+                      resultado.wacc > resultado.referenciasSectoriales.rango[1] ?
+                      'Evalúe opciones para reducir el costo de capital, como renegociar deuda o mejorar el perfil crediticio.' :
+                      'Monitoree las tendencias del sector para mantener su posición competitiva.'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
               <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-semibold flex items-center justify-center" onclick="window.waccCalculator.guardarAnalisis()">
@@ -528,6 +616,15 @@ class WACCCalculator {
 
     exportarExcel() {
         UIUtils.exportarExcel('wacc');
+    }
+
+    /**
+     * Actualiza tabla de comparación sectorial
+     */
+    actualizarTablaComparacionSectorial(resultado) {
+        // La tabla ya se genera dinámicamente en el HTML con los datos correctos
+        // Esta función está aquí por compatibilidad futura
+        console.log('Tabla de comparación sectorial actualizada');
     }
 
     /**

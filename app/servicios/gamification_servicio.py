@@ -24,7 +24,7 @@ class GamificationService:
                 insignias_otorgadas.append('Analista Novato')
 
         # Insignia: Experto en VAN - Más de 10 cálculos de VAN
-        if GamificationService._verificar_experto_van(usuario_id):
+        if GamificationService._verificar_experto_van_actualizado(usuario_id):
             insignia_id = GamificationService._obtener_insignia_por_nombre('Experto en VAN')
             if insignia_id and GamificationService._otorgar_insignia_si_no_tiene(usuario_id, insignia_id):
                 insignias_otorgadas.append('Experto en VAN')
@@ -34,6 +34,24 @@ class GamificationService:
             insignia_id = GamificationService._obtener_insignia_por_nombre('Analista Avanzado')
             if insignia_id and GamificationService._otorgar_insignia_si_no_tiene(usuario_id, insignia_id):
                 insignias_otorgadas.append('Analista Avanzado')
+
+        # Insignia: Maestro TIR - Más de 15 cálculos de TIR
+        if GamificationService._verificar_maestro_tir(usuario_id):
+            insignia_id = GamificationService._obtener_insignia_por_nombre('Maestro TIR')
+            if insignia_id and GamificationService._otorgar_insignia_si_no_tiene(usuario_id, insignia_id):
+                insignias_otorgadas.append('Maestro TIR')
+
+        # Insignia: Inversor Estratégico - Más de 20 análisis de portafolio
+        if GamificationService._verificar_inversor_estrategico_actualizado(usuario_id):
+            insignia_id = GamificationService._obtener_insignia_por_nombre('Inversor Estratégico')
+            if insignia_id and GamificationService._otorgar_insignia_si_no_tiene(usuario_id, insignia_id):
+                insignias_otorgadas.append('Inversor Estratégico')
+
+        # Insignia: Maestro de Finanzas - Todos los tipos de simulación
+        if GamificationService._verificar_maestro_finanzas(usuario_id):
+            insignia_id = GamificationService._obtener_insignia_por_nombre('Maestro de Finanzas')
+            if insignia_id and GamificationService._otorgar_insignia_si_no_tiene(usuario_id, insignia_id):
+                insignias_otorgadas.append('Maestro de Finanzas')
 
         # Insignia: Benchmarking Explorer - Se unió a un grupo
         if GamificationService._verificar_benchmarking_explorer(usuario_id):
@@ -171,6 +189,86 @@ class GamificationService:
             return False
         except Exception as e:
             print(f"Error verificando experto VAN: {e}")
+            return False
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def _verificar_experto_van_actualizado(usuario_id):
+        """Verificar si realizó más de 10 simulaciones VAN"""
+        db = get_db_connection()
+        query = """
+        SELECT COUNT(*) as count
+        FROM Simulaciones s
+        WHERE s.usuario_id = %s AND s.tipo_simulacion = 'VAN'
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id,), fetch=True)
+            count = result[0]['count'] if result else 0
+            return count >= 10
+        except Exception as e:
+            print(f"Error verificando experto VAN actualizado: {e}")
+            return False
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def _verificar_maestro_tir(usuario_id):
+        """Verificar si realizó más de 15 simulaciones TIR"""
+        db = get_db_connection()
+        query = """
+        SELECT COUNT(*) as count
+        FROM Simulaciones s
+        WHERE s.usuario_id = %s AND s.tipo_simulacion = 'TIR'
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id,), fetch=True)
+            count = result[0]['count'] if result else 0
+            return count >= 15
+        except Exception as e:
+            print(f"Error verificando maestro TIR: {e}")
+            return False
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def _verificar_inversor_estrategico_actualizado(usuario_id):
+        """Verificar si realizó más de 20 simulaciones de portafolio"""
+        db = get_db_connection()
+        query = """
+        SELECT COUNT(*) as count
+        FROM Simulaciones s
+        WHERE s.usuario_id = %s AND s.tipo_simulacion = 'PORTAFOLIO'
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id,), fetch=True)
+            count = result[0]['count'] if result else 0
+            return count >= 20
+        except Exception as e:
+            print(f"Error verificando inversor estratégico actualizado: {e}")
+            return False
+        finally:
+            db.disconnect()
+
+    @staticmethod
+    def _verificar_maestro_finanzas(usuario_id):
+        """Verificar si realizó todos los tipos de simulación (VAN, TIR, WACC, PORTAFOLIO)"""
+        db = get_db_connection()
+        query = """
+        SELECT COUNT(DISTINCT tipo_simulacion) as tipos_diferentes
+        FROM Simulaciones s
+        WHERE s.usuario_id = %s AND s.tipo_simulacion IN ('VAN', 'TIR', 'WACC', 'PORTAFOLIO')
+        """
+        try:
+            db.connect()
+            result = db.execute_query(query, (usuario_id,), fetch=True)
+            tipos = result[0]['tipos_diferentes'] if result else 0
+            return tipos >= 4  # Todos los 4 tipos diferentes
+        except Exception as e:
+            print(f"Error verificando maestro de finanzas: {e}")
             return False
         finally:
             db.disconnect()
@@ -410,78 +508,123 @@ class GamificationService:
     @staticmethod
     def _calcular_progreso_insignia(usuario_id, nombre_insignia):
         """Calcular el progreso hacia una insignia específica"""
-        if nombre_insignia == 'Primeros Pasos':
-            return 100 if GamificationService._verificar_primera_simulacion(usuario_id) else 0
+        try:
+            if nombre_insignia == 'Primeros Pasos':
+                return 100 if GamificationService._verificar_primera_simulacion(usuario_id) else 0
 
-        elif nombre_insignia == 'Analista Novato':
-            count = Simulacion.contar_simulaciones_usuario(usuario_id)
-            return round(min(count / 5 * 100, 100))
+            elif nombre_insignia == 'Analista Novato':
+                count = Simulacion.contar_simulaciones_usuario(usuario_id)
+                return round(min(count / 5 * 100, 100))
 
-        elif nombre_insignia == 'Analista Avanzado':
-            count = Simulacion.contar_simulaciones_usuario(usuario_id)
-            return round(min(count / 25 * 100, 100))
+            elif nombre_insignia == 'Analista Avanzado':
+                count = Simulacion.contar_simulaciones_usuario(usuario_id)
+                return round(min(count / 25 * 100, 100))
 
-        elif nombre_insignia == 'Experto en VAN':
-            db = get_db_connection()
-            query = """
-            SELECT COUNT(*) as count
-            FROM Resultados r
-            JOIN Simulaciones s ON r.simulacion_id = s.simulacion_id
-            WHERE s.usuario_id = %s AND r.indicador = 'VAN'
-            """
-            try:
-                db.connect()
-                result = db.execute_query(query, (usuario_id,), fetch=True)
-                if result:
-                    count = result[0]['count']
+            elif nombre_insignia == 'Experto en VAN':
+                # Contar simulaciones VAN guardadas
+                db = get_db_connection()
+                query = """
+                SELECT COUNT(*) as count
+                FROM Simulaciones s
+                WHERE s.usuario_id = %s AND s.tipo_simulacion = 'VAN'
+                """
+                try:
+                    db.connect()
+                    result = db.execute_query(query, (usuario_id,), fetch=True)
+                    count = result[0]['count'] if result else 0
                     return round(min(count / 10 * 100, 100))
+                except Exception as e:
+                    print(f"Error calculando progreso Experto VAN: {e}")
+                    return 0
+                finally:
+                    db.disconnect()
+
+            elif nombre_insignia == 'Benchmarking Explorer':
+                grupos = Usuario_Benchmarking.obtener_grupos_usuario(usuario_id)
+                return 100 if len(grupos) > 0 else 0
+
+            elif nombre_insignia == 'Benchmarking Experto':
+                grupos = Usuario_Benchmarking.obtener_grupos_usuario(usuario_id)
+                if grupos:
+                    # Contar análisis realizados en los grupos
+                    total_analisis = sum(len(grupo.get('analisis', [])) for grupo in grupos)
+                    return round(min(total_analisis / 15 * 100, 100))
                 return 0
-            except Exception as e:
-                print(f"Error calculando progreso Experto VAN: {e}")
-                return 0
-            finally:
-                db.disconnect()
 
-        elif nombre_insignia == 'Benchmarking Explorer':
-            grupos = Usuario_Benchmarking.obtener_grupos_usuario(usuario_id)
-            return 100 if len(grupos) > 0 else 0
-
-        elif nombre_insignia == 'Benchmarking Experto':
-            grupos = Usuario_Benchmarking.obtener_grupos_usuario(usuario_id)
-            return round(min(len(grupos) / 15 * 100, 100))
-
-        elif nombre_insignia == 'Inversor Estratégico':
-            db = get_db_connection()
-            query = """
-            SELECT COUNT(*) as count
-            FROM Resultados r
-            JOIN Simulaciones s ON r.simulacion_id = s.simulacion_id
-            WHERE s.usuario_id = %s AND r.indicador = 'Portafolio'
-            """
-            try:
-                db.connect()
-                result = db.execute_query(query, (usuario_id,), fetch=True)
-                if result:
-                    count = result[0]['count']
+            elif nombre_insignia == 'Inversor Estratégico':
+                # Contar simulaciones de portafolio
+                db = get_db_connection()
+                query = """
+                SELECT COUNT(*) as count
+                FROM Simulaciones s
+                WHERE s.usuario_id = %s AND s.tipo_simulacion = 'PORTAFOLIO'
+                """
+                try:
+                    db.connect()
+                    result = db.execute_query(query, (usuario_id,), fetch=True)
+                    count = result[0]['count'] if result else 0
                     return round(min(count / 20 * 100, 100))
-                return 0
-            except Exception as e:
-                print(f"Error calculando progreso Inversor Estratégico: {e}")
-                return 0
-            finally:
-                db.disconnect()
+                except Exception as e:
+                    print(f"Error calculando progreso Inversor Estratégico: {e}")
+                    return 0
+                finally:
+                    db.disconnect()
 
-        # Para insignias que no tienen progreso calculable, devolver 0 (no mostrar en próximos logros)
-        return 0
+            elif nombre_insignia == 'Maestro TIR':
+                # Contar simulaciones TIR
+                db = get_db_connection()
+                query = """
+                SELECT COUNT(*) as count
+                FROM Simulaciones s
+                WHERE s.usuario_id = %s AND s.tipo_simulacion = 'TIR'
+                """
+                try:
+                    db.connect()
+                    result = db.execute_query(query, (usuario_id,), fetch=True)
+                    count = result[0]['count'] if result else 0
+                    return round(min(count / 15 * 100, 100))
+                except Exception as e:
+                    print(f"Error calculando progreso Maestro TIR: {e}")
+                    return 0
+                finally:
+                    db.disconnect()
+
+            elif nombre_insignia == 'Maestro de Finanzas':
+                # Requiere múltiples tipos de simulaciones
+                db = get_db_connection()
+                query = """
+                SELECT COUNT(DISTINCT tipo_simulacion) as tipos_diferentes
+                FROM Simulaciones s
+                WHERE s.usuario_id = %s AND s.tipo_simulacion IN ('VAN', 'TIR', 'WACC', 'PORTAFOLIO')
+                """
+                try:
+                    db.connect()
+                    result = db.execute_query(query, (usuario_id,), fetch=True)
+                    tipos = result[0]['tipos_diferentes'] if result else 0
+                    return round(min(tipos / 4 * 100, 100))  # 4 tipos diferentes
+                except Exception as e:
+                    print(f"Error calculando progreso Maestro de Finanzas: {e}")
+                    return 0
+                finally:
+                    db.disconnect()
+
+            # Para insignias sin progreso calculable, devolver 0
+            return 0
+
+        except Exception as e:
+            print(f"Error general calculando progreso para {nombre_insignia}: {e}")
+            return 0
 
     @staticmethod
     def obtener_actividad_reciente(usuario_id, limite=5):
         """Obtener actividad reciente del usuario"""
         actividades = []
 
-        # Obtener insignias recientes
+        # Obtener insignias recientes (últimas 5)
         insignias_recientes = Usuario_Insignia.obtener_insignias_usuario(usuario_id)
-        for item in insignias_recientes[-limite:]:
+        insignias_mostrar = insignias_recientes[-limite:] if len(insignias_recientes) > limite else insignias_recientes
+
+        for item in insignias_mostrar:
             fecha = item['fecha_obtenida']
             if hasattr(fecha, 'strftime'):
                 tiempo_str = fecha.strftime('%Y-%m-%d %H:%M:%S')
@@ -489,20 +632,21 @@ class GamificationService:
                 tiempo_str = str(fecha)
             actividades.append({
                 'descripcion': f'Obtuviste la insignia "{item["insignia"]["nombre_insig"]}"',
-                'puntos': '+100',
+                'puntos': '+10',  # Corregido: 10 puntos por insignia
                 'tiempo': tiempo_str,
                 'icono': 'medal',
                 'color': 'bg-green-100 text-green-600'
             })
 
-        # Obtener simulaciones recientes
+        # Obtener simulaciones recientes (máximo 5 adicionales)
         db = get_db_connection()
         query = """
-        SELECT s.fecha_creacion, COUNT(r.resultado_id) as num_calculos
+        SELECT s.fecha_creacion, s.tipo_simulacion,
+               COUNT(r.resultado_id) as num_calculos
         FROM Simulaciones s
         LEFT JOIN Resultados r ON s.simulacion_id = r.simulacion_id
         WHERE s.usuario_id = %s
-        GROUP BY s.simulacion_id, s.fecha_creacion
+        GROUP BY s.simulacion_id, s.fecha_creacion, s.tipo_simulacion
         ORDER BY s.fecha_creacion DESC
         LIMIT %s
         """
@@ -512,13 +656,14 @@ class GamificationService:
             if result:
                 for row in result:
                     fecha = row['fecha_creacion']
+                    tipo = row['tipo_simulacion'] or 'General'
                     if hasattr(fecha, 'strftime'):
                         tiempo_str = fecha.strftime('%Y-%m-%d %H:%M:%S')
                     else:
                         tiempo_str = str(fecha)
                     actividades.append({
-                        'descripcion': f'Completaste una simulación financiera',
-                        'puntos': '+25',
+                        'descripcion': f'Completaste simulación: {tipo.upper()}',
+                        'puntos': '+5',  # Corregido: 5 puntos por simulación
                         'tiempo': tiempo_str,
                         'icono': 'calculator',
                         'color': 'bg-blue-100 text-blue-600'

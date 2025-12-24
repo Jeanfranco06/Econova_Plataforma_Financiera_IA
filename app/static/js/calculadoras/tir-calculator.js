@@ -40,11 +40,6 @@ class TIRCalculator {
         // Mostrar resultados
         this.mostrarResultadosTIRProfesional(resultado, datos);
 
-        // Crear tabla de convergencia si está solicitada
-        if (datos.mostrarConvergencia && resultado.convergencia) {
-            this.crearTablaConvergenciaTIR(resultado.convergencia);
-        }
-
         // Crear gráfico de sensibilidad si está solicitado
         if (datos.analisisSensibilidad && typeof Chart !== 'undefined') {
             this.crearGraficoSensibilidadTIR(datos, resultado);
@@ -429,6 +424,29 @@ class TIRCalculator {
             </div>
             ` : ''}
 
+            ${datos.analisisSensibilidad ? `
+            <!-- Análisis de Sensibilidad -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-2 text-green-600"></i>
+                Análisis de Sensibilidad - TIR vs Variación en Flujos
+              </h5>
+
+              <div class="mb-4">
+                <canvas id="grafico-tir-sensibilidad" width="400" height="200"></canvas>
+              </div>
+
+              <div class="bg-green-50 p-4 rounded-lg">
+                <h6 class="font-semibold text-green-800 mb-2">Interpretación</h6>
+                <p class="text-green-700 text-sm">
+                  El gráfico muestra cómo cambia la TIR cuando varían los flujos de caja operativos.
+                  Una pendiente pronunciada indica alta sensibilidad a cambios en los ingresos/egresos.
+                  ${resultado.sensibilidad ? `Rango analizado: ${Math.min(...resultado.sensibilidad.map(s => s.variacion))}% - ${Math.max(...resultado.sensibilidad.map(s => s.variacion))}%` : ''}
+                </p>
+              </div>
+            </div>
+            ` : ''}
+
             <!-- TIR Formula Explanation -->
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200 mb-6">
               <h5 class="font-bold text-gray-800 mb-4 flex items-center">
@@ -468,6 +486,13 @@ class TIRCalculator {
 
         resultsDiv.innerHTML = html;
         resultsDiv.style.display = 'block';
+
+        // Poblar tabla de convergencia si hay datos
+        if (datos.mostrarConvergencia && resultado.convergencia) {
+            setTimeout(() => {
+                this.crearTablaConvergenciaTIR(resultado.convergencia);
+            }, 10);
+        }
 
         // Scroll to results
         resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

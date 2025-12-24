@@ -4,21 +4,21 @@
 
 {% block content %}
 <!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
+<div class="border-b" style="background: var(--color-card-bg); border-color: var(--color-border);">
   <div class="container mx-auto px-6 py-8">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Sistema de Gamificación</h1>
-        <p class="text-gray-600">Gana puntos, desbloquea insignias y compite con otros usuarios</p>
+        <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">Sistema de Gamificación</h1>
+        <p style="color: var(--color-text-secondary);">Gana puntos, desbloquea insignias y compite con otros usuarios</p>
       </div>
       <div class="hidden md:flex items-center space-x-4">
         <div class="text-center">
-          <div class="text-2xl font-bold text-blue-600" id="puntaje-total">{{ estadisticas.puntaje_total or 0 }}</div>
-          <div class="text-sm text-gray-500">Puntos Totales</div>
+          <div class="text-2xl font-bold" id="puntaje-total" style="color: var(--color-primary);">{{ estadisticas.puntaje_total or 0 }}</div>
+          <div class="text-sm" style="color: var(--color-text-secondary);">Puntos Totales</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-green-600" id="insignias-total">{{ estadisticas.num_insignias or 0 }}</div>
-          <div class="text-sm text-gray-500">Insignias</div>
+          <div class="text-2xl font-bold" id="insignias-total" style="color: var(--color-success);">{{ estadisticas.num_insignias or 0 }}</div>
+          <div class="text-sm" style="color: var(--color-text-secondary);">Insignias</div>
         </div>
       </div>
     </div>
@@ -97,7 +97,7 @@
           <div class="text-4xl font-bold text-purple-600 mb-2" id="nivel-actual">{{ (estadisticas.puntaje_total or 0) // 100 + 1 }}</div>
           <div class="text-sm text-gray-600 mb-3">Nivel</div>
           <div class="bg-gray-200 rounded-full h-3">
-            <div class="bg-purple-600 h-3 rounded-full transition-all duration-500" style="width: {{ ((estadisticas.puntaje_total or 0) % 100) }}%"></div>
+            <div class="bg-purple-600 h-3 rounded-full transition-all duration-500" id="progress-bar" style="width: 0%;"></div>
           </div>
           <div class="text-xs text-gray-500 mt-2">{{ (estadisticas.puntaje_total or 0) % 100 }}/100 puntos para el siguiente nivel</div>
         </div>

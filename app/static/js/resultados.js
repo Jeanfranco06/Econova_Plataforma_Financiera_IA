@@ -293,10 +293,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     let label = key.toUpperCase();
 
                     // Format specific financial metrics
-                    if (key === 'van' && typeof value === 'number') {
+                    if ((key === 'van' || key === 'van_calculado') && typeof value === 'number') {
                         displayValue = `S/ ${value.toLocaleString('es-ES', {maximumFractionDigits: 0})}`;
                         label = 'VAN Calculado';
-                    } else if (key === 'tir' && typeof value === 'number') {
+                    } else if ((key === 'tir' || key === 'tir_calculado') && typeof value === 'number') {
                         displayValue = `${value.toFixed(1)}%`;
                         label = 'TIR';
                     } else if (key === 'wacc_porcentaje' && typeof value === 'number') {
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (key === 'wacc' && typeof value === 'number') {
                         displayValue = `${(value * 100).toFixed(1)}%`;
                         label = 'WACC';
-                    } else if (key === 'payback' && typeof value === 'number') {
+                    } else if ((key === 'payback' || key === 'payback_calculado') && typeof value === 'number') {
                         displayValue = `${value.toFixed(1)} años`;
                         label = 'Periodo Recuperación';
                     } else if (key === 'rendimiento' && typeof value === 'number') {
@@ -512,12 +512,39 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create result cards
             uniqueAnalisis.forEach(analisisItem => {
                 const fecha = new Date(analisisItem.timestamp).toLocaleDateString('es-ES');
-                const tipo = analisisItem.datos ? 'Sectorial' : 'Personalizada';
+                const tipo = analisisItem.tipo === 'personalizado' ? 'Personalizada' : 'Sectorial';
                 const hasCompleteData = analisisItem.analisis || analisisItem.comparacion;
 
                 let resultHTML = '';
 
-                if (analisisItem.analisis) {
+                if (tipo === 'Personalizada' && analisisItem.analisis) {
+                    // Personalized comparison - use analisis data
+                    const stats = analisisItem.analisis;
+                    const numEmpresas = analisisItem.numeroEmpresas || analisisItem.datos?.empresasComparacion?.length || 0;
+                    const numCriterios = analisisItem.numeroCriterios || analisisItem.datos?.criteriosSeleccionados?.length || 0;
+                    const posicionPromedio = analisisItem.posicionPromedio || calcularPosicionPromedioPersonalizada(stats) || 0;
+
+                    resultHTML = `
+                        <div class="grid md:grid-cols-3 gap-4 mb-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-600">${numEmpresas}</div>
+                                <div class="text-sm text-gray-600">Empresas Comparadas</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-pink-600">${numCriterios}</div>
+                                <div class="text-sm text-gray-600">Criterios Analizados</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-indigo-600">${posicionPromedio.toFixed(1)}%</div>
+                                <div class="text-sm text-gray-600">Posición General</div>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h6 class="font-semibold text-purple-800 mb-2">Empresa Base</h6>
+                            <p class="text-purple-700">${analisisItem.empresaBase || analisisItem.datos?.empresaBase?.nombre || 'No disponible'}</p>
+                        </div>
+                    `;
+                } else if (tipo === 'Sectorial' && analisisItem.analisis) {
                     // Sectorial analysis
                     const stats = analisisItem.analisis;
                     resultHTML = `
@@ -541,29 +568,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div><strong>Sector:</strong> ${analisisItem.sector || analisisItem.datos?.sector || 'No disponible'}</div>
                                 <div><strong>Tamaño:</strong> ${analisisItem.tamanoEmpresa || analisisItem.datos?.tamanoEmpresa || 'No disponible'}</div>
                             </div>
-                        </div>
-                    `;
-                } else if (analisisItem.comparacion) {
-                    // Personalized comparison
-                    const comparacion = analisisItem.comparacion;
-                    resultHTML = `
-                        <div class="grid md:grid-cols-3 gap-4 mb-4">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-purple-600">${comparacion.empresas_comparacion.length}</div>
-                                <div class="text-sm text-gray-600">Empresas Comparadas</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-pink-600">${Object.keys(comparacion.resultados).length}</div>
-                                <div class="text-sm text-gray-600">Criterios Analizados</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-indigo-600">${calcularPosicionGeneral(comparacion).toFixed(1)}%</div>
-                                <div class="text-sm text-gray-600">Posición General</div>
-                            </div>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <h6 class="font-semibold text-purple-800 mb-2">Empresa Base</h6>
-                            <p class="text-purple-700">${analisisItem.datos.empresaBase.nombre}</p>
                         </div>
                     `;
                 } else {
@@ -605,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         <div class="flex justify-between items-center mt-4">
                             <div class="text-sm text-gray-500">
-                                ${analisisItem.numeroMetricas || (tipo === 'Sectorial' ? Object.keys(analisisItem.analisis || {}).filter(k => !k.startsWith('_')).length : Object.keys(analisisItem.comparacion?.resultados || {}).length)} métricas analizadas
+                                ${analisisItem.numeroMetricas || analisisItem.numeroCriterios || Object.keys(analisisItem.analisis || {}).filter(k => !k.startsWith('_')).length} métricas analizadas
                             </div>
                         </div>
                     </div>
@@ -660,7 +664,87 @@ document.addEventListener('DOMContentLoaded', function() {
             let modalContent = '';
             const fecha = new Date(analisis.timestamp).toLocaleDateString('es-ES');
 
-            if (analisis.analisis) {
+            if (analisis.tipo === 'personalizado' && analisis.analisis) {
+                // Personalized comparison details
+                const stats = analisis.analisis;
+                modalContent = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Detalles de la Comparación Personalizada</h2>
+                    <div class="space-y-6">
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-purple-800 mb-2">Información General</h3>
+                            <p class="text-purple-700"><strong>Fecha:</strong> ${fecha}</p>
+                            <p class="text-purple-700"><strong>Empresa Base:</strong> ${analisis.empresaBase || analisis.datos?.empresaBase?.nombre || 'No disponible'}</p>
+                            <p class="text-purple-700"><strong>Empresas Comparadas:</strong> ${analisis.numeroEmpresas || analisis.datos?.empresasComparacion?.length || 0}</p>
+                            <p class="text-purple-700"><strong>Criterios Analizados:</strong> ${analisis.numeroCriterios || analisis.datos?.criteriosSeleccionados?.length || 0}</p>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-4">Resultados por Criterio</h3>
+                            <div class="space-y-4">
+                                ${Object.entries(stats).filter(([metrica, data]) => !metrica.startsWith('_')).map(([metrica, data]) => `
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-gray-800 mb-2">${window.BenchmarkingUtils.nombreMetrica(metrica)}</h4>
+                                        <div class="grid md:grid-cols-4 gap-4">
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-blue-600">${window.BenchmarkingUtils.formatearValor(metrica, data.valor_base)}</div>
+                                                <div class="text-xs text-gray-600">Tu Valor</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-gray-600">${window.BenchmarkingUtils.formatearValor(metrica, data.promedio_comparacion)}</div>
+                                                <div class="text-xs text-gray-600">Promedio</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-green-600">${window.BenchmarkingUtils.formatearValor(metrica, data.maximo_comparacion)}</div>
+                                                <div class="text-xs text-gray-600">Mejor</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold ${window.BenchmarkingUtils.clasePosicion(data.percentil)}">${data.percentil ? data.percentil.toFixed(1) + '%' : 'N/A'}</div>
+                                                <div class="text-xs text-gray-600">Tu Posición</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-sm text-gray-600">
+                                            <span class="font-medium">Ranking:</span> ${data.posicion_relativa?.ranking || 'N/A'}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        ${analisis.insights && analisis.insights.length > 0 ? `
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-4">Insights Automáticos</h3>
+                                <div class="space-y-3">
+                                    ${analisis.insights.map(insight => `
+                                        <div class="border-l-4 p-4 rounded-r-lg ${insight.color === 'green' ? 'border-green-400 bg-green-50' : insight.color === 'yellow' ? 'border-yellow-400 bg-yellow-50' : insight.color === 'blue' ? 'border-blue-400 bg-blue-50' : 'border-purple-400 bg-purple-50'}">
+                                            <h5 class="font-semibold text-gray-800 mb-1">${insight.titulo}</h5>
+                                            <p class="text-sm text-gray-700">${insight.descripcion}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${analisis.recomendaciones && analisis.recomendaciones.length > 0 ? `
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-4">Recomendaciones</h3>
+                                <div class="space-y-3">
+                                    ${analisis.recomendaciones.map(rec => `
+                                        <div class="border-l-4 p-4 rounded-r-lg ${rec.prioridad === 'alta' ? 'border-red-400 bg-red-50' : rec.prioridad === 'media' ? 'border-yellow-400 bg-yellow-50' : 'border-blue-400 bg-blue-50'}">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <h5 class="font-semibold text-gray-800">${rec.titulo}</h5>
+                                                <span class="px-2 py-1 text-xs rounded-full ${rec.prioridad === 'alta' ? 'bg-red-100 text-red-800' : rec.prioridad === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                                                    ${rec.prioridad.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-gray-700">${rec.descripcion}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else if (analisis.analisis) {
                 // Sectorial analysis details
                 const stats = analisis.analisis;
                 modalContent = `
@@ -678,57 +762,18 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="space-y-4">
                                 ${Object.entries(stats).filter(([metrica, data]) => !metrica.startsWith('_')).map(([metrica, data]) => `
                                     <div class="bg-gray-50 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-gray-800 mb-2">${BenchmarkingUtils.nombreMetrica(metrica)}</h4>
+                                        <h4 class="font-semibold text-gray-800 mb-2">${window.BenchmarkingUtils.nombreMetrica(metrica)}</h4>
                                         <div class="grid md:grid-cols-3 gap-4">
                                             <div class="text-center">
-                                                <div class="text-lg font-bold text-blue-600">${BenchmarkingUtils.formatearValor(metrica, data.valor_empresa)}</div>
+                                                <div class="text-lg font-bold text-blue-600">${window.BenchmarkingUtils.formatearValor(metrica, data.valor_empresa)}</div>
                                                 <div class="text-xs text-gray-600">Tu Valor</div>
                                             </div>
                                             <div class="text-center">
-                                                <div class="text-lg font-bold text-gray-600">${BenchmarkingUtils.formatearValor(metrica, data.promedio_sector)}</div>
+                                                <div class="text-lg font-bold text-gray-600">${window.BenchmarkingUtils.formatearValor(metrica, data.promedio_sector)}</div>
                                                 <div class="text-xs text-gray-600">Promedio Sector</div>
                                             </div>
                                             <div class="text-center">
-                                                <div class="text-lg font-bold ${data.posicion_relativa && data.posicion_relativa.percentil >= 75 ? 'text-green-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 50 ? 'text-blue-600' : data.posicion_relativa && data.posicion_relativa.percentil >= 25 ? 'text-yellow-600' : 'text-red-600'}">${formatearPercentilBenchmarking(data.posicion_relativa?.percentil)}</div>
-                                                <div class="text-xs text-gray-600">Tu Posición</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (analisis.comparacion) {
-                // Personalized comparison details
-                const comparacion = analisis.comparacion;
-                modalContent = `
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Detalles de la Comparación Personalizada</h2>
-                    <div class="space-y-6">
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <h3 class="font-semibold text-purple-800 mb-2">Información General</h3>
-                            <p class="text-purple-700"><strong>Fecha:</strong> ${fecha}</p>
-                            <p class="text-purple-700"><strong>Empresa Base:</strong> ${analisis.datos.empresaBase.nombre}</p>
-                            <p class="text-purple-700"><strong>Empresas Comparadas:</strong> ${comparacion.empresas_comparacion.length}</p>
-                        </div>
-
-                        <div>
-                            <h3 class="font-semibold text-gray-800 mb-4">Resultados por Criterio</h3>
-                            <div class="space-y-4">
-                                ${Object.entries(comparacion.resultados).map(([criterio, data]) => `
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-gray-800 mb-2">${BenchmarkingUtils.nombreMetrica(criterio)}</h4>
-                                        <div class="grid md:grid-cols-3 gap-4">
-                                            <div class="text-center">
-                                                <div class="text-lg font-bold text-blue-600">${BenchmarkingUtils.formatearValor(criterio, data.valor_base)}</div>
-                                                <div class="text-xs text-gray-600">Tu Valor</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-lg font-bold text-gray-600">${BenchmarkingUtils.formatearValor(criterio, data.promedio_comparacion)}</div>
-                                                <div class="text-xs text-gray-600">Promedio Comparación</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-lg font-bold ${data.posicion === 'Mejor' ? 'text-green-600' : data.posicion === 'Superior' ? 'text-blue-600' : data.posicion === 'Promedio' ? 'text-yellow-600' : 'text-red-600'}">${data.posicion}</div>
+                                                <div class="text-lg font-bold ${window.BenchmarkingUtils.clasePosicion(data.posicion_relativa?.percentil)}">${window.BenchmarkingUtils.formatearPercentil(data.posicion_relativa?.percentil)}</div>
                                                 <div class="text-xs text-gray-600">Tu Posición</div>
                                             </div>
                                         </div>
@@ -843,6 +888,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return posiciones.reduce((sum, p) => sum + p, 0) / posiciones.length;
     }
 
+    function calcularPosicionPromedioPersonalizada(analisis) {
+        if (!analisis || typeof analisis !== 'object') return 0;
+
+        // Filtrar solo las métricas reales (excluir metadatos que empiezan con _)
+        const metricasReales = Object.entries(analisis)
+            .filter(([key, value]) => !key.startsWith('_') && value && typeof value === 'object' && value.percentil !== undefined);
+
+        const percentiles = metricasReales
+            .map(([key, stats]) => stats?.percentil)
+            .filter(percentil => typeof percentil === 'number' && !isNaN(percentil));
+
+        if (percentiles.length === 0) return 0;
+
+        const promedio = percentiles.reduce((sum, p) => sum + p, 0) / percentiles.length;
+        return isNaN(promedio) ? 0 : promedio;
+    }
+
     // Function to setup event listeners for benchmarking detail buttons
     function setupBenchmarkingDetailListeners() {
         console.log('🎯 Configurando listeners para botones de benchmarking');
@@ -894,4 +956,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return percentil.toFixed(1) + '%';
     }
+
+    // Global utility functions for benchmarking formatting
+    window.BenchmarkingUtils = {
+        nombreMetrica: function(metrica) {
+            const nombres = {
+                'ingresos': 'ingresos',
+                'margen_beneficio': 'margen de beneficio',
+                'roi': 'retorno sobre inversión',
+                'empleados': 'número de empleados',
+                'crecimiento': 'tasa de crecimiento',
+                'endeudamiento': 'nivel de endeudamiento'
+            };
+            return nombres[metrica] || metrica;
+        },
+
+        formatearValor: function(metrica, valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return 'N/A';
+
+            if (metrica.includes('margen') || metrica.includes('roi') || metrica.includes('crecimiento') || metrica.includes('endeudamiento')) {
+                const num = parseFloat(valor);
+                return num > 1 ? num.toFixed(2) + '%' : (num * 100).toFixed(2) + '%';
+            }
+            if (metrica === 'ingresos') return 'S/ ' + parseFloat(valor).toLocaleString('es-PE');
+            if (metrica === 'empleados') return Math.round(parseFloat(valor)).toString();
+            return parseFloat(valor).toFixed(2);
+        },
+
+        clasePosicion: function(percentil) {
+            if (percentil >= 75) return 'text-green-600';
+            if (percentil >= 50) return 'text-blue-600';
+            if (percentil >= 25) return 'text-yellow-600';
+            return 'text-red-600';
+        },
+
+        formatearPercentil: function(percentil) {
+            if (percentil === null || percentil === undefined || isNaN(percentil)) {
+                return '0.0%';
+            }
+            return percentil.toFixed(1) + '%';
+        }
+    };
 });

@@ -38,6 +38,11 @@ class VANCalculator {
         // Calcular VAN con análisis completo
         const resultado = this.calcularVANCompleto(datos);
 
+        // Crear análisis de riesgo si solicitado (antes de mostrar resultados)
+        if (datos.incluirRiesgo) {
+            resultado.riesgo = this.analizarRiesgoVAN(datos, resultado);
+        }
+
         // Mostrar resultados
         this.mostrarResultadosVANProfesional(resultado, datos);
 
@@ -69,7 +74,7 @@ class VANCalculator {
         const { flujos, tasaDescuento, inversion } = datos;
         const tasaDecimal = tasaDescuento / 100;
 
-        let van = 0;
+        let van = -inversion; // VAN = -inversión inicial + flujos descontados
         let vanAcumulado = -inversion;
         const detalleFlujos = [];
 
@@ -121,25 +126,25 @@ class VANCalculator {
             inversion: inversion,
             horizonte: flujos.length,
             // Análisis de sensibilidad si solicitado
-            sensibilidad: datos.incluirSensibilidad ? this.analizarSensibilidadVAN(flujos, tasaDescuento, 10) : null
+            sensibilidad: datos.incluirSensibilidad ? this.analizarSensibilidadVAN(flujos, tasaDescuento, 10, inversion) : null
         };
     }
 
     /**
      * Analiza sensibilidad del VAN
      */
-    analizarSensibilidadVAN(flujos, tasaBase, rango) {
+    analizarSensibilidadVAN(flujos, tasaBase, rango, inversion = 0) {
         const sensibilidades = [];
         const pasos = 20;
 
         for (let i = -rango; i <= rango; i += (rango * 2) / pasos) {
             const tasaActual = tasaBase + i;
             if (tasaActual >= 0) {
-                let vanSensibilidad = 0;
+                let vanSensibilidad = -inversion; // Incluir inversión inicial
                 const tasaDecimal = tasaActual / 100;
 
                 for (let j = 0; j < flujos.length; j++) {
-                    vanSensibilidad += flujos[j] / Math.pow(1 + tasaDecimal, j);
+                    vanSensibilidad += flujos[j] / Math.pow(1 + tasaDecimal, j + 1); // +1 porque el flujo 0 es la inversión
                 }
 
                 sensibilidades.push({
@@ -282,6 +287,103 @@ class VANCalculator {
                 <div class="text-sm text-gray-600">Horizonte de Análisis</div>
               </div>
             </div>
+
+            ${datos.incluirSensibilidad ? `
+            <!-- Análisis de Sensibilidad -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-2 text-blue-600"></i>
+                Análisis de Sensibilidad - VAN vs Tasa de Descuento
+              </h5>
+
+              <div class="mb-4">
+                <canvas id="grafico-van-sensibilidad" width="400" height="200"></canvas>
+              </div>
+
+              <div class="bg-blue-50 p-4 rounded-lg">
+                <h6 class="font-semibold text-blue-800 mb-2">Interpretación</h6>
+                <p class="text-blue-700 text-sm">
+                  El gráfico muestra cómo cambia el VAN cuando varía la tasa de descuento.
+                  Una pendiente pronunciada indica alta sensibilidad a cambios en la tasa de descuento.
+                  ${resultado.sensibilidad ? `Rango analizado: ${(Math.min(...resultado.sensibilidad.map(s => s.tasa)))}% - ${(Math.max(...resultado.sensibilidad.map(s => s.tasa)))}%` : ''}
+                </p>
+              </div>
+            </div>
+            ` : ''}
+
+            ${datos.incluirRiesgo && resultado.riesgo ? `
+            <!-- Evaluación de Riesgo -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
+                Evaluación de Riesgo del Proyecto
+              </h5>
+
+              <!-- Nivel de Riesgo Principal -->
+              <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-medium text-gray-800">Nivel de Riesgo:</span>
+                  <span class="px-3 py-1 rounded-full text-sm font-semibold ${resultado.riesgo.nivelRiesgoColor} bg-current">
+                    ${resultado.riesgo.nivelRiesgo}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-600">${resultado.riesgo.nivelRiesgoTexto}</p>
+              </div>
+
+              <!-- Métricas de Riesgo -->
+              <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+                  <div class="text-lg font-bold text-red-600 mb-1">${FinancialUtils.formatearMoneda(resultado.riesgo.volatilidad)}</div>
+                  <div class="text-sm text-gray-600">Volatilidad (Desv. Estándar)</div>
+                  <div class="text-xs text-gray-500 mt-1">${resultado.riesgo.volatilidadRelativa.toFixed(1)}% relativo</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+                  <div class="text-lg font-bold text-purple-600 mb-1">${FinancialUtils.formatearMoneda(resultado.riesgo.var95)}</div>
+                  <div class="text-sm text-gray-600">Value at Risk (VaR 95%)</div>
+                  <div class="text-xs text-gray-500 mt-1">Pérdida máxima estimada</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 text-center">
+                  <div class="text-lg font-bold text-indigo-600 mb-1">${resultado.riesgo.escenarios.length}</div>
+                  <div class="text-sm text-gray-600">Escenarios Analizados</div>
+                  <div class="text-xs text-gray-500 mt-1">Optimista, Base, Pesimista</div>
+                </div>
+              </div>
+
+              <!-- Escenarios de Riesgo -->
+              <div class="mb-6">
+                <h6 class="font-semibold text-gray-800 mb-3">Análisis por Escenarios</h6>
+                <div class="space-y-3">
+                  ${resultado.riesgo.escenarios.map(escenario => `
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium ${escenario.color}">${escenario.nombre}</span>
+                        <span class="font-bold ${escenario.van >= 0 ? 'text-green-600' : 'text-red-600'}">
+                          ${FinancialUtils.formatearMoneda(escenario.van)}
+                        </span>
+                      </div>
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Variación: ${escenario.variacion >= 0 ? '+' : ''}${escenario.variacion.toFixed(1)}%</span>
+                        <span class="text-gray-600">Flujos: ${escenario.factor === 1.0 ? 'Base' : escenario.factor > 1.0 ? '+' + Math.round(((escenario.factor - 1) * 100) * 100) / 100 + '%' : Math.round(((escenario.factor - 1) * 100) * 100) / 100 + '%'}</span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Recomendaciones -->
+              <div class="bg-orange-50 p-4 rounded-lg">
+                <h6 class="font-semibold text-orange-800 mb-2 flex items-center">
+                  <i class="fas fa-lightbulb mr-2"></i>
+                  Recomendaciones de Gestión de Riesgo
+                </h6>
+                <ul class="text-orange-700 text-sm space-y-1">
+                  ${resultado.riesgo.recomendaciones.map(rec => `<li>• ${rec}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+            ` : ''}
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -430,6 +532,106 @@ class VANCalculator {
      */
     actualizarSimulacionTiempoReal(input) {
         UIUtils.actualizarSimulacionTiempoReal(input);
+    }
+
+    /**
+     * Analiza riesgo del VAN basado en variabilidad de flujos y escenarios
+     */
+    analizarRiesgoVAN(datos, resultado) {
+        const { flujos, tasaDescuento, inversion } = datos;
+        const tasaDecimal = tasaDescuento / 100;
+
+        // Calcular VAN base
+        const vanBase = resultado.van;
+
+        // Escenarios de riesgo: optimista (+20%), base, pesimista (-20%)
+        const escenarios = [
+            { nombre: 'Optimista', factor: 1.2, color: 'text-green-600' },
+            { nombre: 'Base', factor: 1.0, color: 'text-blue-600' },
+            { nombre: 'Pesimista', factor: 0.8, color: 'text-red-600' }
+        ];
+
+        const analisisEscenarios = escenarios.map(escenario => {
+            const flujosAjustados = flujos.map(flujo => flujo * escenario.factor);
+            let vanEscenario = -inversion;
+
+            for (let i = 0; i < flujosAjustados.length; i++) {
+                vanEscenario += flujosAjustados[i] / Math.pow(1 + tasaDecimal, i + 1);
+            }
+
+            return {
+                ...escenario,
+                van: vanEscenario,
+                variacion: Math.round((((vanEscenario - vanBase) / Math.abs(vanBase)) * 100) * 100) / 100 // Redondear a 2 decimales
+            };
+        });
+
+        // Calcular volatilidad (desviación estándar de escenarios)
+        const vans = analisisEscenarios.map(e => e.van);
+        const promedio = vans.reduce((a, b) => a + b, 0) / vans.length;
+        const varianza = vans.reduce((a, b) => a + Math.pow(b - promedio, 2), 0) / vans.length;
+        const volatilidad = Math.sqrt(varianza);
+
+        // Calcular Value at Risk (VaR) aproximado (percentil 5% de escenarios)
+        const vansOrdenados = [...vans].sort((a, b) => a - b);
+        const var95 = vansOrdenados[Math.floor(vansOrdenados.length * 0.05)];
+
+        // Clasificar nivel de riesgo
+        let nivelRiesgo, nivelRiesgoColor, nivelRiesgoTexto;
+        const volatilidadRelativa = volatilidad / Math.abs(vanBase);
+
+        if (volatilidadRelativa < 0.1) {
+            nivelRiesgo = 'Bajo';
+            nivelRiesgoColor = 'text-green-600';
+            nivelRiesgoTexto = 'Riesgo bajo. El proyecto es relativamente estable.';
+        } else if (volatilidadRelativa < 0.3) {
+            nivelRiesgo = 'Moderado';
+            nivelRiesgoColor = 'text-yellow-600';
+            nivelRiesgoTexto = 'Riesgo moderado. Considerar estrategias de mitigación.';
+        } else {
+            nivelRiesgo = 'Alto';
+            nivelRiesgoColor = 'text-red-600';
+            nivelRiesgoTexto = 'Riesgo alto. Requiere análisis más detallado y mitigación.';
+        }
+
+        return {
+            escenarios: analisisEscenarios,
+            volatilidad: volatilidad,
+            volatilidadRelativa: volatilidadRelativa * 100,
+            var95: var95,
+            nivelRiesgo: nivelRiesgo,
+            nivelRiesgoColor: nivelRiesgoColor,
+            nivelRiesgoTexto: nivelRiesgoTexto,
+            recomendaciones: this.generarRecomendacionesRiesgo(volatilidadRelativa)
+        };
+    }
+
+    /**
+     * Genera recomendaciones basadas en el nivel de riesgo
+     */
+    generarRecomendacionesRiesgo(volatilidadRelativa) {
+        if (volatilidadRelativa < 0.1) {
+            return [
+                'El proyecto tiene bajo riesgo. Proceder con confianza.',
+                'Monitorear indicadores clave durante la ejecución.',
+                'Considerar diversificación de fuentes de ingresos.'
+            ];
+        } else if (volatilidadRelativa < 0.3) {
+            return [
+                'Implementar planes de contingencia para escenarios adversos.',
+                'Diversificar fuentes de financiamiento.',
+                'Establecer indicadores de alerta temprana.',
+                'Considerar seguros o coberturas contra riesgos.'
+            ];
+        } else {
+            return [
+                'Realizar análisis de sensibilidad más detallado.',
+                'Desarrollar planes de mitigación específicos.',
+                'Considerar postergar o rediseñar el proyecto.',
+                'Evaluar alternativas con menor riesgo.',
+                'Consultar con expertos en gestión de riesgos.'
+            ];
+        }
     }
 
     /**

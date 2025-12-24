@@ -35,6 +35,13 @@ class GamificationManager {
             this.otorgarPuntos('benchmarking_realizado', event.detail);
         });
 
+        document.addEventListener('portafolioOptimizado', (event) => {
+            console.log('🎯 Evento portafolioOptimizado detectado:', event.detail);
+            this.otorgarPuntos('portafolio_optimizado', event.detail);
+            // Forzar actualización inmediata del progreso
+            setTimeout(() => this.actualizarProgresoLogros(), 100);
+        });
+
         document.addEventListener('usuarioRegistrado', (event) => {
             this.otorgarInsignia('primeros_pasos');
             this.mostrarNotificacionBienvenida();
@@ -431,6 +438,7 @@ class GamificationManager {
                 'calculo_financiero': 'cálculo financiero',
                 'simulacion_completada': 'simulación completada',
                 'benchmarking_realizado': 'análisis de benchmarking',
+                'portafolio_optimizado': 'optimización de portafolio',
                 'insignia_obtenida': 'insignia obtenida'
             };
 
@@ -702,6 +710,34 @@ class GamificationManager {
         .catch(error => {
             console.warn('Error marcando notificaciones como leídas:', error);
         });
+    }
+
+    /**
+     * Actualizar progreso de logros inmediatamente
+     */
+    actualizarProgresoLogros() {
+        // Disparar evento para que la página de gamificación se actualice
+        const eventoActualizacion = new CustomEvent('gamificationProgresoActualizado', {
+            detail: {
+                acciones: this.contarTodasLasAcciones(),
+                timestamp: new Date()
+            }
+        });
+        document.dispatchEvent(eventoActualizacion);
+        console.log('📊 Progreso de logros actualizado');
+    }
+
+    /**
+     * Contar todas las acciones del usuario
+     */
+    contarTodasLasAcciones() {
+        const acciones = JSON.parse(localStorage.getItem('econova_acciones') || '{}');
+        return {
+            calculo_financiero: acciones.calculo_financiero || 0,
+            simulacion_completada: acciones.simulacion_completada || 0,
+            benchmarking_realizado: acciones.benchmarking_realizado || 0,
+            portafolio_optimizado: acciones.portafolio_optimizado || 0
+        };
     }
 
     dispararEvento(evento, datos) {

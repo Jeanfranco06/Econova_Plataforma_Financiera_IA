@@ -13,6 +13,8 @@ class PortfolioCalculator {
      * Optimiza portafolio usando teoría moderna de portafolios
      */
     simular(form) {
+        console.log('🚀 Iniciando simulación de portafolio');
+
         const formData = new FormData(form);
         const datos = {
             nombrePortafolio: formData.get('nombre_portafolio') || 'Mi Portafolio',
@@ -21,28 +23,66 @@ class PortfolioCalculator {
             metodoOptimizacion: formData.get('metodo_optimizacion') || 'markowitz',
             objetivo: formData.get('objetivo') || 'max_retorno',
             restriccionRiesgo: parseFloat(formData.get('restriccion_riesgo')) || null,
-            horizonteTiempo: formData.get('horizonte_tiempo') || 'anual'
+            horizonteTiempo: formData.get('horizonte_tiempo') || 'anual',
+            analisisSensibilidad: formData.get('analisis_sensibilidad') === 'on',
+            mostrarFrontera: formData.get('mostrar_frontera') === 'on'
         };
+
+        console.log('📊 Datos parseados:', datos);
 
         // Validar datos con mensajes específicos
         const errores = ValidationUtils.validarDatosPortafolio(datos);
         if (errores.length > 0) {
+            console.error('❌ Errores de validación:', errores);
             ValidationUtils.mostrarErrores(errores, 'portafolio-form');
             return;
         }
+
+        console.log('✅ Validación pasada, calculando portafolio...');
 
         // Mostrar indicador de carga
         UIUtils.mostrarCarga('portafolio-results', 'Optimizando portafolio...');
 
         // Calcular optimización de portafolio
         const resultado = this.optimizarPortafolio(datos);
+        console.log('📈 Resultado del cálculo:', resultado);
 
         // Mostrar resultados
+        console.log('🖥️ Mostrando resultados...');
         this.mostrarResultadosPortafolioProfesional(resultado, datos);
 
-        // Crear gráfico de frontera eficiente si está disponible
+        // Crear gráficos según opciones seleccionadas
+        console.log('Creando gráficos - Chart.js disponible:', typeof Chart !== 'undefined');
+        console.log('Opciones seleccionadas:', { mostrarFrontera: datos.mostrarFrontera, analisisSensibilidad: datos.analisisSensibilidad });
+
         if (typeof Chart !== 'undefined') {
-            this.crearGraficoFronteraEficiente(datos, resultado);
+            // Frontera eficiente (siempre se muestra por defecto)
+            if (datos.mostrarFrontera !== false) {
+                console.log('Creando gráfico de frontera eficiente...');
+                setTimeout(() => {
+                    try {
+                        this.crearGraficoFronteraEficiente(datos, resultado);
+                        console.log('Gráfico de frontera creado exitosamente');
+                    } catch (error) {
+                        console.error('Error creando gráfico de frontera:', error);
+                    }
+                }, 500);
+            }
+
+            // Análisis de sensibilidad si está solicitado
+            if (datos.analisisSensibilidad) {
+                console.log('Creando gráfico de sensibilidad...');
+                setTimeout(() => {
+                    try {
+                        this.crearGraficoSensibilidadPortafolio(datos, resultado);
+                        console.log('Gráfico de sensibilidad creado exitosamente');
+                    } catch (error) {
+                        console.error('Error creando gráfico de sensibilidad:', error);
+                    }
+                }, 1000);
+            }
+        } else {
+            console.error('Chart.js no está disponible. Los gráficos no se mostrarán.');
         }
 
         // Guardar simulación
@@ -336,8 +376,15 @@ class PortfolioCalculator {
      * Muestra resultados de portafolio profesional
      */
     mostrarResultadosPortafolioProfesional(resultado, datos) {
+        console.log('🎨 Generando HTML de resultados de portafolio...');
+
         const resultsDiv = document.getElementById('portafolio-results');
-        if (!resultsDiv) return;
+        if (!resultsDiv) {
+            console.error('❌ No se encontró el elemento portafolio-results');
+            return;
+        }
+
+        console.log('✅ Elemento portafolio-results encontrado');
 
         // Construir HTML completo para resultados profesionales
         const html = `
@@ -488,6 +535,25 @@ class PortfolioCalculator {
               </div>
             </div>
 
+            ${datos.mostrarFrontera ? `
+            <!-- Efficient Frontier Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-2 text-gray-600"></i>
+                Frontera Eficiente - Teoría Moderna de Portafolios
+              </h5>
+
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <canvas id="grafico-portafolio-frontera" width="400" height="200"></canvas>
+              </div>
+
+              <div class="mt-4 text-sm text-gray-600">
+                <p><strong>Frontera Eficiente:</strong> Conjunto de portafolios que ofrecen el máximo retorno esperado para un nivel dado de riesgo.</p>
+                <p><strong>Punto Óptimo:</strong> Portafolio que maximiza el ratio de Sharpe (retorno adicional por unidad de riesgo).</p>
+              </div>
+            </div>
+            ` : ''}
+
             <!-- Teoría Moderna de Portafolios -->
             <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-lg border border-orange-200 mb-6">
               <h5 class="font-bold text-orange-800 mb-4 flex items-center">
@@ -556,6 +622,145 @@ class PortfolioCalculator {
             'riesgo_especifico': 'Mantiene el riesgo dentro de límites aceptables.'
         };
         return descripciones[objetivo] || 'Optimización personalizada según sus preferencias.';
+    }
+
+    /**
+     * Crea gráfico de análisis de sensibilidad
+     */
+    crearGraficoSensibilidadPortafolio(datos, resultado) {
+        if (!resultado.portafolioOptimo || typeof Chart === 'undefined') return;
+
+        // Agregar contenedor para el gráfico de sensibilidad en los resultados
+        const resultsDiv = document.getElementById('portafolio-results');
+        if (!resultsDiv) return;
+
+        // Buscar donde insertar el gráfico de sensibilidad (después del gráfico de frontera)
+        const fronteraSection = resultsDiv.querySelector('.bg-white.p-6.rounded-lg.shadow-sm.border.border-gray-200.mb-6 canvas#grafico-portafolio-frontera');
+        if (!fronteraSection) return;
+
+        const parentSection = fronteraSection.closest('.bg-white.p-6.rounded-lg.shadow-sm.border.border-gray-200.mb-6');
+
+        // Crear sección de sensibilidad
+        const sensibilidadSection = document.createElement('div');
+        sensibilidadSection.className = 'bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6';
+        sensibilidadSection.innerHTML = `
+            <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-2 text-orange-600"></i>
+                Análisis de Sensibilidad - Impacto de Cambios en Rendimientos
+            </h5>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <canvas id="grafico-portafolio-sensibilidad" width="400" height="200"></canvas>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-600">
+                <p><strong>Análisis de Sensibilidad:</strong> Muestra cómo cambia el retorno óptimo del portafolio cuando varían los rendimientos esperados de los activos individuales.</p>
+                <p><strong>Interpretación:</strong> Una pendiente pronunciada indica que el portafolio es muy sensible a cambios en ese activo específico.</p>
+            </div>
+        `;
+
+        parentSection.insertAdjacentElement('afterend', sensibilidadSection);
+
+        // Crear datos de sensibilidad
+        const sensibilidades = this.calcularSensibilidadPortafolio(datos, resultado);
+
+        const ctx = document.getElementById('grafico-portafolio-sensibilidad');
+        if (!ctx) return;
+
+        if (this.graficos.sensibilidad) {
+            this.graficos.sensibilidad.destroy();
+        }
+
+        this.graficos.sensibilidad = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sensibilidades.labels,
+                datasets: sensibilidades.datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sensibilidad del Portafolio a Cambios en Rendimientos'
+                    },
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Variación en Rendimiento (%)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Retorno del Portafolio (%)'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Calcula sensibilidad del portafolio a cambios en rendimientos
+     */
+    calcularSensibilidadPortafolio(datos, resultado) {
+        const variaciones = [-20, -10, -5, 0, 5, 10, 20]; // ±20%
+        const datasets = [];
+
+        // Para cada activo, calcular cómo cambia el retorno óptimo
+        datos.activos.forEach((activo, index) => {
+            const dataPoints = [];
+
+            variaciones.forEach(variacion => {
+                // Crear copia de datos con rendimiento modificado
+                const datosModificados = JSON.parse(JSON.stringify(datos));
+                datosModificados.activos[index].rendimientoEsperado = activo.rendimientoEsperado * (1 + variacion / 100);
+
+                // Recalcular portafolio óptimo
+                const resultadoModificado = this.optimizarPortafolio(datosModificados);
+                const retornoOptimo = resultadoModificado.portafolioOptimo ?
+                    resultadoModificado.portafolioOptimo.retorno * 100 : 0;
+
+                dataPoints.push(retornoOptimo);
+            });
+
+            datasets.push({
+                label: activo.nombre,
+                data: dataPoints,
+                borderColor: this.getColorByIndex(index),
+                backgroundColor: this.getColorByIndex(index, 0.1),
+                tension: 0.4
+            });
+        });
+
+        return {
+            labels: variaciones.map(v => v + '%'),
+            datasets: datasets
+        };
+    }
+
+    /**
+     * Obtiene color basado en índice
+     */
+    getColorByIndex(index, alpha = 1) {
+        const colors = [
+            `rgba(249, 115, 22, ${alpha})`,   // Orange
+            `rgba(16, 185, 129, ${alpha})`,   // Green
+            `rgba(59, 130, 246, ${alpha})`,   // Blue
+            `rgba(168, 85, 247, ${alpha})`,   // Purple
+            `rgba(239, 68, 68, ${alpha})`,    // Red
+            `rgba(245, 158, 11, ${alpha})`,   // Yellow
+            `rgba(6, 182, 212, ${alpha})`,    // Cyan
+            `rgba(236, 72, 153, ${alpha})`    // Pink
+        ];
+        return colors[index % colors.length];
     }
 
     /**
@@ -666,11 +871,11 @@ class PortfolioCalculator {
         const container = document.getElementById('portafolio-activos');
         if (!container) return;
 
-        const existingActivos = container.querySelectorAll('.grid.md\\:grid-cols-3');
+        const existingActivos = container.querySelectorAll('.grid.md\\:grid-cols-4');
         const nextIndex = existingActivos.length + 1;
 
         const newActivoDiv = document.createElement('div');
-        newActivoDiv.className = 'grid md:grid-cols-3 gap-4 items-center';
+        newActivoDiv.className = 'grid md:grid-cols-4 gap-4 items-center';
         newActivoDiv.innerHTML = `
             <div>
                 <input
@@ -703,9 +908,60 @@ class PortfolioCalculator {
                     value="6"
                 >
             </div>
+            <div class="flex items-center justify-center">
+                <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         `;
 
         container.appendChild(newActivoDiv);
+
+        // Agregar event listener al botón de quitar
+        const removeBtn = newActivoDiv.querySelector('.remover-activo');
+        removeBtn.addEventListener('click', () => {
+            this.quitarActivo(newActivoDiv);
+        });
+    }
+
+    /**
+     * Quita un activo del portafolio
+     */
+    quitarActivo(activoDiv) {
+        const container = document.getElementById('portafolio-activos');
+        if (!container) return;
+
+        // No permitir quitar si solo queda un activo
+        const remainingActivos = container.querySelectorAll('.grid.md\\:grid-cols-4');
+        if (remainingActivos.length <= 1) {
+            alert('Debe mantener al menos un activo en el portafolio.');
+            return;
+        }
+
+        activoDiv.remove();
+        this.renumerarActivos();
+    }
+
+    /**
+     * Renumera los activos después de quitar uno
+     */
+    renumerarActivos() {
+        const container = document.getElementById('portafolio-activos');
+        if (!container) return;
+
+        const activoDivs = container.querySelectorAll('.grid.md\\:grid-cols-4');
+
+        activoDivs.forEach((div, index) => {
+            const inputs = div.querySelectorAll('input');
+            const indexActual = index + 1;
+
+            // Actualizar nombres de los inputs
+            if (inputs.length >= 3) {
+                inputs[0].name = `activo${indexActual}`;
+                inputs[1].name = `peso${indexActual}`;
+                inputs[2].name = `rendimiento${indexActual}`;
+            }
+        });
     }
 
     /**

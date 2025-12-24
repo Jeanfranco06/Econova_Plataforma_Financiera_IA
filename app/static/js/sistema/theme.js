@@ -25,8 +25,8 @@ class ThemeManager {
         this.currentTheme = theme;this.storeTheme(theme);// Actualizar clase del body
         document.body.classList.remove('theme-light', 'theme-dark');document.body.classList.add(`theme-${theme}`);// Aplicar estilos CSS variables
         this.setCSSVariables(theme);// Disparar evento de cambio de tema
-        document.dispatchEvent(new CustomEvent('themeChanged', { 
-            detail: { theme: theme } 
+        document.dispatchEvent(new CustomEvent('themeChanged', {
+            detail: { theme: theme }
         }));}
 
     // Establecer variables CSS según el tema

@@ -1,5 +1,8 @@
 <!-- Portfolio Calculator -->
 <div id="portafolio-calculator" class="simulation-calculator" style="display: none;">
+  <!-- Chart.js for Portfolio sensitivity analysis -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <div class="bg-white rounded-2xl shadow-xl p-8">
     <!-- Header with Engineering Economics Context -->
     <div class="flex items-start justify-between mb-6">
@@ -22,10 +25,26 @@
                 La teoría moderna de portafolios de Markowitz busca la combinación óptima de activos que maximice
                 el retorno esperado para un nivel dado de riesgo, o minimice el riesgo para un retorno esperado dado.
               </p>
-            </div>
-          </div>
-        </div>
       </div>
+    </div>
+
+    <!-- Initialize portfolio calculator -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize remove buttons for existing assets
+        const removeButtons = document.querySelectorAll('#portafolio-activos .remover-activo:not([disabled])');
+        removeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const activoDiv = this.closest('.grid.md\\:grid-cols-4');
+            if (window.portfolioCalculator && activoDiv) {
+              window.portfolioCalculator.quitarActivo(activoDiv);
+            }
+          });
+        });
+      });
+    </script>
+  </div>
+</div>
     </div>
 
     <form id="portafolio-form" class="space-y-6">
@@ -112,7 +131,7 @@
         <p class="text-xs text-gray-600 mb-3">Configure los activos con sus pesos actuales y rendimientos esperados</p>
 
         <div id="portafolio-activos" class="space-y-3">
-          <div class="grid md:grid-cols-3 gap-4 items-center">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
             <div>
               <label class="block text-xs text-gray-600 mb-1">Nombre del Activo</label>
               <input
@@ -147,9 +166,14 @@
                 value="12"
               >
             </div>
+            <div class="flex items-center justify-center pt-5">
+              <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-4 items-center">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
             <div>
               <input
                 type="text"
@@ -181,9 +205,14 @@
                 value="10"
               >
             </div>
+            <div class="flex items-center justify-center">
+              <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-4 items-center">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
             <div>
               <input
                 type="text"
@@ -215,9 +244,14 @@
                 value="15"
               >
             </div>
+            <div class="flex items-center justify-center">
+              <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-4 items-center">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
             <div>
               <input
                 type="text"
@@ -249,9 +283,14 @@
                 value="18"
               >
             </div>
+            <div class="flex items-center justify-center">
+              <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-4 items-center">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
             <div>
               <input
                 type="text"
@@ -283,12 +322,18 @@
                 value="5"
               >
             </div>
+            <div class="flex items-center justify-center">
+              <button type="button" class="remover-activo text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </div>
         </div>
 
         <button
           type="button"
           id="add-activo-portafolio"
+          onclick="window.portfolioCalculator.agregarActivo()"
           class="mt-3 text-orange-600 hover:text-orange-800 text-sm font-medium flex items-center"
         >
           <i class="fas fa-plus mr-1"></i>Agregar activo adicional
