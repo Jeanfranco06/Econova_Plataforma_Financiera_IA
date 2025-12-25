@@ -16,9 +16,10 @@ class FinancialUtils {
 
     /**
      * Formatea un número como porcentaje
+     * Espera valores en formato decimal (ej: 0.2586) y los convierte a porcentaje (25.86%)
      */
     static formatearPorcentaje(valor) {
-        return (valor).toFixed(2) + '%';
+        return (valor * 100).toFixed(2) + '%';
     }
 
     /**
@@ -59,13 +60,13 @@ class FinancialUtils {
             }
 
             if (Math.abs(van) < tolerancia) {
-                return tir * 100; // Convertir a porcentaje
+                return tir; // Retornar en formato DECIMAL (ej: 0.2586)
             }
 
             if (Math.abs(derivada) > 1e-10) {
                 const nuevaTir = tir - van / derivada;
                 if (Math.abs(nuevaTir - tir) < tolerancia) {
-                    return nuevaTir * 100;
+                    return nuevaTir; // Retornar en formato DECIMAL
                 }
                 tir = nuevaTir;
             } else {
@@ -115,8 +116,8 @@ class FinancialUtils {
      * Calcula métricas adicionales de VAN
      */
     static calcularMetricasVAN(van, inversion, flujos) {
-        const vanSobreInversion = van / inversion;
-        const roi = (van / inversion) * 100; // Retorno sobre inversión
+        const vanSobreInversion = van / inversion; // En formato DECIMAL
+        const roi = van / inversion; // Retorno sobre inversión en DECIMAL
         const bcr = van > 0 ? (van + inversion) / inversion : 0; // Beneficio-Costo Ratio
 
         return {

@@ -175,16 +175,19 @@ class PortfolioCalculator {
         }
 
         // Calcular métricas adicionales
-        const sharpeRatio = portafolioOptimo ? (portafolioOptimo.retorno - tasaLibreRiesgo / 100) / portafolioOptimo.riesgo : 0;
-        const sortinoRatio = portafolioOptimo ? this.calcularSortinoRatio(portafolioOptimo, tasaLibreRiesgo / 100) : 0;
+        const tasaDecimal = tasaLibreRiesgo / 100;
+        const sharpeRatioActual = (portafolioActual.retorno - tasaDecimal) / portafolioActual.riesgo;
+        const sharpeRatio = portafolioOptimo ? (portafolioOptimo.retorno - tasaDecimal) / portafolioOptimo.riesgo : 0;
+        const sortinoRatio = portafolioOptimo ? this.calcularSortinoRatio(portafolioOptimo, tasaDecimal) : 0;
 
         return {
             portafolioActual: portafolioActual,
             portafolioOptimo: portafolioOptimo,
             fronteraEficiente: portafoliosAleatorios.filter(p => this.esEficiente(p, portafoliosAleatorios)),
+            sharpeRatioActual: sharpeRatioActual,
             sharpeRatio: sharpeRatio,
             sortinoRatio: sortinoRatio,
-            tasaLibreRiesgo: tasaLibreRiesgo / 100,
+            tasaLibreRiesgo: tasaDecimal,
             objetivo: objetivo,
             activos: activos,
             // Análisis de contribución al riesgo
@@ -420,7 +423,7 @@ class PortfolioCalculator {
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600">Ratio Sharpe:</span>
-                    <span class="font-semibold text-blue-600">${resultado.sharpeRatio.toFixed(2)}</span>
+                    <span class="font-semibold text-blue-600">${resultado.sharpeRatioActual.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

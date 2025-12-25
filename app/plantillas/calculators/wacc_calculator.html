@@ -77,6 +77,21 @@
           Estructura de Capital
         </h4>
 
+        <!-- Selector de método de entrada -->
+        <div class="bg-gray-100 p-3 rounded-lg mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">¿Cómo deseas ingresar la estructura de capital?</label>
+          <div class="flex gap-4">
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" name="metodo_estructura" id="metodo-proporciones" value="proporciones" checked class="mr-2">
+              <span class="text-sm">Ingresar proporciones directamente</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" name="metodo_estructura" id="metodo-montos" value="montos" class="mr-2">
+              <span class="text-sm">Ingresar montos de deuda y capital</span>
+            </label>
+          </div>
+        </div>
+
         <div class="grid md:grid-cols-2 gap-6">
           <!-- Debt Component -->
           <div class="bg-red-50 p-4 rounded-lg border border-red-200">
@@ -104,7 +119,23 @@
                 <p class="text-xs text-gray-500 mt-1">Tasa de interés efectiva de la deuda</p>
               </div>
 
-              <div>
+              <!-- Campo para monto de deuda -->
+              <div id="campo-monto-deuda" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Monto de Deuda (S/)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-monto-deuda"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="400000"
+                >
+                <p class="text-xs text-gray-500 mt-1">Valor total de la deuda</p>
+              </div>
+
+              <div id="campo-proporcion-deuda">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                   Proporción de Deuda (%)
                 </label>
@@ -150,7 +181,23 @@
                 <p class="text-xs text-gray-500 mt-1">Costo de equity (CAPM o similar)</p>
               </div>
 
-              <div>
+              <!-- Campo para monto de capital propio -->
+              <div id="campo-monto-capital" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Monto de Capital Propio (S/)
+                </label>
+                <input
+                  type="number"
+                  id="wacc-monto-capital"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="600000"
+                >
+                <p class="text-xs text-gray-500 mt-1">Valor total del capital propio</p>
+              </div>
+
+              <div id="campo-proporcion-capital">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                   Proporción de Capital Propio (%)
                 </label>
@@ -167,6 +214,28 @@
                 >
                 <p class="text-xs text-gray-500 mt-1">Porcentaje de equity en estructura de capital</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen de estructura calculado automáticamente -->
+        <div id="resumen-estructura" class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200" style="display: none;">
+          <h5 class="font-medium text-blue-800 mb-2 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>
+            Estructura Calculada
+          </h5>
+          <div class="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <span class="text-gray-600">Total Capital:</span>
+              <span class="font-semibold text-gray-800 ml-2" id="total-capital-display">S/ 0</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Proporción Deuda:</span>
+              <span class="font-semibold text-red-600 ml-2" id="prop-deuda-calculada">0%</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Proporción Capital:</span>
+              <span class="font-semibold text-green-600 ml-2" id="prop-capital-calculada">0%</span>
             </div>
           </div>
         </div>

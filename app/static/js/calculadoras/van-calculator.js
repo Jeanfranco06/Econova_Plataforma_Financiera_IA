@@ -425,8 +425,8 @@ class VANCalculator {
 
         // Filas de flujos de caja
         detalleFlujos.forEach((flujo, index) => {
-            const vanAcumuladoTotal = -inversion + flujo.vanAcumulado;
-            const claseVAN = vanAcumuladoTotal >= 0 ? 'text-green-600' : 'text-red-600';
+            // flujo.vanAcumulado ya incluye la inversión inicial restada
+            const claseVAN = flujo.vanAcumulado >= 0 ? 'text-green-600' : 'text-red-600';
 
             html += `
                 <tr class="${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
@@ -434,7 +434,7 @@ class VANCalculator {
                     <td class="px-4 py-2 text-right text-gray-700">${FinancialUtils.formatearMoneda(flujo.flujo)}</td>
                     <td class="px-4 py-2 text-right text-gray-600">${flujo.factorDescuento.toFixed(4)}</td>
                     <td class="px-4 py-2 text-right text-gray-700">${FinancialUtils.formatearMoneda(flujo.valorPresente)}</td>
-                    <td class="px-4 py-2 text-right font-bold ${claseVAN}">${FinancialUtils.formatearMoneda(vanAcumuladoTotal)}</td>
+                    <td class="px-4 py-2 text-right font-bold ${claseVAN}">${FinancialUtils.formatearMoneda(flujo.vanAcumulado)}</td>
                 </tr>
             `;
         });

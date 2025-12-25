@@ -7,6 +7,115 @@ class WACCCalculator {
     constructor() {
         this.graficos = {};
         this.simulacionTimeout = null;
+        this.setupEstructuraCapitalListeners();
+    }
+
+    /**
+     * Configura listeners para alternar entre proporciones y montos
+     */
+    setupEstructuraCapitalListeners() {
+        // Listeners para radio buttons
+        const metodoProporciones = document.getElementById('metodo-proporciones');
+        const metodoMontos = document.getElementById('metodo-montos');
+
+        if (metodoProporciones) {
+            metodoProporciones.addEventListener('change', () => {
+                this.mostrarCamposProporciones();
+            });
+        }
+
+        if (metodoMontos) {
+            metodoMontos.addEventListener('change', () => {
+                this.mostrarCamposMontos();
+            });
+        }
+
+        // Listeners para calcular proporciones cuando se ingresan montos
+        const montoDeuda = document.getElementById('wacc-monto-deuda');
+        const montoCapital = document.getElementById('wacc-monto-capital');
+
+        if (montoDeuda) {
+            montoDeuda.addEventListener('input', () => {
+                this.calcularProporcionesDesdeMontos();
+            });
+        }
+
+        if (montoCapital) {
+            montoCapital.addEventListener('input', () => {
+                this.calcularProporcionesDesdeMontos();
+            });
+        }
+    }
+
+    /**
+     * Muestra campos para ingresar proporciones directamente
+     */
+    mostrarCamposProporciones() {
+        // Ocultar campos de montos
+        document.getElementById('campo-monto-deuda').style.display = 'none';
+        document.getElementById('campo-monto-capital').style.display = 'none';
+        document.getElementById('resumen-estructura').style.display = 'none';
+
+        // Mostrar campos de proporciones
+        document.getElementById('campo-proporcion-deuda').style.display = 'block';
+        document.getElementById('campo-proporcion-capital').style.display = 'block';
+
+        // Hacer campos de proporción requeridos
+        document.getElementById('wacc-proporcion-deuda').required = true;
+        document.getElementById('wacc-proporcion-capital').required = true;
+        
+        // Campos de monto no requeridos
+        document.getElementById('wacc-monto-deuda').required = false;
+        document.getElementById('wacc-monto-capital').required = false;
+    }
+
+    /**
+     * Muestra campos para ingresar montos y calcular proporciones
+     */
+    mostrarCamposMontos() {
+        // Mostrar campos de montos
+        document.getElementById('campo-monto-deuda').style.display = 'block';
+        document.getElementById('campo-monto-capital').style.display = 'block';
+        document.getElementById('resumen-estructura').style.display = 'block';
+
+        // Ocultar campos de proporciones
+        document.getElementById('campo-proporcion-deuda').style.display = 'none';
+        document.getElementById('campo-proporcion-capital').style.display = 'none';
+
+        // Hacer campos de monto requeridos
+        document.getElementById('wacc-monto-deuda').required = true;
+        document.getElementById('wacc-monto-capital').required = true;
+        
+        // Campos de proporción no requeridos (se calcularán automáticamente)
+        document.getElementById('wacc-proporcion-deuda').required = false;
+        document.getElementById('wacc-proporcion-capital').required = false;
+    }
+
+    /**
+     * Calcula proporciones automáticamente a partir de montos
+     */
+    calcularProporcionesDesdeMontos() {
+        const montoDeuda = parseFloat(document.getElementById('wacc-monto-deuda').value) || 0;
+        const montoCapital = parseFloat(document.getElementById('wacc-monto-capital').value) || 0;
+        const totalCapital = montoDeuda + montoCapital;
+
+        if (totalCapital > 0) {
+            const propDeuda = (montoDeuda / totalCapital) * 100;
+            const propCapital = (montoCapital / totalCapital) * 100;
+
+            // Actualizar campos ocultos de proporción
+            document.getElementById('wacc-proporcion-deuda').value = propDeuda.toFixed(2);
+            document.getElementById('wacc-proporcion-capital').value = propCapital.toFixed(2);
+
+            // Actualizar resumen visual
+            document.getElementById('total-capital-display').textContent = 'S/ ' + totalCapital.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('prop-deuda-calculada').textContent = propDeuda.toFixed(2) + '%';
+            document.getElementById('prop-capital-calculada').textContent = propCapital.toFixed(2) + '%';
+        } else {
+            document.getElementById('total-capital-display').textContent = 'S/ 0';
+            document.getElementById('prop-deuda-calculada').textContent = '0%';
+            document.getElementById('prop-capital-calculada').textContent = '0%';
+        }
     }
 
     /**
@@ -17,11 +126,11 @@ class WACCCalculator {
         const datos = {
             empresa: formData.get('empresa') || 'Empresa sin nombre',
             sector: formData.get('sector') || 'general',
-            costoDeuda: parseFloat(formData.get('costo_deuda')) || 0,
-            costoCapital: parseFloat(formData.get('costo_capital')) || 0,
-            proporcionDeuda: parseFloat(formData.get('proporcion_deuda')) || 0,
-            proporcionCapital: parseFloat(formData.get('proporcion_capital')) || 0,
-            tasaImpuestos: parseFloat(formData.get('tasa_impuestos')) || 0,
+            costoDeuda: parseFloat(formData.get('costo_deuda')) / 100 || 0,
+            costoCapital: parseFloat(formData.get('costo_capital')) / 100 || 0,
+            proporcionDeuda: parseFloat(formData.get('proporcion_deuda')) / 100 || 0,
+            proporcionCapital: parseFloat(formData.get('proporcion_capital')) / 100 || 0,
+            tasaImpuestos: parseFloat(formData.get('tasa_impuestos')) / 100 || 0,
             escudoFiscal: formData.get('escudo_fiscal') === 'on',
             analisisSensibilidad: formData.get('analisis_sensibilidad') === 'on',
             comparacionSector: formData.get('comparacion_sector') === 'on'
@@ -73,24 +182,24 @@ class WACCCalculator {
         const { costoDeuda, costoCapital, proporcionDeuda, proporcionCapital, tasaImpuestos, escudoFiscal } = datos;
 
         // Calcular costo de deuda después de impuestos
-        const costoDeudaDespuesImpuestos = escudoFiscal ? costoDeuda * (1 - tasaImpuestos / 100) : costoDeuda;
+        const costoDeudaDespuesImpuestos = escudoFiscal ? costoDeuda * (1 - tasaImpuestos) : costoDeuda;
 
         // Calcular WACC
-        const wacc = (proporcionDeuda / 100) * costoDeudaDespuesImpuestos + (proporcionCapital / 100) * costoCapital;
+        const wacc = proporcionDeuda * costoDeudaDespuesImpuestos + proporcionCapital * costoCapital;
 
         // Calcular contribución de cada componente
-        const contribucionDeuda = (proporcionDeuda / 100) * costoDeudaDespuesImpuestos;
-        const contribucionCapital = (proporcionCapital / 100) * costoCapital;
+        const contribucionDeuda = proporcionDeuda * costoDeudaDespuesImpuestos;
+        const contribucionCapital = proporcionCapital * costoCapital;
 
         // Calcular métricas adicionales
         const leverageRatio = proporcionDeuda / proporcionCapital;
-        const taxShieldValue = escudoFiscal ? costoDeuda * (tasaImpuestos / 100) * (proporcionDeuda / 100) : 0;
+        const taxShieldValue = escudoFiscal ? costoDeuda * tasaImpuestos * proporcionDeuda : 0;
 
         // Determinar evaluación del WACC
         const evaluacion = FinancialUtils.evaluarWACC(wacc);
 
         // Calcular WACC sin escudo fiscal para comparación
-        const waccSinEscudo = proporcionDeuda / 100 * costoDeuda + proporcionCapital / 100 * costoCapital;
+        const waccSinEscudo = proporcionDeuda * costoDeuda + proporcionCapital * costoCapital;
         const ahorroFiscal = waccSinEscudo - wacc;
 
         // Análisis de sensibilidad si solicitado
@@ -135,15 +244,15 @@ class WACCCalculator {
             // Variar costo de deuda
             const costoDeudaModificado = datos.costoDeuda * (1 + variacion / 100);
             const costoDeudaDespuesImpuestosMod = datos.escudoFiscal ?
-                costoDeudaModificado * (1 - datos.tasaImpuestos / 100) : costoDeudaModificado;
+                costoDeudaModificado * (1 - datos.tasaImpuestos) : costoDeudaModificado;
 
-            const waccDeuda = (datos.proporcionDeuda / 100) * costoDeudaDespuesImpuestosMod +
-                             (datos.proporcionCapital / 100) * datos.costoCapital;
+            const waccDeuda = datos.proporcionDeuda * costoDeudaDespuesImpuestosMod +
+                             datos.proporcionCapital * datos.costoCapital;
 
             // Variar costo de capital propio
             const costoCapitalModificado = datos.costoCapital * (1 + variacion / 100);
-            const waccCapital = (datos.proporcionDeuda / 100) * datos.costoDeudaDespuesImpuestos +
-                               (datos.proporcionCapital / 100) * costoCapitalModificado;
+            const waccCapital = datos.proporcionDeuda * datos.costoDeudaDespuesImpuestos +
+                               datos.proporcionCapital * costoCapitalModificado;
 
             sensibilidades.push({
                 variacion: variacion,
@@ -162,10 +271,10 @@ class WACCCalculator {
      */
     calcularWACCBase(datos) {
         const costoDeudaDespuesImpuestos = datos.escudoFiscal ?
-            datos.costoDeuda * (1 - datos.tasaImpuestos / 100) : datos.costoDeuda;
+            datos.costoDeuda * (1 - datos.tasaImpuestos) : datos.costoDeuda;
 
-        return (datos.proporcionDeuda / 100) * costoDeudaDespuesImpuestos +
-               (datos.proporcionCapital / 100) * datos.costoCapital;
+        return datos.proporcionDeuda * costoDeudaDespuesImpuestos +
+               datos.proporcionCapital * datos.costoCapital;
     }
 
     /**
@@ -173,14 +282,14 @@ class WACCCalculator {
      */
     obtenerReferenciasSectoriales(sector) {
         const referencias = {
-            energia: { wacc: 8.5, rango: [7.0, 10.0], descripcion: "Energía y Recursos" },
-            manufactura: { wacc: 9.2, rango: [8.0, 11.0], descripcion: "Manufactura" },
-            tecnologia: { wacc: 10.8, rango: [9.0, 13.0], descripcion: "Tecnología" },
-            construccion: { wacc: 9.8, rango: [8.5, 11.5], descripcion: "Construcción" },
-            financiero: { wacc: 8.9, rango: [7.5, 10.5], descripcion: "Servicios Financieros" },
-            retail: { wacc: 9.5, rango: [8.0, 11.0], descripcion: "Retail y Comercio" },
-            salud: { wacc: 9.1, rango: [7.8, 10.5], descripcion: "Salud" },
-            general: { wacc: 9.5, rango: [8.0, 11.0], descripcion: "Promedio General" }
+            energia: { wacc: 0.085, rango: [0.070, 0.100], descripcion: "Energía y Recursos" },
+            manufactura: { wacc: 0.092, rango: [0.080, 0.110], descripcion: "Manufactura" },
+            tecnologia: { wacc: 0.108, rango: [0.090, 0.130], descripcion: "Tecnología" },
+            construccion: { wacc: 0.098, rango: [0.085, 0.115], descripcion: "Construcción" },
+            financiero: { wacc: 0.089, rango: [0.075, 0.105], descripcion: "Servicios Financieros" },
+            retail: { wacc: 0.095, rango: [0.080, 0.110], descripcion: "Retail y Comercio" },
+            salud: { wacc: 0.091, rango: [0.078, 0.105], descripcion: "Salud" },
+            general: { wacc: 0.095, rango: [0.080, 0.110], descripcion: "Promedio General" }
         };
 
         return referencias[sector] || referencias.general;

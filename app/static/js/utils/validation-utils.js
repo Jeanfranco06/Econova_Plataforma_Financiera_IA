@@ -224,7 +224,7 @@ class ValidationUtils {
         }
 
         // Validar costo de deuda
-        if (datos.costoDeuda < 0 || datos.costoDeuda > 50) {
+        if (datos.costoDeuda < 0 || datos.costoDeuda > 0.5) {
             errores.push({
                 campo: 'costo_deuda',
                 mensaje: 'El costo de deuda debe estar entre 0% y 50%.',
@@ -239,13 +239,13 @@ class ValidationUtils {
         }
 
         // Validar costo de capital propio
-        if (datos.costoCapitalPropio < 0 || datos.costoCapitalPropio > 50) {
+        if (datos.costoCapital < 0 || datos.costoCapital > 0.5) {
             errores.push({
                 campo: 'costo_capital',
                 mensaje: 'El costo de capital propio debe estar entre 0% y 50%.',
                 tipo: 'error'
             });
-        } else if (datos.costoCapitalPropio < 5) {
+        } else if (datos.costoCapital < 0.05) {
             errores.push({
                 campo: 'costo_capital',
                 mensaje: 'El costo de capital propio parece bajo. Verifique el cálculo del CAPM.',
@@ -254,7 +254,7 @@ class ValidationUtils {
         }
 
         // Validar proporciones
-        if (datos.proporcionDeuda < 0 || datos.proporcionDeuda > 100) {
+        if (datos.proporcionDeuda < 0 || datos.proporcionDeuda > 1) {
             errores.push({
                 campo: 'proporcion_deuda',
                 mensaje: 'La proporción de deuda debe estar entre 0% y 100%.',
@@ -262,7 +262,7 @@ class ValidationUtils {
             });
         }
 
-        if (datos.proporcionCapital < 0 || datos.proporcionCapital > 100) {
+        if (datos.proporcionCapital < 0 || datos.proporcionCapital > 1) {
             errores.push({
                 campo: 'proporcion_capital',
                 mensaje: 'La proporción de capital propio debe estar entre 0% y 100%.',
@@ -272,7 +272,7 @@ class ValidationUtils {
 
         // Validar que las proporciones sumen 100%
         const sumaProporciones = datos.proporcionDeuda + datos.proporcionCapital;
-        if (Math.abs(sumaProporciones - 100) > 0.01) {
+        if (Math.abs(sumaProporciones - 1) > 0.01) {
             errores.push({
                 campo: 'proporciones',
                 mensaje: 'La suma de las proporciones de deuda y capital propio debe ser 100%.',
@@ -281,7 +281,7 @@ class ValidationUtils {
         }
 
         // Validar tasa de impuestos
-        if (datos.tasaImpuestos < 0 || datos.tasaImpuestos > 50) {
+        if (datos.tasaImpuestos < 0 || datos.tasaImpuestos > 0.5) {
             errores.push({
                 campo: 'tasa_impuestos',
                 mensaje: 'La tasa de impuestos debe estar entre 0% y 50%.',

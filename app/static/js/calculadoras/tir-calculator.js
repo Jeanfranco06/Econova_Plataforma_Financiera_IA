@@ -20,6 +20,7 @@ class TIRCalculator {
             inversion: parseFloat(formData.get('inversion')) || 0,
             flujos: UIUtils.parsearFlujosTIR(form),
             metodo: formData.get('metodo') || 'newton',
+            tasaReferencia: parseFloat(formData.get('tasa_referencia')) || 12,
             mostrarConvergencia: formData.get('mostrar_convergencia') === 'on',
             analisisSensibilidad: formData.get('analisis_sensibilidad') === 'on'
         };
@@ -62,7 +63,7 @@ class TIRCalculator {
      * Calcula TIR completo con análisis detallado de convergencia
      */
     calcularTIRCompleto(datos) {
-        const { flujos, inversion, metodo } = datos;
+        const { flujos, inversion, metodo, tasaReferencia } = datos;
 
         // Crear array de flujos incluyendo inversión inicial (negativa)
         const flujosCompletos = [-Math.abs(inversion), ...flujos];
@@ -86,15 +87,24 @@ class TIRCalculator {
             metodoUsado = 'aproximacion';
         }
 
-        // Calcular VAN a la TIR encontrada (verificación)
+        // Calcular VAN a la TIR encontrada (verificación - debe ser ≈ 0)
         let vanATir = null;
         if (tir !== null) {
-            vanATir = FinancialUtils.calcularVAN(flujos, tir / 100); // Convertir porcentaje a decimal
+            // Incluir inversión negativa para calcular VAN correctamente
+            vanATir = -inversion;
+            const tasaDecimal = tir; // Ya está en DECIMAL
+            for (let i = 0; i < flujos.length; i++) {
+                vanATir += flujos[i] / Math.pow(1 + tasaDecimal, i + 1);
+            }
         }
 
-        // Calcular VAN con tasa de descuento estándar para comparación
-        const tasaDescuentoEstandar = 12; // 12% como referencia
-        const vanEstandar = FinancialUtils.calcularVAN(flujos, tasaDescuentoEstandar);
+        // Calcular VAN con tasa de referencia del usuario
+        const tasaDescuentoEstandar = tasaReferencia || 12; // Usar la tasa del usuario
+        let vanEstandar = -inversion;
+        const tasaEstandarDecimal = tasaDescuentoEstandar / 100;
+        for (let i = 0; i < flujos.length; i++) {
+            vanEstandar += flujos[i] / Math.pow(1 + tasaEstandarDecimal, i + 1);
+        }
 
         // Determinar evaluación de la TIR
         const evaluacion = FinancialUtils.evaluarTIR(tir);
@@ -147,7 +157,7 @@ class TIRCalculator {
 
             convergencia.push({
                 iteracion: iteracion + 1,
-                tir: tir * 100,
+                tir: tir * 100, // Solo para visualización en tabla
                 van: van,
                 derivada: derivada,
                 error: Math.abs(van)
@@ -155,7 +165,7 @@ class TIRCalculator {
 
             if (Math.abs(van) < tolerancia) {
                 return {
-                    tir: tir * 100, // Convertir a porcentaje
+                    tir: tir, // Retornar en DECIMAL
                     convergencia: convergencia
                 };
             }
@@ -164,7 +174,7 @@ class TIRCalculator {
                 const nuevaTir = tir - van / derivada;
                 if (Math.abs(nuevaTir - tir) < tolerancia) {
                     return {
-                        tir: nuevaTir * 100,
+                        tir: nuevaTir, // Retornar en DECIMAL
                         convergencia: convergencia
                     };
                 }
@@ -223,7 +233,7 @@ class TIRCalculator {
 
             if (Math.abs(vanC) < tolerancia) {
                 return {
-                    tir: c * 100,
+                    tir: c, // Retornar en DECIMAL
                     convergencia: convergencia
                 };
             }
@@ -269,7 +279,7 @@ class TIRCalculator {
         const pendiente = (vanAlta - vanBaja) / (tasaAlta - tasaBaja);
         const tir = tasaBaja - vanBaja / pendiente;
 
-        return tir * 100;
+        return tir; // Retornar en DECIMAL
     }
 
     /**
@@ -383,7 +393,7 @@ class TIRCalculator {
 
                 <div>
                   <div class="flex items-center justify-between mb-2">
-                    <span class="font-medium text-gray-800">VAN con tasa 12%:</span>
+                    <span class="font-medium text-gray-800">VAN con tasa ${resultado.tasaDescuentoEstandar}%:</span>
                     <span class="px-3 py-1 rounded-full text-sm font-semibold ${
                         resultado.vanEstandar >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }">

@@ -84,16 +84,25 @@ class SimulacionFinanciera {
         });// Escuchar eventos de botones de agregar año
         document.addEventListener('click', (e) => {
             if (e.target.id === 'add-flujo-van' || e.target.closest('#add-flujo-van')) {
-                e.preventDefault();if (this.calculadoras.van) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // Detener todos los handlers
+                if (this.calculadoras.van) {
                     this.calculadoras.van.agregarAnio();}
+                return; // Salir inmediatamente
             }
             if (e.target.id === 'add-flujo-tir' || e.target.closest('#add-flujo-tir')) {
-                e.preventDefault();if (this.calculadoras.tir) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // Detener todos los handlers
+                if (this.calculadoras.tir) {
                     this.calculadoras.tir.agregarAnio();}
+                return; // Salir inmediatamente
             }
             if (e.target.id === 'add-activo-portafolio' || e.target.closest('#add-activo-portafolio')) {
-                e.preventDefault();if (this.calculadoras.portafolio) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // Detener todos los handlers
+                if (this.calculadoras.portafolio) {
                     this.calculadoras.portafolio.agregarActivo();}
+                return; // Salir inmediatamente
             }
             // ML Calculator add period buttons - check for closest button with class
             const tornadoBtn = e.target.closest('#add-flujo-tornado') || e.target.closest('.add-period-btn[data-type="tornado"]');if (tornadoBtn) {

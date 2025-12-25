@@ -74,9 +74,10 @@ class SimulacionFinanciera {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'add-flujo-van' || e.target.closest('#add-flujo-van')) {
                 e.preventDefault();
+                e.stopImmediatePropagation(); // Detener todos los handlers
                 this.agregarAnioVAN();
             }
-        });
+        }, { capture: true }); // Usar capture para ejecutar primero
 
         // Escuchar eventos de actualización de gráficos
         document.addEventListener('actualizarGrafico', (event) => {
@@ -1004,7 +1005,7 @@ class SimulacionFinanciera {
         const { flujos, tasaDescuento, inversion } = datos;
         const tasaDecimal = tasaDescuento / 100;
 
-        let van = 0;
+        let van = -inversion; // Iniciar con la inversión negativa
         let vanAcumulado = -inversion;
         const detalleFlujos = [];
 
@@ -1032,7 +1033,7 @@ class SimulacionFinanciera {
         // Calcular período de recuperación (payback)
         const payback = this.calcularPaybackMejorado(inversion, flujos);
 
-        // Calcular VAN/Inversión (rentabilidad relativa)
+        // Calcular VAN/Inversión (rentabilidad relativa) - en formato DECIMAL
         const vanSobreInversion = van / inversion;
 
         // Determinar decisión económica
@@ -1050,9 +1051,15 @@ class SimulacionFinanciera {
             decisionColor = 'red';
         }
 
-        // Calcular métricas adicionales
-        const roi = (van / inversion) * 100; // Retorno sobre inversión
+        // Calcular métricas adicionales - en formato DECIMAL
+        const roi = van / inversion; // Retorno sobre inversión en decimal
         const bcr = van > 0 ? (van + inversion) / inversion : 0; // Beneficio-Costo Ratio
+
+        // Log para depuración
+        console.log('=== Debug VAN Completo ===');
+        console.log('TIR desde calcularTIRMejorado:', tir);
+        console.log('ROI calculado:', roi);
+        console.log('VAN/Inversión:', vanSobreInversion);
 
         return {
             van: van,
@@ -1086,46 +1093,96 @@ class SimulacionFinanciera {
         if (!tieneNegativo || !tienePositivo) return null;
 
         // Método de Newton-Raphson mejorado
-        let tir = 0.1; // Estimación inicial del 10%
+        let tir = 0.1; // Estimación inicial del 10% (en decimal: 0.10)
         const maxIteraciones = 100;
-        const tolerancia = 0.000001;
+        const tolerancia = 0.00001;
 
         for (let iteracion = 0; iteracion < maxIteraciones; iteracion++) {
             let van = 0;
             let derivada = 0;
 
-            for (let i = 0; i < flujos.length; i++) {
-                if (Math.abs(tir) > 1e-10) { // Evitar división por cero
-                    van += flujos[i] / Math.pow(1 + tir, i);
-                    if (i > 0) {
-                        derivada -= i * flujos[i] / Math.pow(1 + tir, i + 1);
-                    }
+            // Calcular VAN y su derivada en el punto actual
+            for (let t = 0; t < flujos.length; t++) {
+                const denominador = Math.pow(1 + tir, t);
+                van += flujos[t] / denominador;
+                
+                // Derivada: dVAN/dr = -Σ(t * FCt / (1+r)^(t+1))
+                if (t > 0) {
+                    derivada -= t * flujos[t] / Math.pow(1 + tir, t + 1);
                 }
             }
 
+            // Si VAN es suficientemente cercano a cero, hemos encontrado la TIR
             if (Math.abs(van) < tolerancia) {
-                return tir * 100; // Convertir a porcentaje
+                return tir; // Retornar en formato DECIMAL (ej: 0.2586)
             }
 
+            // Aplicar Newton-Raphson: r_nuevo = r_actual - f(r)/f'(r)
             if (Math.abs(derivada) > 1e-10) {
-                const nuevaTir = tir - van / derivada;
-                // Verificar convergencia
-                if (Math.abs(nuevaTir - tir) < tolerancia) {
-                    return nuevaTir * 100;
+                const tirAnterior = tir;
+                tir = tir - van / derivada;
+                
+                // Verificar si la convergencia es suficientemente pequeña
+                if (Math.abs(tir - tirAnterior) < tolerancia) {
+                    return tir; // Retornar en formato DECIMAL
                 }
-                tir = nuevaTir;
             } else {
-                // Si derivada es muy pequeña, hacer ajuste pequeño
-                tir += 0.001;
+                // Si la derivada es muy pequeña, intentar ajuste manual
+                break;
             }
 
-            // Limitar TIR a rango razonable
-            if (tir < -0.9 || tir > 5) {
-                return null; // No convergió
+            // Limitar TIR a rango razonable (-90% a 500%)
+            if (tir < -0.9 || tir > 5.0) {
+                return null; // No convergió a un valor razonable
             }
         }
 
-        return null; // No convergió en iteraciones máximas
+        // Si no convergió, intentar método de bisección como fallback
+        return this.calcularTIRBiseccionFallback(flujos);
+    }
+
+    /**
+     * Método de bisección como fallback para TIR
+     */
+    calcularTIRBiseccionFallback(flujos) {
+        let tirMin = -0.5; // -50%
+        let tirMax = 2.0;  // 200%
+        const tolerancia = 0.0001;
+        const maxIteraciones = 100;
+
+        // Calcular VAN en un punto
+        const calcularVAN = (tasa) => {
+            let van = 0;
+            for (let t = 0; t < flujos.length; t++) {
+                van += flujos[t] / Math.pow(1 + tasa, t);
+            }
+            return van;
+        };
+
+        for (let iter = 0; iter < maxIteraciones; iter++) {
+            const tirMedio = (tirMin + tirMax) / 2;
+            const vanMedio = calcularVAN(tirMedio);
+
+            if (Math.abs(vanMedio) < tolerancia) {
+                return tirMedio; // Retornar en formato DECIMAL
+            }
+
+            const vanMin = calcularVAN(tirMin);
+            
+            // Ajustar el intervalo
+            if ((vanMin < 0 && vanMedio < 0) || (vanMin > 0 && vanMedio > 0)) {
+                tirMin = tirMedio;
+            } else {
+                tirMax = tirMedio;
+            }
+
+            // Verificar convergencia del intervalo
+            if (Math.abs(tirMax - tirMin) < tolerancia) {
+                return tirMedio; // Retornar en formato DECIMAL
+            }
+        }
+
+        return null; // No convergió
     }
 
     /**
@@ -1953,7 +2010,10 @@ class SimulacionFinanciera {
     }
 
     formatearPorcentaje(valor) {
-        return (valor).toFixed(2) + '%';
+        // Siempre multiplicar por 100 para convertir de decimal a porcentaje
+        // Entrada: 0.2586 (decimal) -> Salida: "25.86%"
+        const porcentaje = valor * 100;
+        return porcentaje.toFixed(2) + '%';
     }
 
     actualizarSimulacionTiempoReal(input) {

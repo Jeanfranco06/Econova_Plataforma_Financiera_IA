@@ -403,9 +403,10 @@ class UIUtils {
      */
     static parsearFlujos(form, prefix = 'flujo') {
         const flujos = [];let index = 1;while (true) {
-            const input = form.querySelector(`input[name="${prefix}${index}"]`);if (!input) break;const valor = parseFloat(input.value);if (!isNaN(valor)) {
+            const input = form.querySelector(`input[name="${prefix}${index}"]`);if (!input) break;const valor = parseFloat(input.value);if (!isNaN(valor) && input.value.trim() !== '') {
                 flujos.push(valor);}
             index++;}
+        console.log(`Flujos parseados (${prefix}):`, flujos);
         return flujos;}
 
     static parsearFlujosVAN(form) {
