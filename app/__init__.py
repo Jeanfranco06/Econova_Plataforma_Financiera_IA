@@ -186,6 +186,43 @@ def crear_tablas_sqlite():
         db.disconnect()
 
 
+def init_default_data():
+    """Inicializar datos por defecto como grupos de benchmarking"""
+    try:
+        # Inicializar grupos de benchmarking
+        from app.modelos.benchmarking import Benchmarking_Grupo
+
+        groups = [
+            ('Emprendedores Tecnológicos', 'Grupo para startups y empresas de tecnología'),
+            ('PYMEs Industriales', 'Pequeñas y medianas empresas del sector industrial'),
+            ('Comercio Minorista', 'Empresas dedicadas al comercio minorista'),
+            ('Servicios Financieros', 'Instituciones y consultores financieros'),
+            ('Agricultura Moderna', 'Empresas del sector agrícola con enfoque innovador'),
+            ('Turismo y Hospitalidad', 'Empresas del sector turístico'),
+            ('Construcción', 'Empresas constructoras y del sector inmobiliario'),
+            ('Educación', 'Instituciones educativas y edtech'),
+            ('Salud', 'Empresas del sector salud y biotecnología'),
+            ('Energías Renovables', 'Empresas de energías limpias y sostenibles')
+        ]
+
+        for nombre, descripcion in groups:
+            try:
+                Benchmarking_Grupo.crear_grupo(nombre, descripcion)
+                print(f"✅ Grupo '{nombre}' creado")
+            except Exception as e:
+                if "duplicate key" in str(e).lower() or "unique constraint" in str(e).lower():
+                    # Grupo ya existe, continuar
+                    pass
+                else:
+                    print(f"⚠️ Error creando grupo '{nombre}': {e}")
+
+        print("✅ Grupos de benchmarking inicializados")
+
+    except Exception as e:
+        print(f"❌ Error inicializando datos por defecto: {e}")
+        raise
+
+
 def crear_app(config_name="development"):
     """
     Factory para crear la aplicación Flask
@@ -220,6 +257,15 @@ def crear_app(config_name="development"):
 
                 if not USE_POSTGRESQL:
                     crear_tablas_sqlite()
+
+                # Inicializar datos por defecto (grupos de benchmarking, etc.)
+                try:
+                    print("🔄 Inicializando datos por defecto...")
+                    init_default_data()
+                    print("✅ Datos por defecto inicializados")
+                except Exception as e:
+                    print(f"⚠️  Error inicializando datos por defecto: {e}")
+
             else:
                 print("⚠️  No se pudo conectar a la base de datos")
                 print("   La aplicación funcionará con limitaciones")
