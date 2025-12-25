@@ -4,7 +4,7 @@ from app.modelos.logro import Insignia, Usuario_Insignia, Ranking
 from app.modelos.usuario import Usuario
 import json
 
-gamification_bp = Blueprint('gamification', __name__, url_prefix='/gamification')
+gamification_bp = Blueprint('gamification', __name__)
 
 @gamification_bp.route('/')
 def gamification_dashboard():
@@ -29,8 +29,8 @@ def gamification_dashboard():
                          ranking_usuario=ranking_usuario,
                          ranking_general=ranking_general)
 
-@gamification_bp.route('/api/estadisticas')
-def obtener_estadisticas():
+@gamification_bp.route('estadisticas/<int:usuario_id>')
+def obtener_estadisticas(usuario_id):
     """API para obtener estadísticas de gamificación"""
     if 'usuario_id' not in session:
         return jsonify({
@@ -38,7 +38,12 @@ def obtener_estadisticas():
             'error': 'Usuario no autenticado'
         }), 401
 
-    usuario_id = session.get('usuario_id')
+    # Verificar que el usuario_id de la URL coincida con el de la sesión
+    if usuario_id != session['usuario_id']:
+        return jsonify({
+            'success': False,
+            'error': 'No autorizado'
+        }), 403
 
     try:
         estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
@@ -52,7 +57,7 @@ def obtener_estadisticas():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/ranking-global')
+@gamification_bp.route('ranking-global')
 def obtener_ranking_global():
     """Obtener ranking global de usuarios"""
     limite = request.args.get('limite', 10, type=int)
@@ -80,7 +85,7 @@ def obtener_ranking_global():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/verificar-insignias', methods=['POST'])
+@gamification_bp.route('verificar-insignias', methods=['POST'])
 def verificar_insignias():
     """Verificar y otorgar insignias automáticamente"""
     if 'usuario_id' not in session:
@@ -105,7 +110,7 @@ def verificar_insignias():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/ranking/<sector>')
+@gamification_bp.route('ranking/<sector>')
 def obtener_ranking_sector(sector):
     """Obtener ranking de un sector específico"""
     limite = request.args.get('limite', 20, type=int)
@@ -207,7 +212,7 @@ def obtener_ranking_sector(sector):
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/ranking/usuario')
+@gamification_bp.route('ranking/usuario')
 def obtener_ranking_usuario():
     """Obtener rankings del usuario actual"""
     if 'usuario_id' not in session:
@@ -230,7 +235,7 @@ def obtener_ranking_usuario():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/actualizar-puntaje', methods=['POST'])
+@gamification_bp.route('actualizar-puntaje', methods=['POST'])
 def actualizar_puntaje():
     """Actualizar puntaje del usuario en un sector"""
     if 'usuario_id' not in session:
@@ -262,7 +267,7 @@ def actualizar_puntaje():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/insignias')
+@gamification_bp.route('insignias')
 def obtener_insignias():
     """Obtener todas las insignias disponibles"""
     try:
@@ -277,7 +282,7 @@ def obtener_insignias():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/insignias/usuario')
+@gamification_bp.route('insignias/usuario')
 def obtener_insignias_usuario():
     """Obtener insignias del usuario actual"""
     if 'usuario_id' not in session:
@@ -300,7 +305,7 @@ def obtener_insignias_usuario():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/logro/<tipo>', methods=['POST'])
+@gamification_bp.route('logro/<tipo>', methods=['POST'])
 def registrar_logro(tipo):
     """Registrar un logro específico del usuario"""
     if 'usuario_id' not in session:
@@ -337,7 +342,7 @@ def registrar_logro(tipo):
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/logros-proximos')
+@gamification_bp.route('logros-proximos')
 def obtener_logros_proximos():
     """Obtener logros próximos (insignias que el usuario puede obtener próximamente)"""
     if 'usuario_id' not in session:
@@ -360,7 +365,7 @@ def obtener_logros_proximos():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/actividad-reciente')
+@gamification_bp.route('actividad-reciente')
 def obtener_actividad_reciente():
     """Obtener actividad reciente del usuario"""
     if 'usuario_id' not in session:
@@ -383,7 +388,7 @@ def obtener_actividad_reciente():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/puntaje-total')
+@gamification_bp.route('puntaje-total')
 def obtener_puntaje_total():
     """Obtener puntaje total de gamificación del usuario"""
     if 'usuario_id' not in session:
@@ -406,7 +411,7 @@ def obtener_puntaje_total():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/notificaciones-pendientes')
+@gamification_bp.route('notificaciones-pendientes')
 def obtener_notificaciones_pendientes():
     """Obtener notificaciones pendientes del usuario"""
     if 'usuario_id' not in session:
@@ -436,7 +441,7 @@ def obtener_notificaciones_pendientes():
             'error': str(e)
         }), 500
 
-@gamification_bp.route('/api/marcar-leidas', methods=['POST'])
+@gamification_bp.route('marcar-leidas', methods=['POST'])
 def marcar_notificaciones_leidas():
     """Marcar notificaciones como leídas"""
     if 'usuario_id' not in session:

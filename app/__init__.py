@@ -504,7 +504,7 @@ def registrar_blueprints(app):
     # Rutas de Gamificación
     from app.rutas.gamification import gamification_bp
 
-    app.register_blueprint(gamification_bp)
+    app.register_blueprint(gamification_bp, url_prefix="/api/v1/gamification")
 
 
 def registrar_manejadores_errores(app):
