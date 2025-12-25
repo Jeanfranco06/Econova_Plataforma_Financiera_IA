@@ -641,13 +641,13 @@ class GamificationService:
         # Obtener simulaciones recientes (máximo 5 adicionales)
         db = get_db_connection()
         query = """
-        SELECT s.fecha_creacion, s.tipo_simulacion,
+        SELECT s.fecha, s.tipo_simulacion,
                COUNT(r.resultado_id) as num_calculos
         FROM Simulaciones s
         LEFT JOIN Resultados r ON s.simulacion_id = r.simulacion_id
         WHERE s.usuario_id = %s
-        GROUP BY s.simulacion_id, s.fecha_creacion, s.tipo_simulacion
-        ORDER BY s.fecha_creacion DESC
+        GROUP BY s.simulacion_id, s.fecha, s.tipo_simulacion
+        ORDER BY s.fecha DESC
         LIMIT %s
         """
         try:
@@ -655,7 +655,7 @@ class GamificationService:
             result = db.execute_query(query, (usuario_id, limite), fetch=True)
             if result:
                 for row in result:
-                    fecha = row['fecha_creacion']
+                    fecha = row['fecha']
                     tipo = row['tipo_simulacion'] or 'General'
                     if hasattr(fecha, 'strftime'):
                         tiempo_str = fecha.strftime('%Y-%m-%d %H:%M:%S')
