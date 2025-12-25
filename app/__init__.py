@@ -359,6 +359,11 @@ def crear_app(config_name="development"):
 
     @app.route("/benchmarking")
     def benchmarking():
+        from flask import session, flash, redirect, url_for
+        if 'usuario_id' not in session:
+            flash('Debes iniciar sesión para acceder al sistema de benchmarking', 'error')
+            return redirect(url_for('login'))
+
         return render_template("benchmarking.html")
 
     @app.route("/prestamo")

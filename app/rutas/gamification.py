@@ -10,25 +10,19 @@ gamification_bp = Blueprint('gamification', __name__, url_prefix='/gamification'
 def gamification_dashboard():
     """Mostrar dashboard de gamificación"""
     if 'usuario_id' not in session:
-        # Usuario no autenticado - mostrar página con datos por defecto
-        estadisticas = {
-            'puntaje_total': 0,
-            'num_insignias': 0,
-            'num_simulaciones': 0
-        }
-        ranking_usuario = []
-        ranking_general = []
-    else:
-        usuario_id = session.get('usuario_id')
+        flash('Debes iniciar sesión para acceder al sistema de gamificación', 'error')
+        return redirect(url_for('login'))
 
-        # Obtener estadísticas del usuario
-        estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
+    usuario_id = session.get('usuario_id')
 
-        # Obtener ranking del usuario
-        ranking_usuario = Ranking.obtener_ranking_usuario(usuario_id)
+    # Obtener estadísticas del usuario
+    estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
 
-        # Obtener top 10 del ranking general
-        ranking_general = Ranking.obtener_ranking_sector('General', 10)
+    # Obtener ranking del usuario
+    ranking_usuario = Ranking.obtener_ranking_usuario(usuario_id)
+
+    # Obtener top 10 del ranking general
+    ranking_general = Ranking.obtener_ranking_sector('General', 10)
 
     return render_template('gamification_nuevo.html',
                          estadisticas=estadisticas,
