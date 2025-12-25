@@ -29,9 +29,32 @@ def gamification_dashboard():
                          ranking_usuario=ranking_usuario,
                          ranking_general=ranking_general)
 
+@gamification_bp.route('api/estadisticas')
+def obtener_estadisticas():
+    """API para obtener estadísticas de gamificación del usuario actual"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
+    usuario_id = session.get('usuario_id')
+
+    try:
+        estadisticas = GamificationService.obtener_estadisticas_gamification(usuario_id)
+        return jsonify({
+            'success': True,
+            'estadisticas': estadisticas
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @gamification_bp.route('api/estadisticas/<int:usuario_id>')
-def obtener_estadisticas(usuario_id):
-    """API para obtener estadísticas de gamificación"""
+def obtener_estadisticas_usuario(usuario_id):
+    """API para obtener estadísticas de gamificación de un usuario específico"""
     if 'usuario_id' not in session:
         return jsonify({
             'success': False,
