@@ -187,7 +187,7 @@ def crear_tablas_sqlite():
 
 
 def init_default_data():
-    """Inicializar datos por defecto como grupos de benchmarking"""
+    """Inicializar datos por defecto como grupos de benchmarking e insignias"""
     try:
         # Inicializar grupos de benchmarking
         from app.modelos.benchmarking import Benchmarking_Grupo
@@ -217,6 +217,44 @@ def init_default_data():
                     print(f"⚠️ Error creando grupo '{nombre}': {e}")
 
         print("✅ Grupos de benchmarking inicializados")
+
+        # Inicializar insignias predefinidas
+        from app.modelos.logro import Insignia
+
+        insignias_predefinidas = [
+            ('Primeros Pasos', 'Te has registrado en Econova y completado tu primera acción'),
+            ('Analista Novato', 'Has realizado 5 simulaciones financieras'),
+            ('Calculador Financiero', 'Has realizado 10 cálculos financieros básicos'),
+            ('Analista Avanzado', 'Has completado 25 simulaciones financieras'),
+            ('Experto en VAN', 'Has calculado VAN en más de 10 proyectos de inversión'),
+            ('Maestro TIR', 'Has calculado TIR en más de 15 proyectos'),
+            ('Inversor Estratégico', 'Has optimizado 20 portafolios de inversión'),
+            ('Maestro de Finanzas', 'Has alcanzado el nivel máximo de conocimiento financiero'),
+            ('Benchmarking Explorer', 'Te has unido a tu primer grupo de benchmarking'),
+            ('Benchmarking Experto', 'Has realizado 15 análisis de benchmarking'),
+            ('Login Diario', 'Has iniciado sesión hoy')
+        ]
+
+        for nombre, descripcion in insignias_predefinidas:
+            try:
+                # Verificar si la insignia ya existe
+                existing = Insignia.listar_insignias()
+                exists = any(i.nombre_insig == nombre for i in existing)
+
+                if not exists:
+                    insignia_id = Insignia.crear_insignia(nombre, descripcion)
+                    if insignia_id:
+                        print(f"✅ Insignia '{nombre}' creada")
+                    else:
+                        print(f"❌ Error creando insignia '{nombre}'")
+            except Exception as e:
+                if "duplicate key" in str(e).lower() or "unique constraint" in str(e).lower():
+                    # Insignia ya existe, continuar
+                    pass
+                else:
+                    print(f"⚠️ Error creando insignia '{nombre}': {e}")
+
+        print("✅ Insignias predefinidas inicializadas")
 
     except Exception as e:
         print(f"❌ Error inicializando datos por defecto: {e}")
