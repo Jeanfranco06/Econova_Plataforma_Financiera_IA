@@ -556,6 +556,223 @@ class BenchmarkingUIFinal {
         }
     }
 
+    setupActionButtons() {
+        // Delegar eventos para botones de acción usando event delegation
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            // Botón "Ver Guía Rápida" (en el hero section)
+            if (button.textContent.trim() === 'Ver Guía Rápida') {
+                e.preventDefault();
+                this.mostrarGuiaRapida();
+                return;
+            }
+
+            // Botón "Actualizar Grupos"
+            if (button.querySelector('.fa-refresh') || button.textContent.includes('Actualizar Grupos')) {
+                e.preventDefault();
+                if (window.benchmarkingManager) {
+                    window.benchmarkingManager.cargarGruposBenchmarking();
+                }
+                return;
+            }
+
+            // Botón "¿Cómo Funciona?"
+            if (button.querySelector('.fa-question-circle') || button.textContent.includes('¿Cómo Funciona?')) {
+                e.preventDefault();
+                this.mostrarComoFunciona();
+                return;
+            }
+
+            // Botón "Guardar Análisis" (sectorial)
+            if (button.id === 'btn-guardar-sectorial') {
+                e.preventDefault();
+                if (window.benchmarkingManager) {
+                    window.benchmarkingManager.guardarAnalisis();
+                    this.mostrarExito('Análisis guardado exitosamente', '¡Guardado!');
+                }
+                return;
+            }
+
+            // Botón "Guardar Análisis" (personalizado)
+            if (button.id === 'btn-guardar-personalizado') {
+                e.preventDefault();
+                if (window.benchmarkingManager) {
+                    window.benchmarkingManager.guardarAnalisisPersonalizado();
+                    this.mostrarExito('Análisis personalizado guardado exitosamente', '¡Guardado!');
+                }
+                return;
+            }
+
+            // Botón "Nuevo Análisis" (sectorial)
+            if (button.id === 'btn-nuevo-sectorial') {
+                e.preventDefault();
+                // Resetear formulario y ocultar resultados
+                const form = document.getElementById('form-benchmarking-sectorial');
+                const results = document.getElementById('sectorial-results');
+                if (form) form.reset();
+                if (results) results.style.display = 'none';
+                // Mostrar calculadora sectorial
+                this.showCalculator('sectorial');
+                return;
+            }
+        });
+    }
+
+    mostrarGuiaRapida() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Guía Rápida de Benchmarking</h3>
+                        <button id="cerrar-guia" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-800 mb-2">1. Grupos de Benchmarking</h4>
+                            <p class="text-blue-700 text-sm">Únete a comunidades especializadas donde empresarios comparten datos anonimizados para comparar su rendimiento.</p>
+                        </div>
+
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-800 mb-2">2. Benchmarking Sectorial</h4>
+                            <p class="text-green-700 text-sm">Analiza tu desempeño contra estándares y mejores prácticas de tu sector específico.</p>
+                        </div>
+
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-purple-800 mb-2">3. Comparación Personalizada</h4>
+                            <p class="text-purple-700 text-sm">Compara tu empresa contra competidores específicos que elijas manualmente.</p>
+                        </div>
+
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-orange-800 mb-2">4. Tu Historial</h4>
+                            <p class="text-orange-700 text-sm">Revisa todos tus análisis anteriores y tendencias a lo largo del tiempo.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h5 class="font-semibold text-gray-800 mb-2">💡 Consejos Rápidos</h5>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Todos los datos son 100% anónimos y confidenciales</li>
+                            <li>• Puedes guardar y exportar tus análisis</li>
+                            <li>• Únete a múltiples grupos para comparaciones más amplias</li>
+                            <li>• Las recomendaciones se basan en mejores prácticas del sector</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Cerrar modal
+        modal.querySelector('#cerrar-guia').addEventListener('click', () => {
+            modal.remove();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    mostrarComoFunciona() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-96 overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">¿Cómo Funciona el Benchmarking Anónimo?</h3>
+                        <button id="cerrar-como-funciona" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">🔒 Anonimización de Datos</h4>
+                            <p class="text-gray-600 mb-3">Utilizamos técnicas avanzadas de anonimización para proteger tu información:</p>
+                            <ul class="text-sm text-gray-600 space-y-1 ml-4">
+                                <li>• Tus datos nunca se identifican individualmente</li>
+                                <li>• Se agregan con datos de otras empresas similares</li>
+                                <li>• Solo se comparten estadísticas agregadas</li>
+                                <li>• Tú controlas qué datos compartir</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">📊 Proceso de Benchmarking</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <h5 class="font-semibold text-blue-800 mb-1">1. Recopilación</h5>
+                                    <p class="text-sm text-blue-700">Reunimos datos de empresas similares en grupos especializados.</p>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-lg">
+                                    <h5 class="font-semibold text-green-800 mb-1">2. Anonimización</h5>
+                                    <p class="text-sm text-green-700">Aplicamos técnicas de privacidad para proteger la identidad.</p>
+                                </div>
+                                <div class="bg-purple-50 p-3 rounded-lg">
+                                    <h5 class="font-semibold text-purple-800 mb-1">3. Análisis</h5>
+                                    <p class="text-sm text-purple-700">Calculamos percentiles, promedios y posiciones relativas.</p>
+                                </div>
+                                <div class="bg-orange-50 p-3 rounded-lg">
+                                    <h5 class="font-semibold text-orange-800 mb-1">4. Recomendaciones</h5>
+                                    <p class="text-sm text-orange-700">Generamos insights accionables basados en mejores prácticas.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">🎯 Beneficios</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>✅ Identificar fortalezas y debilidades</li>
+                                    <li>✅ Comparar con mejores prácticas</li>
+                                    <li>✅ Establecer metas realistas</li>
+                                    <li>✅ Aprender de la competencia</li>
+                                </ul>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>✅ Mejorar procesos operativos</li>
+                                    <li>✅ Optimizar recursos</li>
+                                    <li>✅ Aumentar rentabilidad</li>
+                                    <li>✅ Mantener ventaja competitiva</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h5 class="font-semibold text-yellow-800 mb-2">⚠️ Importante</h5>
+                            <p class="text-sm text-yellow-700">
+                                El benchmarking es una herramienta de mejora continua. Los resultados deben interpretarse
+                                en contexto y considerarse junto con factores específicos de tu negocio.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Cerrar modal
+        modal.querySelector('#cerrar-como-funciona').addEventListener('click', () => {
+            modal.remove();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
     mostrarResultadosBenchmarking(analisis, recomendaciones, datos) {
         const container = document.getElementById('sectorial-results');
         if (!container) return;
@@ -1234,6 +1451,7 @@ class BenchmarkingManagerFinal {
 
     init() {
         this.ui.setupCalculatorSelection();
+        this.ui.setupActionButtons(); // Configurar botones de acción como "Ver Guía Rápida"
         this.setupEventListeners();
         this.setupMetricInputs(); // Habilitar/deshabilitar inputs según checkboxes
         this.ui.showCalculator('grupos');

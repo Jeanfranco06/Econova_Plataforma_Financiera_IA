@@ -4,11 +4,14 @@
 
 {% block content %}
 <!-- Login Hero -->
-<section class="py-24 relative overflow-hidden" style="background: var(--color-surface); color: var(--color-text-primary);">
+<section class="py-24 relative overflow-hidden"
+  style="background: var(--color-surface); color: var(--color-text-primary);">
   <!-- Elementos decorativos sutiles -->
   <div class="absolute inset-0 opacity-3">
-    <div class="absolute top-20 left-10 w-32 h-32 border-2 rounded-full" style="border-color: var(--color-primary); opacity: 0.1;"></div>
-    <div class="absolute top-40 right-20 w-24 h-24 border rounded-lg rotate-45" style="border-color: var(--color-primary); opacity: 0.1;"></div>
+    <div class="absolute top-20 left-10 w-32 h-32 border-2 rounded-full"
+      style="border-color: var(--color-primary); opacity: 0.1;"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 border rounded-lg rotate-45"
+      style="border-color: var(--color-primary); opacity: 0.1;"></div>
     <div class="absolute bottom-32 left-1/4 w-16 h-16 rounded-full" style="background: rgba(37, 99, 235, 0.1);"></div>
   </div>
 
@@ -37,19 +40,14 @@
         <form id="login-form" method="POST" action="/api/v1/login" class="space-y-6">
 
           <div>
-            <label for="email_username" class="block text-sm font-medium mb-2" style="color: var(--color-text-secondary);">
+            <label for="email_username" class="block text-sm font-medium mb-2"
+              style="color: var(--color-text-secondary);">
               Correo Electrónico o Nombre de Usuario
             </label>
-            <input
-              type="text"
-              id="email_username"
-              name="email_username"
-              required
-              value="{{ email_value or '' }}"
+            <input type="text" id="email_username" name="email_username" required value="{{ email_value or '' }}"
               class="w-full px-4 py-3 rounded-lg transition duration-200"
               style="border: 1px solid var(--color-border); background: var(--color-input-bg); color: var(--color-text-primary);"
-              placeholder="tu@email.com o tu_usuario"
-            >
+              placeholder="tu@email.com o tu_usuario">
           </div>
 
           <div>
@@ -57,16 +55,13 @@
               Contraseña
             </label>
             <div class="relative">
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
+              <input type="password" id="password" name="password" required
                 class="w-full px-4 py-3 pr-12 rounded-lg transition duration-200"
                 style="border: 1px solid var(--color-border); background: var(--color-input-bg); color: var(--color-text-primary);"
-                placeholder="••••••••"
-              >
-              <button type="button" id="toggle-password" class="absolute right-3 top-3" style="color: var(--color-text-secondary);" onmouseover="this.style.color='var(--color-text-primary)'" onmouseout="this.style.color='var(--color-text-secondary)'">
+                placeholder="••••••••">
+              <button type="button" id="toggle-password" class="absolute right-3 top-3"
+                style="color: var(--color-text-secondary);" onmouseover="this.style.color='var(--color-text-primary)'"
+                onmouseout="this.style.color='var(--color-text-secondary)'">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -74,31 +69,18 @@
 
           <div class="flex items-center justify-between">
             <div class="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                name="remember"
-                {% if remember_checked %}checked{% endif %}
-                class="h-4 w-4 rounded"
-                style="accent-color: var(--color-primary);"
-              >
+              <input type="checkbox" id="remember" name="remember" {% if remember_checked %}checked{% endif %}
+                class="h-4 w-4 rounded" style="accent-color: var(--color-primary);">
               <label for="remember" class="ml-2 text-sm" style="color: var(--color-text-secondary);">
                 Recordarme
               </label>
             </div>
-            <a href="/recuperar-password" class="text-sm hover:underline" style="color: var(--color-primary);" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">
-              ¿Olvidaste tu contraseña?
-            </a>
           </div>
 
-          <button
-            type="submit"
-            id="submit-btn"
+          <button type="submit" id="submit-btn"
             class="w-full py-3 px-6 rounded-lg font-semibold transition duration-300"
-            style="background: var(--color-primary); color: white;"
-            onmouseover="this.style.background='#2563eb'"
-            onmouseout="this.style.background='var(--color-primary)'"
-          >
+            style="background: var(--color-primary); color: white;" onmouseover="this.style.background='#2563eb'"
+            onmouseout="this.style.background='var(--color-primary)'">
             <i class="fas fa-sign-in-alt mr-2"></i>
             Iniciar Sesión
           </button>
@@ -110,25 +92,30 @@
         <div class="text-center mt-8">
           <p style="color: var(--color-text-secondary);">
             ¿No tienes cuenta?
-            <a href="/api/v1/registro" class="font-medium hover:underline" style="color: var(--color-primary);" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">Regístrate aquí</a>
+            <a href="/api/v1/registro" class="font-medium hover:underline" style="color: var(--color-primary);"
+              onmouseover="this.style.color='var(--color-primary)'"
+              onmouseout="this.style.color='var(--color-primary)'">Regístrate aquí</a>
           </p>
         </div>
 
         <!-- Success/Error Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="mt-6 p-4 rounded-lg" style="{% if category == 'error' %}background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.3);{% else %}background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);{% endif %}">
-                <i class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="mt-6 p-4 rounded-lg"
+          style="{% if category == 'error' %}background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.3);{% else %}background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);{% endif %}">
+          <i
+            class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
         <!-- URL Parameter Messages -->
         <div id="url-message" class="mt-6 hidden">
-          <div class="p-4 rounded-lg" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);">
+          <div class="p-4 rounded-lg"
+            style="background: rgba(34, 197, 94, 0.1); color: var(--color-success); border: 1px solid rgba(34, 197, 94, 0.3);">
             <i class="fas fa-check-circle mr-2"></i>
             <span id="url-message-text"></span>
           </div>
@@ -139,108 +126,108 @@
 </section>
 
 <script>
-// Password visibility toggle
-document.getElementById('toggle-password').addEventListener('click', function() {
-  const passwordInput = document.getElementById('password');
-  const icon = this.querySelector('i');
+  // Password visibility toggle
+  document.getElementById('toggle-password').addEventListener('click', function () {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
 
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    icon.classList.remove('fa-eye');
-    icon.classList.add('fa-eye-slash');
-  } else {
-    passwordInput.type = 'password';
-    icon.classList.remove('fa-eye-slash');
-    icon.classList.add('fa-eye');
-  }
-});
-
-// Handle URL parameters for messages
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const message = urlParams.get('message');
-
-  if (message === 'registration_success') {
-    const messageDiv = document.getElementById('url-message');
-    const messageText = document.getElementById('url-message-text');
-
-    messageText.textContent = '¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.';
-    messageDiv.classList.remove('hidden');
-
-    // Scroll to message
-    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-});
-
-// Form submission
-document.getElementById('login-form').addEventListener('submit', function(e) {
-  e.preventDefault(); // Prevent default form submission
-
-  const submitBtn = document.getElementById('submit-btn');
-  const formData = new FormData(this);
-
-  // Disable button and show loading
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...';
-
-  // Send AJAX request
-  fetch('/api/v1/login', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Login successful - redirect to dashboard
-      window.location.href = '/dashboard';
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
     } else {
-      // Login failed - show error
-      showMessage(data.error || 'Error al iniciar sesión', 'error');
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+      passwordInput.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    showMessage('Error interno del servidor', 'error');
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
   });
-});
 
-// Function to show messages
-function showMessage(message, type) {
-  // Remove existing messages
-  const existingMessages = document.querySelectorAll('.message-alert');
-  existingMessages.forEach(msg => msg.remove());
+  // Handle URL parameters for messages
+  document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
 
-  // Create new message element
-  const messageDiv = document.createElement('div');
-  messageDiv.className = 'message-alert mt-6 p-4 rounded-lg border';
-  messageDiv.style.cssText = type === 'error'
-    ? 'background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);'
-    : 'background: rgba(34, 197, 94, 0.1); color: var(--color-success); border-color: rgba(34, 197, 94, 0.3);';
+    if (message === 'registration_success') {
+      const messageDiv = document.getElementById('url-message');
+      const messageText = document.getElementById('url-message-text');
 
-  messageDiv.innerHTML = `
+      messageText.textContent = '¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.';
+      messageDiv.classList.remove('hidden');
+
+      // Scroll to message
+      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  // Form submission
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const submitBtn = document.getElementById('submit-btn');
+    const formData = new FormData(this);
+
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...';
+
+    // Send AJAX request
+    fetch('/api/v1/login', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Login successful - redirect to dashboard
+          window.location.href = '/dashboard';
+        } else {
+          // Login failed - show error
+          showMessage(data.error || 'Error al iniciar sesión', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error interno del servidor', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+      });
+  });
+
+  // Function to show messages
+  function showMessage(message, type) {
+    // Remove existing messages
+    const existingMessages = document.querySelectorAll('.message-alert');
+    existingMessages.forEach(msg => msg.remove());
+
+    // Create new message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message-alert mt-6 p-4 rounded-lg border';
+    messageDiv.style.cssText = type === 'error'
+      ? 'background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);'
+      : 'background: rgba(34, 197, 94, 0.1); color: var(--color-success); border-color: rgba(34, 197, 94, 0.3);';
+
+    messageDiv.innerHTML = `
     <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-2"></i>
     ${message}
   `;
 
-  // Insert after form
-  const form = document.getElementById('login-form');
-  form.parentNode.insertBefore(messageDiv, form.nextSibling);
+    // Insert after form
+    const form = document.getElementById('login-form');
+    form.parentNode.insertBefore(messageDiv, form.nextSibling);
 
-  // Scroll to message
-  messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Scroll to message
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  // Auto-remove success messages after 5 seconds
-  if (type === 'success') {
-    setTimeout(() => {
-      if (messageDiv.parentNode) {
-        messageDiv.remove();
-      }
-    }, 5000);
+    // Auto-remove success messages after 5 seconds
+    if (type === 'success') {
+      setTimeout(() => {
+        if (messageDiv.parentNode) {
+          messageDiv.remove();
+        }
+      }, 5000);
+    }
   }
-}
 </script>
 {% endblock %}

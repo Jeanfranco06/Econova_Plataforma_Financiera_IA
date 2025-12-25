@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from app.modelos.benchmarking import (
     Benchmarking_Grupo, Usuario_Benchmarking, BenchmarkingService, Analisis_Benchmarking
 )
@@ -10,6 +10,12 @@ benchmarking_bp = Blueprint('benchmarking', __name__)
 @benchmarking_bp.route('/benchmarking/grupos', methods=['GET'])
 def listar_grupos_benchmarking():
     """Listar todos los grupos de benchmarking"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
     try:
         grupos = Benchmarking_Grupo.listar_grupos()
         return jsonify({
@@ -25,6 +31,12 @@ def listar_grupos_benchmarking():
 @benchmarking_bp.route('/benchmarking/analisis', methods=['POST'])
 def guardar_analisis_benchmarking():
     """Guardar un análisis de benchmarking completo"""
+    if 'usuario_id' not in session:
+        return jsonify({
+            'success': False,
+            'error': 'Usuario no autenticado'
+        }), 401
+
     try:
         data = request.get_json()
         usuario_id = data.get('usuario_id')
@@ -38,6 +50,13 @@ def guardar_analisis_benchmarking():
                 'success': False,
                 'error': 'Usuario ID y tipo de análisis requeridos'
             }), 400
+
+        # Verificar que el usuario_id coincida con el de la sesión
+        if usuario_id != session['usuario_id']:
+            return jsonify({
+                'success': False,
+                'error': 'No autorizado'
+            }), 403
 
         analisis = Analisis_Benchmarking.guardar_analisis(
             usuario_id, tipo_analisis, datos, resultados, recomendaciones

@@ -113,7 +113,7 @@ def inicializar_insignias():
         for insignia_data in insignias_predefinidas:
             try:
                 # Verificar si la insignia ya existe
-                existing = Insignia().listar_insignias()
+                existing = Insignia.listar_insignias()
                 exists = any(i.nombre_insig == insignia_data['nombre'] for i in existing)
 
                 if not exists:

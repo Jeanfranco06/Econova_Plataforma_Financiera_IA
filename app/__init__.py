@@ -186,6 +186,81 @@ def crear_tablas_sqlite():
         db.disconnect()
 
 
+def init_default_data():
+    """Inicializar datos por defecto como grupos de benchmarking e insignias"""
+    try:
+        # Inicializar grupos de benchmarking
+        from app.modelos.benchmarking import Benchmarking_Grupo
+
+        groups = [
+            ('Emprendedores Tecnológicos', 'Grupo para startups y empresas de tecnología'),
+            ('PYMEs Industriales', 'Pequeñas y medianas empresas del sector industrial'),
+            ('Comercio Minorista', 'Empresas dedicadas al comercio minorista'),
+            ('Servicios Financieros', 'Instituciones y consultores financieros'),
+            ('Agricultura Moderna', 'Empresas del sector agrícola con enfoque innovador'),
+            ('Turismo y Hospitalidad', 'Empresas del sector turístico'),
+            ('Construcción', 'Empresas constructoras y del sector inmobiliario'),
+            ('Educación', 'Instituciones educativas y edtech'),
+            ('Salud', 'Empresas del sector salud y biotecnología'),
+            ('Energías Renovables', 'Empresas de energías limpias y sostenibles')
+        ]
+
+        for nombre, descripcion in groups:
+            try:
+                Benchmarking_Grupo.crear_grupo(nombre, descripcion)
+                print(f"✅ Grupo '{nombre}' creado")
+            except Exception as e:
+                if "duplicate key" in str(e).lower() or "unique constraint" in str(e).lower():
+                    # Grupo ya existe, continuar
+                    pass
+                else:
+                    print(f"⚠️ Error creando grupo '{nombre}': {e}")
+
+        print("✅ Grupos de benchmarking inicializados")
+
+        # Inicializar insignias predefinidas
+        from app.modelos.logro import Insignia
+
+        insignias_predefinidas = [
+            ('Primeros Pasos', 'Te has registrado en Econova y completado tu primera acción'),
+            ('Analista Novato', 'Has realizado 5 simulaciones financieras'),
+            ('Calculador Financiero', 'Has realizado 10 cálculos financieros básicos'),
+            ('Analista Avanzado', 'Has completado 25 simulaciones financieras'),
+            ('Experto en VAN', 'Has calculado VAN en más de 10 proyectos de inversión'),
+            ('Maestro TIR', 'Has calculado TIR en más de 15 proyectos'),
+            ('Inversor Estratégico', 'Has optimizado 20 portafolios de inversión'),
+            ('Maestro de Finanzas', 'Has alcanzado el nivel máximo de conocimiento financiero'),
+            ('Benchmarking Explorer', 'Te has unido a tu primer grupo de benchmarking'),
+            ('Benchmarking Experto', 'Has realizado 15 análisis de benchmarking'),
+            ('Login Diario', 'Has iniciado sesión hoy')
+        ]
+
+        for nombre, descripcion in insignias_predefinidas:
+            try:
+                # Verificar si la insignia ya existe
+                existing = Insignia.listar_insignias()
+                exists = any(i.nombre_insig == nombre for i in existing)
+
+                if not exists:
+                    insignia_id = Insignia.crear_insignia(nombre, descripcion)
+                    if insignia_id:
+                        print(f"✅ Insignia '{nombre}' creada")
+                    else:
+                        print(f"❌ Error creando insignia '{nombre}'")
+            except Exception as e:
+                if "duplicate key" in str(e).lower() or "unique constraint" in str(e).lower():
+                    # Insignia ya existe, continuar
+                    pass
+                else:
+                    print(f"⚠️ Error creando insignia '{nombre}': {e}")
+
+        print("✅ Insignias predefinidas inicializadas")
+
+    except Exception as e:
+        print(f"❌ Error inicializando datos por defecto: {e}")
+        raise
+
+
 def crear_app(config_name="development"):
     """
     Factory para crear la aplicación Flask
@@ -220,6 +295,15 @@ def crear_app(config_name="development"):
 
                 if not USE_POSTGRESQL:
                     crear_tablas_sqlite()
+
+                # Inicializar datos por defecto (grupos de benchmarking, etc.)
+                try:
+                    print("🔄 Inicializando datos por defecto...")
+                    init_default_data()
+                    print("✅ Datos por defecto inicializados")
+                except Exception as e:
+                    print(f"⚠️  Error inicializando datos por defecto: {e}")
+
             else:
                 print("⚠️  No se pudo conectar a la base de datos")
                 print("   La aplicación funcionará con limitaciones")
@@ -313,6 +397,11 @@ def crear_app(config_name="development"):
 
     @app.route("/benchmarking")
     def benchmarking():
+        from flask import session, flash, redirect, url_for
+        if 'usuario_id' not in session:
+            flash('Debes iniciar sesión para acceder al sistema de benchmarking', 'error')
+            return redirect(url_for('login'))
+
         return render_template("benchmarking.html")
 
     @app.route("/prestamo")
@@ -453,7 +542,7 @@ def registrar_blueprints(app):
     # Rutas de Gamificación
     from app.rutas.gamification import gamification_bp
 
-    app.register_blueprint(gamification_bp)
+    app.register_blueprint(gamification_bp, url_prefix="/gamification")
 
 
 def registrar_manejadores_errores(app):
