@@ -609,7 +609,7 @@ Una **[blue]TIR[/blue]** del **[red]{tir_valor}%[/red]** se considera **[red]muy
 
     def _override_respuestas_van(self, respuesta: str, analysis_context: Dict, mensaje_usuario: str) -> str:
         """
-        Override selectivo para preguntas sobre VAN
+        Override agresivo para preguntas sobre VAN cuando hay contexto de análisis
         """
         if not analysis_context or not isinstance(analysis_context, dict):
             return respuesta
@@ -620,13 +620,16 @@ Una **[blue]TIR[/blue]** del **[red]{tir_valor}%[/red]** se considera **[red]muy
         if tipo_analisis == 'van' and resultados.get('van') is not None:
             van_valor = resultados['van']
 
-            is_too_short_response = len(respuesta.strip()) < 50
+            # Ser más agresivo: aplicar override si hay contexto VAN Y el usuario menciona VAN
             user_asking_about_van = any(word in mensaje_usuario.lower() for word in [
-                'van', 'valor actual', 'qué significa', 'que significa', 'interpretar', 'como interpretar'
+                'van', 'valor actual', 'neto', 'interpretar', 'significa', 'qué significa', 'como interpretar',
+                'este van', 'mi van', 'el van', 'van calculado', 'van de'
             ])
 
-            if is_too_short_response and user_asking_about_van:
-                logger.info(f"🎯 OVERRIDE VAN: Providing contextual interpretation for VAN={van_valor}")
+            # Aplicar override si hay contexto VAN válido y usuario pregunta sobre VAN
+            # No requerir que la respuesta del AI sea corta
+            if user_asking_about_van:
+                logger.info(f"🎯 OVERRIDE VAN AGRESIVO: Providing contextual interpretation for VAN={van_valor}")
 
                 respuesta_contextual = f"""**Interpretación de tu VAN de S/ {van_valor:,.2f}**
 
@@ -960,7 +963,13 @@ La **[green]baja elasticidad[/green]** indica **[green]estabilidad[/green]** ant
     def _agregar_preguntas_sugeridas(self, respuesta: str, contexto: Dict, analysis_context: Dict, nivel: str) -> str:
         """
         Agrega preguntas sugeridas automáticas basadas en el contexto
+        Solo si la respuesta no ya tiene sugerencias (para evitar duplicados)
         """
+        # Verificar si la respuesta ya tiene sugerencias
+        if '[' in respuesta and ']' in respuesta and '|' in respuesta:
+            # La respuesta ya tiene sugerencias, no agregar más
+            return respuesta
+
         preguntas_sugeridas = []
 
         # Determinar tipo de análisis o contexto

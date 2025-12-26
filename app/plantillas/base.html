@@ -827,7 +827,6 @@
     <script src="{{ url_for('static', filename='js/chatbot_avatar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chatbot_messaging.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chatbot_welcome.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/econova_robot_3d.js') }}"></script>
     {% endif %}
 
     <!-- Inicialización de elementos visuales -->
@@ -840,11 +839,12 @@
             // Inicializar elementos específicos de página
             if (currentPath === '/chatbot') {
                 // Chatbot page elements
-                if (window.contextualMessages) window.contextualMessages.init();if (window.chatbotAvatar) window.chatbotAvatar.init();if (window.econovaRobot && document.getElementById('chatbot-robot')) {
-                    window.econovaRobot.init('chatbot-robot');}
+                if (window.contextualMessages) window.contextualMessages.init();
+                if (window.chatbotAvatar) window.chatbotAvatar.init();
             } else if (['/simulacion', '/benchmarking'].includes(currentPath)) {
                 // Simulation/Benchmarking pages
-                if (window.contextualMessages) window.contextualMessages.init();}
+                if (window.contextualMessages) window.contextualMessages.init();
+            }
         });</script>
 
     <!-- Simple Sun/Moon Theme Toggle -->

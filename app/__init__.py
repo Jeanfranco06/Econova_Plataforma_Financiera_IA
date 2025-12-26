@@ -447,6 +447,31 @@ def crear_app(config_name="development"):
         """Página de demostración de gamificación completamente funcional"""
         return render_template('gamification-standalone.html')
 
+    @app.route("/calculadoras/van")
+    def van_calculator():
+        """Página de calculadora VAN"""
+        return render_template('calculators/van_calculator.html')
+
+    @app.route("/calculadoras/tir")
+    def tir_calculator():
+        """Página de calculadora TIR"""
+        return render_template('calculators/tir_calculator.html')
+
+    @app.route("/calculadoras/wacc")
+    def wacc_calculator():
+        """Página de calculadora WACC"""
+        return render_template('calculators/wacc_calculator.html')
+
+    @app.route("/calculadoras/portfolio")
+    def portfolio_calculator():
+        """Página de calculadora de portafolio"""
+        return render_template('calculators/portfolio_calculator.html')
+
+    @app.route("/calculadoras/ml")
+    def ml_calculator():
+        """Página de calculadora ML"""
+        return render_template('calculators/ml_calculator.html')
+
     # User page routes (moved from usuarios blueprint to avoid /api/v1 prefix)
     @app.route('/login', methods=['GET'])
     def login():
