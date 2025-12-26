@@ -58,7 +58,7 @@ class ChatbotServicio:
         self.openai_client = None
         self.response_cache = {}  # Cache de respuestas con TTL
         self.cache_ttl = timedelta(hours=1)  # Tiempo de vida del caché
-        self._initialize_clients()
+        # Inicialización lazy - se hace cuando se necesita
 
     def _initialize_clients(self):
         """Inicializar clientes de IA con fallback"""
@@ -270,7 +270,7 @@ class ChatbotServicio:
         """
         try:
             start_time = datetime.now()
-            
+
             # Validar mensaje
             validacion = self.validar_mensaje(mensaje)
             if not validacion["valid"]:
@@ -279,11 +279,15 @@ class ChatbotServicio:
                     "error": validacion["error"],
                     "respuesta": f"Lo siento, {validacion['error'].lower()}"
                 }
-            
+
             mensaje = validacion["sanitized"]
-            
+
             # Debug: Log analysis_context
             logger.info(f"🔍 Analysis context received: {analysis_context}")
+
+            # Inicializar clientes de IA si no están inicializados (lazy initialization)
+            if not self.groq_client and not self.openai_client:
+                self._initialize_clients()
 
             # Determinar nivel del usuario
             nivel_usuario = self.determinar_nivel_usuario(usuario_id)
@@ -306,7 +310,7 @@ class ChatbotServicio:
 
             # Obtener prompt apropiado con contexto de análisis
             system_prompt = self.obtener_prompt_por_nivel(nivel_usuario, contexto, analysis_context)
-            
+
             # Agregar historial al prompt
             if historial_contexto:
                 system_prompt += historial_contexto

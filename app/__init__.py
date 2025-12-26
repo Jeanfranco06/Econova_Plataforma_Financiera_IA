@@ -140,6 +140,22 @@ def crear_tablas_sqlite():
             )
         """)
 
+        # Crear tabla Conversaciones_Chatbot
+        db.cur.execute("""
+            CREATE TABLE IF NOT EXISTS Conversaciones_Chatbot (
+                conversacion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                mensaje_usuario TEXT NOT NULL,
+                respuesta_ia TEXT NOT NULL,
+                proveedor_ia VARCHAR(20) DEFAULT 'groq',
+                nivel_usuario VARCHAR(20) DEFAULT 'basico',
+                contexto TEXT,
+                tipo_interaccion VARCHAR(50),
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+            )
+        """)
+
         # Crear índices
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_email ON Usuarios(email)")
         db.cur.execute("CREATE INDEX IF NOT EXISTS idx_nombre_usuario ON Usuarios(nombre_usuario)")
