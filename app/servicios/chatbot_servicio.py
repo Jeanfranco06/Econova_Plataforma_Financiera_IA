@@ -80,13 +80,27 @@ class ChatbotServicio:
 
             if groq_key:
                 try:
+                    # Inicializar Groq con manejo simplificado de errores
+                    # El problema parece ser que Render inyecta automáticamente parámetros como 'proxies'
+                    # que no son compatibles con el SDK de Groq
                     self.groq_client = Groq(api_key=groq_key)
                     logger.info("✅ Groq client inicializado correctamente")
+
+                except TypeError as e:
+                    if "unexpected keyword argument" in str(e) or "proxies" in str(e):
+                        logger.error(f"❌ Error de compatibilidad con SDK de Groq - Render inyecta parámetros no compatibles: {e}")
+                        logger.error("   Posible solución: Verificar configuración de Render o usar OpenAI como alternativa")
+                        self.groq_client = None
+                    else:
+                        logger.error(f"❌ Error inicializando Groq (TypeError): {e}")
+                        self.groq_client = None
+
                 except Exception as e:
                     logger.error(f"❌ Error inicializando Groq: {e}")
+                    logger.error("   Verificar que GROQ_API_KEY sea válida y que el servicio esté disponible")
                     self.groq_client = None
             else:
-                logger.warning("⚠️ GROQ_API_KEY no configurada")
+                logger.warning("⚠️ GROQ_API_KEY no configurada - usando solo OpenAI o fallback")
 
         # Initialize OpenAI
         if OPENAI_AVAILABLE:
