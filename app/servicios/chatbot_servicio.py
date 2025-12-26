@@ -316,11 +316,8 @@ class ChatbotServicio:
             # Override completo para preguntas sobre TIR cuando hay contexto de análisis
             respuesta = self._override_respuestas_tir(respuesta, analysis_context, mensaje)
 
-            # Overrides para otros tipos de análisis
-            respuesta = self._override_respuestas_van(respuesta, analysis_context, mensaje)
-            respuesta = self._override_respuestas_wacc(respuesta, analysis_context, mensaje)
-            respuesta = self._override_respuestas_portafolio(respuesta, analysis_context, mensaje)
-            respuesta = self._override_respuestas_ml(respuesta, analysis_context, mensaje)
+            # Overrides inteligentes basados en el contenido del mensaje del usuario
+            respuesta = self._aplicar_override_inteligente(respuesta, analysis_context, mensaje)
 
             # Aplicar formato automático de colores y preguntas sugeridas
             respuesta = self._aplicar_formato_automatico(respuesta, contexto, analysis_context, nivel_usuario)
@@ -532,65 +529,78 @@ class ChatbotServicio:
 
         return respuesta
 
-    def _override_respuestas_tir(self, respuesta: str, analysis_context: Dict, mensaje_usuario: str) -> str:
+    def _aplicar_override_inteligente(self, respuesta: str, analysis_context: Dict, mensaje_usuario: str) -> str:
         """
-        Override selectivo para preguntas sobre TIR - solo cuando la respuesta del AI es claramente genérica
-        y necesitamos proporcionar contexto específico del cálculo realizado.
+        Aplica override inteligente basado en el contenido del mensaje del usuario
+        y el contexto de análisis disponible
         """
-        logger.info(f"🔍 SELECTIVE OVERRIDE CHECK: analysis_context exists, mensaje_usuario='{mensaje_usuario}'")
-
         if not analysis_context or not isinstance(analysis_context, dict):
             return respuesta
 
         tipo_analisis = analysis_context.get('tipo_analisis')
         resultados = analysis_context.get('resultados', {})
+        mensaje_lower = mensaje_usuario.lower()
 
-        if tipo_analisis == 'tir' and resultados.get('tir'):
+        # Detectar qué tipo de pregunta está haciendo el usuario
+        user_asking_about_van = any(word in mensaje_lower for word in [
+            'van', 'valor actual', 'neto', 'interpretar', 'significa', 'qué significa', 'como interpretar',
+            'este van', 'mi van', 'el van', 'van calculado', 'van de'
+        ])
+
+        user_asking_about_tir = any(word in mensaje_lower for word in [
+            'tir', 'tasa interna', 'interpretar', 'significa', 'qué significa', 'como interpretar',
+            'esta tir', 'la tir', 'mi tir', 'tir calculada', 'tir de'
+        ])
+
+        user_asking_about_wacc = any(word in mensaje_lower for word in [
+            'wacc', 'costo capital', 'interpretar', 'significa', 'qué significa', 'como interpretar',
+            'este wacc', 'mi wacc', 'el wacc'
+        ])
+
+        user_asking_about_portafolio = any(word in mensaje_lower for word in [
+            'portafolio', 'riesgo', 'retorno', 'sharpe', 'interpretar', 'significa'
+        ])
+
+        user_asking_interpretation = any(word in mensaje_lower for word in [
+            'interpretar', 'significa', 'qué significa', 'que significa', 'como interpretar',
+            'qué quiere decir', 'explica', 'explícame'
+        ])
+
+        # Aplicar override basado en el tipo de pregunta detectado
+        if user_asking_about_tir and tipo_analisis == 'tir' and resultados.get('tir'):
+            # Override TIR
             tir_valor = resultados['tir']
+            logger.info(f"🎯 INTELIGENT OVERRIDE: TIR context detected, providing interpretation for TIR={tir_valor}%")
 
-            # Solo override si la respuesta del AI es MUY corta (menos de 50 caracteres)
-            # Esto indica que el AI dio una respuesta demasiado breve y necesitamos contextualizar
-            is_too_short_response = len(respuesta.strip()) < 50
-
-            # Y el usuario está preguntando específicamente sobre interpretación del resultado
-            user_asking_interpretation = any(word in mensaje_usuario.lower() for word in [
-                'qué significa', 'que significa', 'interpretar', 'como interpretar',
-                'esta tir', 'la tir', 'mi tir', 'tir calculada', 'significa'
-            ])
-
-            if is_too_short_response and user_asking_interpretation:
-                logger.info(f"🎯 SELECTIVE OVERRIDE: AI response too short ({len(respuesta)} chars), providing contextual interpretation for TIR={tir_valor}%")
-
-                # Respuesta contextual completa en texto plano con marcadores simples
-                respuesta_contextual = f"""**Interpretación de tu TIR del [blue]{tir_valor}%[/blue]**
+            respuesta_contextual = f"""**Interpretación de tu TIR del [blue]{tir_valor}%[/blue]**
 
 Basándome en tu cálculo de **[blue]TIR[/blue]** del **[blue]{tir_valor}%[/blue]**, te explico qué significa este resultado.
 
 Este **[blue]{tir_valor}%[/blue]** representa el rendimiento real anual que genera tu inversión, considerando todos los flujos de caja que proyectaste y el tiempo en que ocurren."""
 
-                # Evaluación contextual detallada
-                if tir_valor >= 20:
-                    respuesta_contextual += f"""
+            # Evaluación contextual detallada
+            if tir_valor >= 20:
+                respuesta_contextual += f"""
 
 Una **[blue]TIR[/blue]** del **[green]{tir_valor}%[/green]** se considera **[green]excelente[/green]** y supera ampliamente el costo de capital promedio en Perú (alrededor del 12-15%). Tu proyecto tiene un rendimiento excepcional."""
-                elif tir_valor >= 15:
-                    respuesta_contextual += f"""
+            elif tir_valor >= 15:
+                respuesta_contextual += f"""
 
 Una **[blue]TIR[/blue]** del **[green]{tir_valor}%[/green]** se considera **[green]muy buena[/green]** y está por encima del costo de capital promedio. Es un resultado sólido."""
-                elif tir_valor >= 12:
-                    respuesta_contextual += f"""
+            elif tir_valor >= 12:
+                respuesta_contextual += f"""
 
 Una **[blue]TIR[/blue]** del **[blue]{tir_valor}%[/blue]** se considera **[blue]aceptable[/blue]**, comparable con el costo de capital en Perú. Es un resultado razonable."""
-                elif tir_valor >= 8:
-                    respuesta_contextual += f"""
+            elif tir_valor >= 8:
+                respuesta_contextual += f"""
 
 Una **[blue]TIR[/blue]** del **[orange]{tir_valor}%[/orange]** se considera **[orange]baja[/orange]** y está por debajo del costo de capital típico. Merece evaluación adicional."""
-                else:
-                    respuesta_contextual += f"""
+            else:
+                respuesta_contextual += f"""
 
 Una **[blue]TIR[/blue]** del **[red]{tir_valor}%[/red]** se considera **[red]muy baja[/red]** y sugiere que el proyecto podría no ser rentable con los parámetros actuales."""
 
-                respuesta_contextual += f"""
+            respuesta_contextual += f"""
 
 **💡 ¿Qué significa esto para tu proyecto?**
 • Si tu costo de capital es menor al **[blue]{tir_valor}%[/blue]**, la inversión es **[green]rentable[/green]**
@@ -601,11 +611,160 @@ Una **[blue]TIR[/blue]** del **[red]{tir_valor}%[/red]** se considera **[red]muy
 
 [¿Cómo mejorar esta TIR?|¿Es rentable mi proyecto?|¿Qué factores afectan la TIR?]"""
 
-                return respuesta_contextual
+            return respuesta_contextual
+
+        elif user_asking_about_van and tipo_analisis == 'van' and resultados.get('van') is not None:
+            # Override VAN
+            van_valor = resultados['van']
+            logger.info(f"🎯 INTELIGENT OVERRIDE: VAN context detected, providing interpretation for VAN={van_valor}")
+
+            respuesta_contextual = f"""**Interpretación de tu VAN de S/ {van_valor:,.2f}**
+
+Basándome en tu cálculo de **[blue]VAN[/blue]** de **S/ {van_valor:,.2f}**, te explico qué significa este resultado.
+
+Este **[blue]VAN[/blue]** representa el beneficio neto actualizado de tu proyecto, considerando todos los flujos de caja descontados a valor presente."""
+
+            if van_valor > 0:
+                respuesta_contextual += f"""
+
+Un **[blue]VAN[/blue]** **[green]positivo[/green]** de **S/ {van_valor:,.2f}** indica que tu proyecto es **[green]rentable[/green]** y generará un beneficio neto superior a la inversión inicial."""
+            elif van_valor < 0:
+                respuesta_contextual += f"""
+
+Un **[blue]VAN[/blue]** **[red]negativo[/red]** de **S/ {van_valor:,.2f}** indica que tu proyecto **[red]no es rentable[/red]** y destruirá valor."""
             else:
-                logger.info(f"✅ AI response is adequate ({len(respuesta)} chars) or user not asking for interpretation - no override needed")
+                respuesta_contextual += f"""
+
+Un **[blue]VAN[/blue]** de **S/ {van_valor:,.2f}** indica el **[orange]punto de equilibrio[/orange]** donde el proyecto ni gana ni pierde valor."""
+
+            respuesta_contextual += f"""
+
+**💡 ¿Qué significa esto para tu proyecto?**
+• **[blue]VAN > 0[/blue]**: Proyecto **[green]viable financieramente[/green]**
+• **[blue]VAN < 0[/blue]**: Proyecto **[red]no viable[/red]**, requiere revisión
+• **[blue]VAN = 0[/blue]**: Punto de equilibrio, decisión depende de otros factores
+
+¿Te gustaría explorar escenarios alternativos para mejorar este VAN, o tienes alguna duda específica sobre su interpretación?
+
+[¿Cómo mejorar el VAN?|¿Qué factores afectan el VAN?|¿Es rentable mi proyecto?]"""
+
+            return respuesta_contextual
+
+        elif user_asking_about_wacc and tipo_analisis == 'wacc' and resultados.get('wacc') is not None:
+            # Override WACC
+            wacc_valor = resultados['wacc']
+            logger.info(f"🎯 INTELIGENT OVERRIDE: WACC context detected, providing interpretation for WACC={wacc_valor}%")
+
+            respuesta_contextual = f"""**Interpretación de tu WACC del [red]{wacc_valor}%[/red]**
+
+Tu **[red]WACC[/red]** calculado es del **[red]{wacc_valor}%[/red]**, que representa el costo promedio ponderado de tu capital.
+
+Este **[red]WACC[/red]** es la tasa mínima de retorno que deben generar tus proyectos para crear valor para los inversionistas."""
+
+            if wacc_valor < 12:
+                respuesta_contextual += f"""
+
+Un **[red]WACC[/red]** del **[green]{wacc_valor}%[/green]** se considera **[green]relativamente bajo[/green]**, lo que facilita la rentabilidad de proyectos."""
+            elif wacc_valor < 15:
+                respuesta_contextual += f"""
+
+Un **[red]WACC[/red]** del **[blue]{wacc_valor}%[/blue]** está en el **[blue]rango promedio[/blue]** del mercado peruano."""
+            else:
+                respuesta_contextual += f"""
+
+Un **[red]WACC[/red]** del **[orange]{wacc_valor}%[/orange]** se considera **[orange]elevado[/orange]**, lo que hace más difícil la rentabilidad de proyectos."""
+
+            respuesta_contextual += f"""
+
+**💡 ¿Qué significa esto para tu empresa?**
+• Proyectos con **[blue]TIR > {wacc_valor}%[/blue]** son candidatos viables
+• El **[red]WACC[/red]** es tu "tasa de descuento" para calcular VAN
+• Un **[red]WACC[/red]** más bajo mejora las oportunidades de inversión
+
+¿Te gustaría explorar estrategias para reducir tu WACC o analizar cómo usarlo en evaluaciones de proyectos?
+
+[¿Cómo reducir el WACC?|¿Cómo usar este WACC?|¿Es alto o bajo este costo de capital?]"""
+
+            return respuesta_contextual
+
+        elif user_asking_about_portafolio and tipo_analisis == 'portafolio' and resultados.get('retorno') is not None:
+            # Override Portafolio
+            retorno = resultados.get('retorno', 0)
+            riesgo = resultados.get('riesgo', 0)
+            sharpe = resultados.get('sharpe', 0)
+            logger.info(f"🎯 INTELIGENT OVERRIDE: Portfolio context detected, providing interpretation")
+
+            respuesta_contextual = f"""**Interpretación de tu Portafolio Optimizado**
+
+Tu portafolio tiene un retorno esperado del **[green]{retorno}%[/green]** con un riesgo del **[orange]{riesgo}%[/orange]** (desviación estándar).
+
+El **[blue]Ratio Sharpe[/blue]** calculado es **[blue]{sharpe:.2f}[/blue]**, que mide la eficiencia riesgo-retorno de tu inversión."""
+
+            if sharpe > 1:
+                respuesta_contextual += f"""
+
+Tu portafolio tiene una **[green]excelente eficiencia[/green]** con un Ratio Sharpe superior a 1."""
+            elif sharpe > 0.5:
+                respuesta_contextual += f"""
+
+Tu portafolio tiene una **[blue]buena eficiencia[/blue]** riesgo-retorno."""
+            else:
+                respuesta_contextual += f"""
+
+Tu portafolio requiere **[orange]optimización[/orange]** para mejorar la relación riesgo-retorno."""
+
+            respuesta_contextual += f"""
+
+**💡 Análisis de tu portafolio:**
+• **[green]Retorno esperado[/green]**: {retorno}% anual
+• **[orange]Riesgo (volatilidad)[/orange]**: {riesgo}% anual
+• **[blue]Ratio Sharpe[/blue]**: {sharpe:.2f} (eficiencia)
+
+¿Te gustaría explorar estrategias de diversificación adicionales o analizar escenarios de mercado alternativos?
+
+[¿Cómo diversificar mejor?|¿Qué recomendaciones tienes?|¿Cuál es el riesgo óptimo?]"""
+
+            return respuesta_contextual
+
+        # Si no hay override específico, aplicar override genérico basado en contexto disponible
+        elif user_asking_interpretation and tipo_analisis and resultados:
+            logger.info(f"🎯 GENERIC OVERRIDE: Providing contextual interpretation for {tipo_analisis}")
+            return self._generar_respuesta_contextual_general(tipo_analisis, resultados, mensaje_usuario)
 
         return respuesta
+
+    def _generar_respuesta_contextual_general(self, tipo_analisis: str, resultados: Dict, mensaje_usuario: str) -> str:
+        """
+        Genera una respuesta contextual general cuando el usuario pregunta sobre interpretar resultados
+        """
+        if tipo_analisis == 'van' and resultados.get('van') is not None:
+            van_valor = resultados['van']
+            return f"""Basándome en tu análisis de **[blue]VAN[/blue]**, puedo ayudarte a interpretar los resultados. ¿Hay algún aspecto específico que te gustaría explorar más? Por ejemplo, significado de métricas, recomendaciones de mejora, o comparación con benchmarks.
+
+Tu VAN calculado fue de **S/ {van_valor:,.2f}**. ¿Te gustaría que te explique qué significa este valor en el contexto de tu proyecto?
+
+[¿Cómo mejorar el VAN?|¿Qué factores afectan el VAN?|¿Es rentable mi inversión?]"""
+
+        elif tipo_analisis == 'tir' and resultados.get('tir'):
+            tir_valor = resultados['tir']
+            return f"""Basándome en tu análisis de **[blue]TIR[/blue]**, puedo ayudarte a interpretar los resultados. ¿Hay algún aspecto específico que te gustaría explorar más? Por ejemplo, significado de métricas, recomendaciones de mejora, o comparación con benchmarks.
+
+Tu TIR calculada fue del **{tir_valor}%**. ¿Te gustaría que te explique qué significa este porcentaje en el contexto de tu proyecto?
+
+[¿Qué significa esta TIR?|¿Cómo comparar con otras inversiones?|¿Es buena esta tasa de retorno?]"""
+
+        elif tipo_analisis == 'wacc' and resultados.get('wacc'):
+            wacc_valor = resultados['wacc']
+            return f"""Basándome en tu análisis de **[red]WACC[/red]**, puedo ayudarte a interpretar los resultados. ¿Hay algún aspecto específico que te gustaría explorar más?
+
+Tu WACC calculado fue del **{wacc_valor}%**. ¿Te gustaría que te explique cómo usar este costo de capital en tus evaluaciones?
+
+[¿Cómo usar este WACC?|¿Es alto o bajo este costo de capital?|¿Cómo reducir mi WACC?]"""
+
+        else:
+            return f"""Basándome en tu análisis de **{tipo_analisis.upper()}**, puedo ayudarte a interpretar los resultados. ¿Hay algún aspecto específico que te gustaría explorar más?
+
+[¿Cómo interpretar estos resultados?|¿Qué recomendaciones tienes?|¿Qué factores debo considerar?]"""
 
     def _override_respuestas_van(self, respuesta: str, analysis_context: Dict, mensaje_usuario: str) -> str:
         """
