@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const suggestionsText = suggestionMatch[1];
                 const suggestions = suggestionsText.split('|').map(s => s.trim());
                 buttonsHtml = suggestions.map(suggestion =>
-                    `<button class="suggestion-button" onclick="window.sendSuggestion('${suggestion.replace(/'/g, '\\\'').replace(/"/g, '"')}')">${suggestion}</button>`
+                    `<button class="suggestion-btn bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm mr-2 mb-2 border border-blue-200" onclick="window.sendSuggestion('${suggestion.replace(/'/g, '\\\'').replace(/"/g, '"')}')">${suggestion}</button>`
                 ).join('');
                 processedText = processedText.replace(/\[[^\]]+\]$/, '');
             } else {
