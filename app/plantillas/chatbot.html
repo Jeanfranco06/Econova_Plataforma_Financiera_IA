@@ -572,8 +572,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Procesar el texto antes de mostrarlo
             let processedText = text;
 
-            // Procesar preguntas sugeridas ANTES de cualquier otro procesamiento
-            const suggestionMatch = processedText.match(/\[([^\]]+)\]$/);
+            // Procesar preguntas sugeridas PRIMERO, antes de cualquier procesamiento HTML
+            const suggestionMatch = processedText.match(/\[([^\]]+)\]/);
             let buttonsHtml = '';
             if (suggestionMatch) {
                 const suggestionsText = suggestionMatch[1];
@@ -581,7 +581,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 buttonsHtml = suggestions.map(suggestion =>
                     `<button class="suggestion-btn bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm mr-2 mb-2 border border-blue-200" onclick="window.sendSuggestion('${suggestion.replace(/'/g, '\\\'').replace(/"/g, '"')}')">${suggestion}</button>`
                 ).join('');
-                processedText = processedText.replace(/\[[^\]]+\]$/, '');
+                // Remover las sugerencias del texto procesado
+                processedText = processedText.replace(/\[[^\]]+\]/, '');
             } else {
                 // Debug: Log if suggestions are not being parsed
                 console.log('No suggestion match found in:', processedText);
