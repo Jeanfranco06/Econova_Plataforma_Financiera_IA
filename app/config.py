@@ -54,6 +54,9 @@ class Config:
     # OpenAI configuration
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 
+    # Groq configuration
+    GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+
     # Google Sheets API configuration
     GOOGLE_SHEETS_CREDENTIALS_PATH = os.getenv('GOOGLE_SHEETS_CREDENTIALS_PATH', '')
     GOOGLE_SHEETS_SPREADSHEET_ID = os.getenv('GOOGLE_SHEETS_SPREADSHEET_ID', '')

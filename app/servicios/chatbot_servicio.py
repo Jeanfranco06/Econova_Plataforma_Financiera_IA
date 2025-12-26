@@ -62,30 +62,61 @@ class ChatbotServicio:
 
     def _initialize_clients(self):
         """Inicializar clientes de IA con fallback"""
+        # Importar configuración de Flask
+        from flask import current_app
+
         # Initialize Groq
         if GROQ_AVAILABLE:
-            groq_key = os.getenv("GROQ_API_KEY", "")
+            groq_key = ""
+            try:
+                # Intentar obtener de configuración de Flask primero
+                groq_key = current_app.config.get('GROQ_API_KEY', '')
+                if not groq_key:
+                    # Fallback a variable de entorno
+                    groq_key = os.getenv("GROQ_API_KEY", "")
+            except:
+                # Si no hay contexto de Flask, usar variable de entorno
+                groq_key = os.getenv("GROQ_API_KEY", "")
+
             if groq_key:
                 try:
                     self.groq_client = Groq(api_key=groq_key)
-                    logger.info("✅ Groq client inicializado")
+                    logger.info("✅ Groq client inicializado correctamente")
                 except Exception as e:
                     logger.error(f"❌ Error inicializando Groq: {e}")
                     self.groq_client = None
+            else:
+                logger.warning("⚠️ GROQ_API_KEY no configurada")
 
         # Initialize OpenAI
         if OPENAI_AVAILABLE:
-            openai_key = os.getenv("OPENAI_API_KEY", "")
+            openai_key = ""
+            try:
+                # Intentar obtener de configuración de Flask primero
+                openai_key = current_app.config.get('OPENAI_API_KEY', '')
+                if not openai_key:
+                    # Fallback a variable de entorno
+                    openai_key = os.getenv("OPENAI_API_KEY", "")
+            except:
+                # Si no hay contexto de Flask, usar variable de entorno
+                openai_key = os.getenv("OPENAI_API_KEY", "")
+
             if openai_key:
                 try:
                     self.openai_client = openai.OpenAI(api_key=openai_key)
-                    logger.info("✅ OpenAI client inicializado")
+                    logger.info("✅ OpenAI client inicializado correctamente")
                 except Exception as e:
                     logger.error(f"❌ Error inicializando OpenAI: {e}")
                     self.openai_client = None
+            else:
+                logger.warning("⚠️ OPENAI_API_KEY no configurada")
 
         if not self.groq_client and not self.openai_client:
             logger.warning("⚠️ Ningún cliente de IA disponible - usando modo fallback")
+        elif self.groq_client:
+            logger.info("🎯 Chatbot usando Groq como proveedor principal")
+        elif self.openai_client:
+            logger.info("🎯 Chatbot usando OpenAI como proveedor principal")
     
     def validar_mensaje(self, mensaje: str) -> Dict[str, Any]:
         """
