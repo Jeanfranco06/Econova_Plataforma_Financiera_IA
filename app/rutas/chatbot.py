@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, session
+from flask import Blueprint, request, jsonify, render_template, session, redirect
 import os
 import logging
 import traceback
@@ -20,6 +20,11 @@ chatbot_service = obtener_servicio_chatbot()
 @chatbot_bp.route("/chatbot", methods=["GET"])
 def chatbot_page():
     """Render chatbot page with optional contextual data"""
+    # Verificar que el usuario esté logueado
+    if 'usuario_id' not in session:
+        logger.warning("Intento de acceso al chatbot sin sesión activa")
+        return redirect('/login')
+
     contexto = None
     mensaje_inicial = None
 

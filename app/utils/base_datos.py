@@ -125,8 +125,13 @@ class DatabaseConnection:
         return False
 
 def get_db_connection():
-    """Obtener nueva instancia de conexión de base de datos"""
-    return DatabaseConnection()
+    """Obtener nueva instancia de conexión de base de datos ya conectada"""
+    db = DatabaseConnection()
+    if db.connect():
+        return db
+    else:
+        print("❌ No se pudo establecer conexión a la base de datos")
+        return None
 
 def init_db():
     """Inicializar conexión de base de datos"""
