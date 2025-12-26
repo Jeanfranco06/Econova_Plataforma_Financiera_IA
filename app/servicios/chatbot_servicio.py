@@ -1206,8 +1206,16 @@ La **[green]baja elasticidad[/green]** indica **[green]estabilidad[/green]** ant
         Registra la conversación en la base de datos
         """
         try:
+            # Solo intentar logging si hay conexión a BD disponible
             db = get_db_connection()
+            if db is None:
+                # No hay conexión a BD, no intentar logging
+                return
+
             cursor = db.cur
+            if cursor is None:
+                # Cursor no disponible
+                return
 
             # Crear tabla si no existe
             cursor.execute("""
@@ -1254,7 +1262,8 @@ La **[green]baja elasticidad[/green]** indica **[green]estabilidad[/green]** ant
             logger.info(f"✅ Conversación logged - Usuario: {usuario_id}, Proveedor: {proveedor}, Nivel: {nivel}")
 
         except Exception as e:
-            logger.error(f"❌ Error logging conversación: {e}")
+            # Logging silencioso - no queremos que falle la respuesta del chatbot por logging
+            logger.debug(f"Debug: Error logging conversación (no crítico): {e}")
 
     def obtener_estadisticas_conversaciones(self, usuario_id: Optional[int] = None) -> Dict[str, Any]:
         """

@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 message: message,
-                analysis_context: window.currentAnalysisContext
+                analysis_context: window.currentAnalysisContext || contextoData // Mantener contexto si existe
             })
         })
         .then(response => response.json())
