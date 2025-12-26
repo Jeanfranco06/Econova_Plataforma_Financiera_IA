@@ -313,9 +313,6 @@ class ChatbotServicio:
             # Aplicar respuestas específicas para consultas sobre valores calculados
             respuesta = self._aplicar_respuestas_especificas(respuesta, analysis_context, mensaje)
 
-            # Override completo para preguntas sobre TIR cuando hay contexto de análisis
-            respuesta = self._override_respuestas_tir(respuesta, analysis_context, mensaje)
-
             # Overrides inteligentes basados en el contenido del mensaje del usuario
             respuesta = self._aplicar_override_inteligente(respuesta, analysis_context, mensaje)
 
