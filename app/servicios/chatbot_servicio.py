@@ -365,6 +365,9 @@ class ChatbotServicio:
             # Overrides inteligentes basados en el contenido del mensaje del usuario
             respuesta = self._aplicar_override_inteligente(respuesta, analysis_context, mensaje)
 
+            # Agregar preguntas sugeridas contextuales usando el sistema mejorado
+            respuesta = self._agregar_preguntas_sugeridas_contextuales(respuesta, analysis_context)
+
             # Aplicar formato automático de colores y preguntas sugeridas
             respuesta = self._aplicar_formato_automatico(respuesta, contexto, analysis_context, nivel_usuario)
 
@@ -446,17 +449,53 @@ class ChatbotServicio:
                     raise e
 
     def _respuesta_fallback(self, mensaje: str, contexto: Dict = None, analysis_context: Dict = None) -> str:
-        """Respuestas predefinidas cuando IA no está disponible"""
+        """Respuestas predefinidas inteligentes cuando IA no está disponible"""
+
+        # Si tenemos contexto de análisis, usar respuestas contextuales específicas
+        if analysis_context and isinstance(analysis_context, dict):
+            tipo_analisis = analysis_context.get('tipo_analisis')
+            resultados = analysis_context.get('resultados', {})
+
+            # Intentar respuestas contextuales específicas
+            try:
+                from .chatbot_prompts import RespuestasContextuales
+
+                if tipo_analisis == 'van':
+                    respuesta = RespuestasContextuales.get_respuesta_van(mensaje, resultados)
+                    if respuesta:
+                        return respuesta
+
+                elif tipo_analisis == 'tir':
+                    # Para TIR, usar el sistema de overrides existente
+                    tir_override = self._override_respuestas_tir("", analysis_context, mensaje)
+                    if tir_override and tir_override != "":
+                        return tir_override
+
+                elif tipo_analisis == 'wacc':
+                    # Para WACC, usar el sistema de overrides existente
+                    wacc_override = self._override_respuestas_wacc("", analysis_context, mensaje)
+                    if wacc_override and wacc_override != "":
+                        return wacc_override
+
+                elif tipo_analisis == 'portafolio':
+                    # Para portafolio, usar el sistema de overrides existente
+                    port_override = self._override_respuestas_portafolio("", analysis_context, mensaje)
+                    if port_override and port_override != "":
+                        return port_override
+
+            except Exception as e:
+                logger.warning(f"Error usando respuestas contextuales: {e}")
+
+        # Respuestas básicas genéricas (fallback final)
         mensaje_lower = mensaje.lower()
 
-        # Respuestas básicas
         if "van" in mensaje_lower and ("que es" in mensaje_lower or "qué es" in mensaje_lower):
             return "**¿Qué es el VAN?**\n\nEl VAN (Valor Actual Neto) mide la rentabilidad real de una inversión, considerando el tiempo y el riesgo del dinero.\n\n**Fórmula básica:** VAN = Flujos de caja descontados - Inversión inicial\n\n**Interpretación:**\n• VAN > 0: Inversión rentable\n• VAN < 0: Inversión no rentable\n• VAN = 0: Punto de equilibrio"
 
         if "tir" in mensaje_lower and ("que es" in mensaje_lower or "qué es" in mensaje_lower):
             return "**¿Qué es la TIR?**\n\nLa TIR (Tasa Interna de Retorno) es el porcentaje de ganancia real que genera tu inversión.\n\n**Interpretación:**\n• Compara la TIR con tu costo de capital\n• TIR > Costo de capital = Buena inversión\n• TIR < Costo de capital = Mala inversión"
 
-        # Respuesta genérica
+        # Respuesta genérica final
         return "**¡Hola! Soy Econova AI**\n\nTu asesor financiero inteligente. Actualmente estoy en modo básico porque los servicios de IA no están disponibles.\n\nPuedo ayudarte con conceptos básicos de finanzas. ¿Qué te gustaría saber sobre VAN, TIR o WACC?"
 
     def _aplicar_copiloto_adaptativo(self, respuesta: str, contexto: Dict, nivel: str, analysis_context: Dict = None) -> str:
@@ -1115,6 +1154,38 @@ La **[green]baja elasticidad[/green]** indica **[green]estabilidad[/green]** ant
                 return respuesta_contextual
 
         return respuesta
+
+    def _agregar_preguntas_sugeridas_contextuales(self, respuesta: str, analysis_context: Dict) -> str:
+        """
+        Agrega preguntas sugeridas contextuales basadas en el análisis realizado
+        """
+        try:
+            from .chatbot_prompts import PreguntasSugeridas
+
+            # Verificar si la respuesta ya tiene sugerencias
+            if '[' in respuesta and ']' in respuesta and '|' in respuesta:
+                return respuesta
+
+            # Obtener tipo de análisis
+            tipo_analisis = None
+            resultados = {}
+
+            if analysis_context and isinstance(analysis_context, dict):
+                tipo_analisis = analysis_context.get('tipo_analisis')
+                resultados = analysis_context.get('resultados', {})
+
+            if tipo_analisis:
+                # Obtener preguntas sugeridas del sistema mejorado
+                preguntas = PreguntasSugeridas.get_preguntas_por_tipo(tipo_analisis, resultados)
+
+                if preguntas:
+                    respuesta += f"\n\n[{'|'.join(preguntas)}]"
+
+            return respuesta
+
+        except Exception as e:
+            logger.error(f"Error agregando preguntas sugeridas contextuales: {e}")
+            return respuesta
 
     def _aplicar_formato_automatico(self, respuesta: str, contexto: Dict, analysis_context: Dict, nivel: str) -> str:
         """
